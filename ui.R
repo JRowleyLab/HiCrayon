@@ -11,16 +11,24 @@ ui <- fluidPage(
         sidebarPanel(
           titlePanel("Choose Parameters"),
           fileInput("hic", label = "Upload HiC:", accept = ".hic", multiple = F),
+          fluidRow(
+            column(5,
+              selectizeInput("norm", label="Normalization Scheme", choices=c("VC", "VC_SQRT", "KR", "NONE"))
+            ),
+            column(5,
+              numericInput("thresh", label="Threshold", value=2)
+            )
+          ),
           tabsetPanel(
             id = "parameters",
             #### Bigwig Tab 1
             tabPanel(
               "Bigwig",
               textInput("n1", label = "Name"),
-              fileInput("bigwig", label = "Upload bigwig:", accept = ".bw", multiple = F),
+              fileInput("bw1", label = "Upload bigwig:", accept = ".bw", multiple = F),
               conditionalPanel(
                 condition = "input.setminmax == false",
-                fileInput("bed", label = "Upload bed:", accept = ".bed", multiple = F),
+                fileInput("p1", label = "Upload bed:", accept = ".bed", multiple = F),
               ),
               conditionalPanel(
                 condition = "input.setminmax == true",
@@ -41,10 +49,10 @@ ui <- fluidPage(
             tabPanel(
               "Bigwig 2",
               textInput("n2", label = "Name"),
-              fileInput("bigwig2", label = "Upload bigwig 2:", accept = ".bw", multiple = F),
+              fileInput("bw2", label = "Upload bigwig 2:", accept = ".bw", multiple = F),
               conditionalPanel(
                 condition = "input.setminmax2 == false",
-                fileInput("bed2", label = "Upload bed:", accept = ".bed", multiple = F),
+                fileInput("p2", label = "Upload bed:", accept = ".bed", multiple = F),
               ),
               conditionalPanel(
                 condition = "input.setminmax2 == true",
@@ -62,7 +70,7 @@ ui <- fluidPage(
               checkboxInput("setminmax2", "Set Min/Max"),
             )
           ),
-          checkboxInput("bigwig2check", "Second Bigwig?"),
+          checkboxInput("bw2check", "Second Bigwig?"),
           fluidRow(
             column(4,
               ofset = 2,
@@ -88,7 +96,7 @@ ui <- fluidPage(
               checkboxInput(inputId = "HiC_check", label = "HiC"),
               checkboxInput(inputId = "bw_check", label = "Bigwig"),
               conditionalPanel(
-                condition = "input.bigwig2check == true",
+                condition = "input.bw2check == true",
                 checkboxInput(inputId = "bw_check2", label = "Bigwig 2"),
               )
             )

@@ -1,6 +1,6 @@
 ## Dynamically show/hide 'bigwig 2 tab'
-observeEvent(input$bigwig2check, {
-    if (isTRUE(input$bigwig2check)) {
+observeEvent(input$bw2check, {
+    if (isTRUE(input$bw2check)) {
         shiny::showTab(
             inputId = "parameters",
             target = "Bigwig 2"
