@@ -1,0 +1,100 @@
+# Define UI
+ui <- fluidPage(
+
+  # Navbar structure for UI
+  navbarPage("HiC Crayon",
+    theme = shinytheme("lumen"),
+    tabPanel("Visualize",
+      fluid = TRUE, icon = icon("globe-americas"),
+      # Sidebar layout with a input and output definitions
+      sidebarLayout(
+        sidebarPanel(
+          titlePanel("Choose Parameters"),
+          fileInput("hic", label = "Upload HiC:", accept = ".hic", multiple = F),
+          tabsetPanel(
+            id = "parameters",
+            #### Bigwig Tab 1
+            tabPanel(
+              "Bigwig",
+              textInput("n1", label = "Name"),
+              fileInput("bigwig", label = "Upload bigwig:", accept = ".bw", multiple = F),
+              conditionalPanel(
+                condition = "input.setminmax == false",
+                fileInput("bed", label = "Upload bed:", accept = ".bed", multiple = F),
+              ),
+              conditionalPanel(
+                condition = "input.setminmax == true",
+                fluidRow(
+                  column(
+                    5,
+                    numericInput("min", "Min:", value = .1, min = 0, max = 1)
+                  ),
+                  column(5,
+                    ofset = 3,
+                    numericInput("max", "Max:", value = .7, min = 0, max = 1)
+                  )
+                )
+              ),
+              checkboxInput("setminmax", "Set Min/Max"),
+            ),
+            #### Bigwig Tab 2
+            tabPanel(
+              "Bigwig 2",
+              textInput("n2", label = "Name"),
+              fileInput("bigwig2", label = "Upload bigwig 2:", accept = ".bw", multiple = F),
+              conditionalPanel(
+                condition = "input.setminmax2 == false",
+                fileInput("bed2", label = "Upload bed:", accept = ".bed", multiple = F),
+              ),
+              conditionalPanel(
+                condition = "input.setminmax2 == true",
+                fluidRow(
+                  column(
+                    5,
+                    numericInput("min2", "Min:", value = .1, min = 0, max = 1)
+                  ),
+                  column(5,
+                    ofset = 3,
+                    numericInput("max2", "Max:", value = .7, min = 0, max = 1)
+                  )
+                )
+              ),
+              checkboxInput("setminmax2", "Set Min/Max"),
+            )
+          ),
+          checkboxInput("bigwig2check", "Second Bigwig?"),
+          fluidRow(
+            column(4,
+              ofset = 2,
+              textInput("chr", "Chr:")
+            ),
+            column(
+              4,
+              numericInput("start", "Start:", value = 5000000, min = 0, max = 10000000),
+            ),
+            column(4,
+              ofset = 2,
+              numericInput("stop", "Stop:", value = 6000000, min = 0, max = 10000000)
+            )
+          ),
+          numericInput("bin", "Bin Size:", value = 5000, min = 5000, max = 50000),
+          actionButton("go", label = "Run!")
+        ),
+        mainPanel(
+          fluidRow(
+            column(3,
+              offset = 9,
+              strong(h3("Overlay")),
+              checkboxInput(inputId = "HiC_check", label = "HiC"),
+              checkboxInput(inputId = "bw_check", label = "Bigwig"),
+              conditionalPanel(
+                condition = "input.bigwig2check == true",
+                checkboxInput(inputId = "bw_check2", label = "Bigwig 2"),
+              )
+            )
+          )
+        )
+      )
+    )
+  )
+)
