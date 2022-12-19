@@ -6,6 +6,7 @@ ui <- fluidPage(
     theme = shinytheme("lumen"),
     tabPanel("Visualize",
       fluid = TRUE, icon = icon("globe-americas"),
+
       # Sidebar layout with a input and output definitions
       sidebarLayout(
         sidebarPanel(
@@ -99,6 +100,9 @@ ui <- fluidPage(
                 condition = "input.bw2check == true",
                 checkboxInput(inputId = "bw_check2", label = "Bigwig 2"),
               )
+            ),
+            column(3,
+            textOutput("dub")
             )
           )
         )

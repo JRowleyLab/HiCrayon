@@ -1,4 +1,8 @@
 # Original program script
 python/HiC_Crayon_v0.1.py
 
+# All test data
+data/
 
+# test python script
+test.py
