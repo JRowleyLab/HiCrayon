@@ -36,6 +36,7 @@ def readHiCasNumpy(hicfile, chrom, start, stop, norm, binsize):
 		hicobject = hicdump.getMatrixZoomData(wchr, wchr, "observed", norm, "BP", binsize)
 
 	hicnumpy = hicobject.getRecordsAsMatrix(start, stop, start, stop)
+	print("HiC Complete")
 	return hicnumpy
 	
 
@@ -57,15 +58,19 @@ def getinversered(myimg):
 
 
 def getinverseblue(myimg):
-        r, g, b = myimg.split()
-        g = b.point(lambda i: (255-i))
-        r = b.point(lambda i: (255-i))
-        b = b.point(lambda i: 255)
-        wimg = Image.merge('RGB', (r,g,b))
-        return(wimg)
+	r, g, b = myimg.split()
+	g = b.point(lambda i: (255-i))
+	r = b.point(lambda i: (255-i))
+	b = b.point(lambda i: 255)
+	wimg = Image.merge('RGB', (r,g,b))
+	return(wimg)
 
 
-def processBigwigs(bigwig,min,max,peaks,binsize,chrom,start,stop, bigwig2,min2,max2,peaks2):
+def processBigwigs(bigwig,min,max,peaks,binsize,chrom,start,stop,bigwig2,min2,max2,peaks2):
+
+	start=int(start)
+	binsize=int(binsize)
+	stop=int(stop)
 
 	redbwopen = pyBigWig.open(bigwig)		
 	redpeaksignal = []
@@ -171,9 +176,8 @@ def processBigwigs(bigwig,min,max,peaks,binsize,chrom,start,stop, bigwig2,min2,m
 				bluebwlist.append(math.log(bluebwopen.stats(chrom, walker, walker+binsize)[0]))
 			except ValueError:
 				bluebwlist.append(0)
-		return redbwlist,bluebwlist,
-
-
+	print("BW list complete")
+	return redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, bluebwmin
 
 
 def getrelative(mylist, mymax, mymin):
@@ -187,12 +191,13 @@ def getrelative(mylist, mymax, mymin):
 			relativelist.append(0)
 		else:
 			relativelist.append(relscore)
+	print("Get relative")
 	return relativelist
 
 
 ############### TODO: onwards 
 
-def distance(hicnumpy, redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, bluebwmin):
+def distanceMat(hicnumpy, redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, bluebwmin,thresh):
 	matsize = len(hicnumpy)
 
 	redlist = getrelative(redbwlist, redbwmax, redbwmin)
@@ -205,6 +210,10 @@ def distance(hicnumpy, redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, blu
 		gmat2 = np.zeros((matsize,matsize))
 		bmat2 = np.zeros((matsize,matsize))
 		bluelist = getrelative(bluebwlist, bluebwmax, bluebwmin)
+	
+	mydiags=[]
+	for i in range(0,len(hicnumpy)):
+		mydiags.append(np.nanmean(np.diag(hicnumpy, k=i)))
 
 	distnormmat = np.zeros((matsize,matsize))
 	for x in range(0,matsize):
@@ -231,10 +240,12 @@ def distance(hicnumpy, redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, blu
 				bmat2[x,y] = bscore
 				bmat2[y,x] = bscore
 			
-			return rmat,gmat,bmat,distnormmat,rmat2,gmat2,bmat2
+	print("Distance complete")
+	return rmat,gmat,bmat,distnormmat,rmat2,gmat2,bmat2,redlist,bluelist
 
-def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2):
+def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redname,bluename,thresh,redbwmin,redbwmax,bluebwmin,bluebwmax,redlist,bluelist,overlayoff):
 
+	#overlayoff=False
 	REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1,1,1),(1,0,0)])
 
 	if rmat2 == "NULL":
@@ -250,7 +261,7 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2):
 		#ax1.set_xlabel(str(chrom) + ":" + str(start) + "-" + str(end))
 
 		ax2.set_title(redname)
-		if args.overlayoff:
+		if overlayoff == True:
 			redimg = getinversered(redimg)
 			ax2.imshow(redimg, interpolation='none', cmap="REDMAP")
 		else:
@@ -281,7 +292,7 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2):
 		#plt.savefig("distnorm.png")
 
 		ax[1,0].set_title(redname)
-		if args.overlayoff:
+		if overlayoff == True:
 			redimg = getinversered(redimg)
 			ax[1,0].imshow(redimg, interpolation='none', cmap=REDMAP)
 		else:
@@ -295,7 +306,7 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2):
 		bluemat = (np.dstack((rmat2,gmat2,bmat2))).astype(np.uint8)
 		blueimg = Image.fromarray(bluemat)
 		ax[1,1].set_title(bluename)
-		if args.overlayoff:
+		if overlayoff == True:
 			blueimg = getinverseblue(blueimg)
 			ax[1,1].imshow(blueimg, interpolation='none')
 		else:
@@ -305,10 +316,9 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2):
 		ax[1,1].yaxis.set_visible(False)
 		#plt.savefig("bw2_overlay.png")
 		ax[0,1].set_title(str(redname + ' + ' + bluename))
-		if args.overlayoff:
+		if overlayoff == True:
 			ax[0,1].imshow(redimg, interpolation='none', alpha=0.75)
 			ax[0,1].imshow(blueimg, interpolation='none', alpha=0.5)
-
 		else:
 			ax[0,1].imshow(distnormmat, 'gray', interpolation='none')
 			ax[0,1].imshow(redimg, interpolation='none', alpha=0.5)
@@ -328,12 +338,13 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2):
 		newax4.axis('off')
 		l2, b2, w2, h2 = ax[1,1].get_position().bounds
 		newax4.set_position((l2*(.97),0.04, w2*1.095, .07))
-		fig.suptitle(str(chrom) + ":" + str(start) + "-" + str(end))
+		fig.suptitle(str(chrom) + ":" + str(start) + "-" + str(stop))
+
 	#plt.tight_layout()
 	#plt.subplots_adjust(top=0.85)
-	plt.savefig(outname)
-	print("Done!")
-	print(str(redname) + " mean,stdev in peaks is " + str(round(redbwmin,2)) + "," + str(round(redbwmax,2)))
-	if bluebw != "NULL":
-		print(str(bluename) + " mean,stdev in peaks is " + str(round(bluebwmin,2)) + "," + str(round(bluebwmax,2)))
+	plt.savefig('plot.png')
+	n1=str(redname) + " mean,stdev in peaks is " + str(round(redbwmin,2)) + "," + str(round(redbwmax,2))
+	if rmat2 != "NULL":
+		n2=str(bluename) + " mean,stdev in peaks is " + str(round(bluebwmin,2)) + "," + str(round(bluebwmax,2))
 	#print(str(ll) + " " + str(bb) + " " + str(ww) + " " + str(hh))
+	return(n1,n2)

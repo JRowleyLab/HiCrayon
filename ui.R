@@ -11,7 +11,8 @@ ui <- fluidPage(
       sidebarLayout(
         sidebarPanel(
           titlePanel("Choose Parameters"),
-          fileInput("hic", label = "Upload HiC:", accept = ".hic", multiple = F),
+          #fileInput("hic", label = "Upload HiC:", accept = ".hic", multiple = F),
+          shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
           fluidRow(
             column(5,
               selectizeInput("norm", label="Normalization Scheme", choices=c("VC", "VC_SQRT", "KR", "NONE"))
@@ -26,10 +27,12 @@ ui <- fluidPage(
             tabPanel(
               "Bigwig",
               textInput("n1", label = "Name"),
-              fileInput("bw1", label = "Upload bigwig:", accept = ".bw", multiple = F),
+              #fileInput("bw1", label = "Upload bigwig:", accept = ".bw", multiple = F),
+              shinyFilesButton('bw1', label='Select bigwig', title='Please select a .bigwig/.bw file', multiple=FALSE),
               conditionalPanel(
                 condition = "input.setminmax == false",
-                fileInput("p1", label = "Upload bed:", accept = ".bed", multiple = F),
+                #fileInput("p1", label = "Upload bed:", accept = ".bed", multiple = F),
+                shinyFilesButton('p1', label='Select bed', title='Please select a .bed file', multiple=FALSE),
               ),
               conditionalPanel(
                 condition = "input.setminmax == true",
@@ -50,10 +53,12 @@ ui <- fluidPage(
             tabPanel(
               "Bigwig 2",
               textInput("n2", label = "Name"),
-              fileInput("bw2", label = "Upload bigwig 2:", accept = ".bw", multiple = F),
+              #fileInput("bw2", label = "Upload bigwig 2:", accept = ".bw", multiple = F),
+              shinyFilesButton('bw2', label='Select bigwig', title='Please select a .bigwig/.bw file', multiple=FALSE),
               conditionalPanel(
                 condition = "input.setminmax2 == false",
-                fileInput("p2", label = "Upload bed:", accept = ".bed", multiple = F),
+                #fileInput("p2", label = "Upload bed:", accept = ".bed", multiple = F),
+                shinyFilesButton('p2', label='Select bed', title='Please select a .bed file', multiple=FALSE),
               ),
               conditionalPanel(
                 condition = "input.setminmax2 == true",
@@ -87,22 +92,29 @@ ui <- fluidPage(
             )
           ),
           numericInput("bin", "Bin Size:", value = 5000, min = 5000, max = 50000),
-          actionButton("go", label = "Run!")
+          actionButton("run", label = "Run!")
         ),
         mainPanel(
           fluidRow(
+            column(12,
+            imageOutput("matPlot") %>% withSpinner()
+            )
+          ),
+          fluidRow(
+            column(12,
+              textOutput("colinfo")
+            )
+          ),
+          fluidRow(
             column(3,
               offset = 9,
-              strong(h3("Overlay")),
+              strong(h4("Overlay")),
               checkboxInput(inputId = "HiC_check", label = "HiC"),
               checkboxInput(inputId = "bw_check", label = "Bigwig"),
               conditionalPanel(
                 condition = "input.bw2check == true",
                 checkboxInput(inputId = "bw_check2", label = "Bigwig 2"),
               )
-            ),
-            column(3,
-            textOutput("dub")
             )
           )
         )
