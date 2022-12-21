@@ -1,14 +1,17 @@
 # Define UI
 ui <- fluidPage(
 
+  useShinyjs(),
   # Navbar structure for UI
-  navbarPage("HiC Crayon",
+  navbarPage(title = tagList("",actionLink("sidebar_button","",icon = icon("bars"))),
+    id="HiC Crayon",
     theme = shinytheme("lumen"),
     tabPanel("Visualize",
       fluid = TRUE, icon = icon("globe-americas"),
 
       # Sidebar layout with a input and output definitions
       sidebarLayout(
+        div(class="sidebar",
         sidebarPanel(
           titlePanel("Choose Parameters"),
           #fileInput("hic", label = "Upload HiC:", accept = ".hic", multiple = F),
@@ -93,30 +96,30 @@ ui <- fluidPage(
           ),
           numericInput("bin", "Bin Size:", value = 5000, min = 5000, max = 50000),
           actionButton("run", label = "Run!")
-        ),
+        )
+      
+      ),
         mainPanel(
+          fluidRow(
+            column(7,
+              textOutput("colinfo")
+            ),
+            column(3,
+              offset = 9,
+              strong(h4("Overlay Off")),
+              checkboxInput(inputId = "HiC_check", label = "HiC")
+              # checkboxInput(inputId = "bw_check", label = "Bigwig"),
+              # conditionalPanel(
+              #   condition = "input.bw2check == true",
+              #   checkboxInput(inputId = "bw_check2", label = "Bigwig 2"),
+              # )
+            )
+          ),
           fluidRow(
             column(12,
             imageOutput("matPlot") %>% withSpinner()
             )
           ),
-          fluidRow(
-            column(12,
-              textOutput("colinfo")
-            )
-          ),
-          fluidRow(
-            column(3,
-              offset = 9,
-              strong(h4("Overlay")),
-              checkboxInput(inputId = "HiC_check", label = "HiC"),
-              checkboxInput(inputId = "bw_check", label = "Bigwig"),
-              conditionalPanel(
-                condition = "input.bw2check == true",
-                checkboxInput(inputId = "bw_check2", label = "Bigwig 2"),
-              )
-            )
-          )
         )
       )
     )

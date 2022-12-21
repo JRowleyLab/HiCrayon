@@ -6,7 +6,6 @@ from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt 
 import pyBigWig
 import math
-from tqdm import tqdm
 from PIL import Image
 
 
@@ -245,7 +244,6 @@ def distanceMat(hicnumpy, redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, 
 
 def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redname,bluename,thresh,redbwmin,redbwmax,bluebwmin,bluebwmax,redlist,bluelist,overlayoff):
 
-	#overlayoff=False
 	REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1,1,1),(1,0,0)])
 
 	if rmat2 == "NULL":
@@ -342,7 +340,10 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redna
 
 	#plt.tight_layout()
 	#plt.subplots_adjust(top=0.85)
-	plt.savefig('plot.png')
+	filename="HiCcrayon.png"
+	plt.rcParams['figure.dpi'] = 300
+	plt.rcParams['savefig.dpi'] = 300
+	plt.savefig(filename)
 	n1=str(redname) + " mean,stdev in peaks is " + str(round(redbwmin,2)) + "," + str(round(redbwmax,2))
 	if rmat2 != "NULL":
 		n2=str(bluename) + " mean,stdev in peaks is " + str(round(bluebwmin,2)) + "," + str(round(bluebwmax,2))

@@ -28,29 +28,63 @@ observeEvent(input$hic, {
     hicv$y <- inFile$datapath
 })
 # p1 file handling
-p1v <- reactiveValues(y = NULL)
-observeEvent(input$p1, {
-    inFile <- parseFilePaths(roots = c(wd = ".."), input$p1)
-    p1v$y <- inFile$datapath
+p1v <- reactiveValues(y = "NULL")
+observe({
+    if(!input$setminmax){
+        inFile <- parseFilePaths(roots = c(wd = ".."), input$p1)
+        p1v$y <- inFile$datapath
+    }else{
+        p1v$y <- "NULL"
+    }
 })
-# Bigwig 1 file handling
-bw1v <- reactiveValues(y = NULL)
+
+# bw2 file handling
+bw1v <- reactiveValues(y = "NULL")
 observeEvent(input$bw1, {
     inFile <- parseFilePaths(roots = c(wd = ".."), input$bw1)
     bw1v$y <- inFile$datapath
 })
 # p2 file handling
-p2v <- reactiveValues(y = NULL)
-observeEvent(input$p2, {
-    inFile <- parseFilePaths(roots = c(wd = ".."), input$p2)
-    p2v$y <- inFile$datapath
+p2v <- reactiveValues(y = "NULL")
+observe({
+    if(!input$setminmax2){
+        inFile <- parseFilePaths(roots = c(wd = ".."), input$p2)
+        p2v$y <- inFile$datapath
+    }else{
+        p2v$y <- "NULL"
+    }
 })
 # bw1 file handling
-bw2v <- reactiveValues(y = NULL)
+bw2v <- reactiveValues(y = "NULL")
 observeEvent(input$bw2, {
     inFile <- parseFilePaths(roots = c(wd = ".."), input$bw2)
     bw2v$y <- inFile$datapath
 })
+
+# min max reactivevalue (global variable)
+minmax <- reactiveValues(min=NULL,max=NULL)
+observe(
+    if(input$setminmax){
+        minmax$min=as.numeric(input$min)
+        minmax$max=as.numeric(input$max)
+    }else {
+        minmax$min="NULL"
+        minmax$min="NULL"
+    }
+)
+
+# min max2 reactivevalue (global variable)
+minmax2 <- reactiveValues(min=NULL,max=NULL)
+observe(
+    if(input$setminmax2){
+        minmax2$min=as.numeric(input$min2)
+        minmax2$max=as.numeric(input$max2)
+    }else {
+        minmax2$min="NULL"
+        minmax2$min="NULL"
+    }
+)
+
 
 #### Functional
 HiCmatrix <- reactive({
@@ -66,20 +100,26 @@ HiCmatrix <- reactive({
 }) %>% shiny::bindEvent(input$run)
 
 
+
 # Functional
 bwlists <- reactive({
+
+    print(p1v$y)
+    print(class(p1v$y))
+    req(p1v$y)
+    req(p2v$y)
     objectBigWig <- processBigwigs(
             bigwig = bw1v$y,
-            min = "NULL",
-            max = "NULL",
+            min = minmax$min,
+            max = minmax$max,
             peaks = p1v$y,
             binsize = input$bin,
             chrom = input$chr,
             start = input$start,
             stop = input$stop,
             bigwig2 = bw2v$y,
-            min2 = "NULL",
-            max2 = "NULL",
+            min2 = minmax2$min,
+            max2 = minmax2$max,
             peaks2 = p2v$y
         )
 
@@ -97,7 +137,7 @@ bwlists <- reactive({
                 bluebwmax=bluebwmax,
                 bluebwmin=bluebwmin
                 ))
-}) 
+}) %>% shiny::bindEvent(input$run)
 
 
 distance <- reactive({
@@ -131,7 +171,7 @@ distance <- reactive({
         redlist=redlist,
         bluelist=bluelist
     ))
-}) 
+}) %>% shiny::bindEvent(input$run)
 
 finalPlot <- reactive({
     validate(need(HiCmatrix(), "Please Select parameters and select run"))
@@ -170,10 +210,16 @@ finalPlot <- reactive({
 
 output$colinfo <- renderText({
     paste(finalPlot()$redinfo,"\n",finalPlot()$blueinfo)
-})
+}) 
 
 output$matPlot <- renderImage({
      finalPlot()
-     list(src = 'plot.png', width = "100%", height = "100%")
-   }, deleteFile = FALSE)
+     list(src = "HiCcrayon.png", width = "100%")
+   }, deleteFile = FALSE) 
+
+
+# Toggle sidebar
+observeEvent(input$sidebar_button,{
+    shinyjs::toggle(selector = ".sidebar")
+  })
 
