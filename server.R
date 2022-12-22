@@ -15,56 +15,65 @@ observeEvent(input$bw2check, {
 
 
 ## Server side file-selection
-shinyFileChoose(input, "hic", root = c(wd = ".."))
-shinyFileChoose(input, "p1", root = c(wd = ".."))
-shinyFileChoose(input, "bw1", root = c(wd = ".."))
-shinyFileChoose(input, "p2", root = c(wd = ".."))
-shinyFileChoose(input, "bw2", root = c(wd = ".."))
+shinyFileChoose(input, "hic", root = c(wd = "/"))
+shinyFileChoose(input, "p1", root = c(wd = "/"))
+shinyFileChoose(input, "bw1", root = c(wd = "/"))
+shinyFileChoose(input, "p2", root = c(wd = "/"))
+shinyFileChoose(input, "bw2", root = c(wd = "/"))
 
 # hic file handling
 hicv <- reactiveValues(y = NULL)
 observeEvent(input$hic, {
-    inFile <- parseFilePaths(roots = c(wd = ".."), input$hic)
+    inFile <- parseFilePaths(roots = c(wd = "/"), input$hic)
     hicv$y <- inFile$datapath
 })
 # p1 file handling
 p1v <- reactiveValues(y = "NULL")
 observe({
     if(!input$setminmax){
-        inFile <- parseFilePaths(roots = c(wd = ".."), input$p1)
+        inFile <- parseFilePaths(roots = c(wd = "/"), input$p1)
         p1v$y <- inFile$datapath
-    }else{
+    }else {
         p1v$y <- "NULL"
     }
 })
 
-# bw2 file handling
+# bw1 file handling
 bw1v <- reactiveValues(y = "NULL")
 observeEvent(input$bw1, {
-    inFile <- parseFilePaths(roots = c(wd = ".."), input$bw1)
+    inFile <- parseFilePaths(roots = c(wd = "/"), input$bw1)
     bw1v$y <- inFile$datapath
 })
+
 # p2 file handling
 p2v <- reactiveValues(y = "NULL")
 observe({
     if(!input$setminmax2){
-        inFile <- parseFilePaths(roots = c(wd = ".."), input$p2)
+        inFile <- parseFilePaths(roots = c(wd = "/"), input$p2)
         p2v$y <- inFile$datapath
     }else{
         p2v$y <- "NULL"
     }
 })
-# bw1 file handling
+# bw2 file handling
 bw2v <- reactiveValues(y = "NULL")
-observeEvent(input$bw2, {
-    inFile <- parseFilePaths(roots = c(wd = ".."), input$bw2)
-    bw2v$y <- inFile$datapath
-})
+# observeEvent(input$bw2, {
+#     inFile <- parseFilePaths(roots = c(wd = "/"), input$bw2)
+#     bw2v$y <- inFile$datapath
+# })
+observe(
+    if (input$bw2check) {
+        inFile <- parseFilePaths(roots = c(wd = "/"), input$bw2)
+        bw2v$y <- inFile$datapath
+    }else {
+        bw2v$y <- "NULL"
+    }
+)
 
 # min max reactivevalue (global variable)
-minmax <- reactiveValues(min=NULL,max=NULL)
+minmax <- reactiveValues(min = NULL, max = NULL)
 observe(
-    if(input$setminmax){
+    if (input$setminmax){
         minmax$min=as.numeric(input$min)
         minmax$max=as.numeric(input$max)
     }else {
@@ -74,14 +83,24 @@ observe(
 )
 
 # min max2 reactivevalue (global variable)
-minmax2 <- reactiveValues(min=NULL,max=NULL)
+minmax2 <- reactiveValues(min = NULL, max = NULL)
 observe(
-    if(input$setminmax2){
+    if (input$setminmax2) {
         minmax2$min=as.numeric(input$min2)
         minmax2$max=as.numeric(input$max2)
     }else {
         minmax2$min="NULL"
         minmax2$min="NULL"
+    }
+)
+
+# bluename reactivevalue
+bname <- reactiveValues(n = "NULL")
+observe(
+    if (!input$bw2check) {
+        bname$n <- "NULL"
+    } else {
+        bname$n <- input$n2
     }
 )
 
@@ -100,14 +119,9 @@ HiCmatrix <- reactive({
 }) %>% shiny::bindEvent(input$run)
 
 
-
 # Functional
 bwlists <- reactive({
 
-    print(p1v$y)
-    print(class(p1v$y))
-    req(p1v$y)
-    req(p2v$y)
     objectBigWig <- processBigwigs(
             bigwig = bw1v$y,
             min = minmax$min,
@@ -174,7 +188,7 @@ distance <- reactive({
 }) %>% shiny::bindEvent(input$run)
 
 finalPlot <- reactive({
-    validate(need(HiCmatrix(), "Please Select parameters and select run"))
+    #validate(need(HiCmatrix(), "Please Select parameters and select run"))
 
     objectPlot <- plotting(rmat=distance()$rmat,
              gmat=distance()$gmat,
@@ -187,7 +201,7 @@ finalPlot <- reactive({
              gmat2=distance()$gmat2,
              bmat2=distance()$bmat2,
              redname=input$n1,
-             bluename=input$n2,
+             bluename=bname$n,
              thresh=input$thresh,
              redbwmin=bwlists()$redbwmin,
              redbwmax=bwlists()$redbwmax,
@@ -198,18 +212,11 @@ finalPlot <- reactive({
              overlayoff=input$HiC_check
              )
 
-    redinfo <- tuple(objectPlot, convert=T)[0]
-    blueinfo <- tuple(objectPlot, convert=T)[1]
-
-    return(list(
-        redinfo=redinfo,
-        blueinfo=blueinfo
-    ))
-    
+    return(objectPlot)
 }) 
 
 output$colinfo <- renderText({
-    paste(finalPlot()$redinfo,"\n",finalPlot()$blueinfo)
+    paste(finalPlot())
 }) 
 
 output$matPlot <- renderImage({

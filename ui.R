@@ -18,7 +18,7 @@ ui <- fluidPage(
           shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
           fluidRow(
             column(5,
-              selectizeInput("norm", label="Normalization Scheme", choices=c("VC", "VC_SQRT", "KR", "NONE"))
+              selectizeInput("norm", label="Normalization Scheme", choices=c("VC", "VC_SQRT", "KR", "NONE"), selected="KR")
             ),
             column(5,
               numericInput("thresh", label="Threshold", value=2)
@@ -42,11 +42,11 @@ ui <- fluidPage(
                 fluidRow(
                   column(
                     5,
-                    numericInput("min", "Min:", value = .1, min = 0, max = 1)
+                    numericInput("min", "Min:", value = 0, min = 0, max = 1)
                   ),
                   column(5,
                     ofset = 3,
-                    numericInput("max", "Max:", value = .7, min = 0, max = 1)
+                    numericInput("max", "Max:", value = .9, min = 0, max = 1)
                   )
                 )
               ),
@@ -68,11 +68,11 @@ ui <- fluidPage(
                 fluidRow(
                   column(
                     5,
-                    numericInput("min2", "Min:", value = .1, min = 0, max = 1)
+                    numericInput("min2", "Min:", value = 0, min = 0, max = 1)
                   ),
                   column(5,
                     ofset = 3,
-                    numericInput("max2", "Max:", value = .7, min = 0, max = 1)
+                    numericInput("max2", "Max:", value = .9, min = 0, max = 1)
                   )
                 )
               ),
@@ -83,7 +83,7 @@ ui <- fluidPage(
           fluidRow(
             column(4,
               ofset = 2,
-              textInput("chr", "Chr:")
+              textInput("chr", "Chr:", value="chr1")
             ),
             column(
               4,

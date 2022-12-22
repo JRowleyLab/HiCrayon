@@ -9,22 +9,6 @@ import math
 from PIL import Image
 
 
-### Arguments provided from command line ~ now used as Shiny inputs
-# hicfile = str(args.hicfile) #input$hic
-# #region = str(args.plotregion) #use separate inputs
-# binsize = int(args.binsize) #input$bin
-# norm = str(args.norm) #input$norm
-# redbw = str(args.redbw) #input$bw1
-# bluebw = str(args.bluebw) #input$bw2
-# thresh = float(args.thresh) #input$thresh
-# outname = str(args.outname) #use default for now
-# redname = str(args.redname) #input$n1
-# bluename = str(args.bluename) #input$n2
-# redpeaks = str(args.redpeaks) #input$p1
-# bluepeaks = str(args.bluepeaks)#input$p2
-# redminmax = str(args.redminmax) #use separate inputs
-# blueminmax = str(args.blueminmax) #use separate inputs
-
 def readHiCasNumpy(hicfile, chrom, start, stop, norm, binsize):
 	hicdump = hicstraw.HiCFile(hicfile)
 	nochr = chrom.strip('chr')
@@ -71,42 +55,48 @@ def processBigwigs(bigwig,min,max,peaks,binsize,chrom,start,stop,bigwig2,min2,ma
 	binsize=int(binsize)
 	stop=int(stop)
 
-	redbwopen = pyBigWig.open(bigwig)		
-	redpeaksignal = []
+	if bigwig2 == "NULL":
 
-	if peaks == "NULL":
-		redbwmin = float(min)
-		redbwmax = float(max)
-	else:
-		with open(peaks, 'r') as rp:
-			for line in rp:
-				li = line.strip().split('\t')
-				#myredpeakslistchr.append(str(li[0]))
-				peakstart = float(li[1])
-				peakend = float(li[2])
-				peakdist = peakend - peakstart
-				try:
-					peakmid = (math.floor((peakstart + (peakdist/2))/binsize))*binsize
-					#myredpeaksliststarts.append(int(mid)))
-					redpeaksignal.append(math.log(redbwopen.stats(str(li[0]), peakmid, peakmid+binsize)[0]))
-				except RuntimeError:
-					continue
-	
-		#redbwmax = np.nanmean(redpeaksignal)
-		redbwmax = np.nanmedian(redpeaksignal)
-		redbwstd = np.nanstd(redpeaksignal)
-		#redbwmin = redbwmax - (redbwstd*2)
-		redbwmin = redbwmax - redbwstd
-		redbwmax = redbwmax + redbwstd
-	if redbwmin < 0:
-		redbwmin = 0
-	redbwlist = []
-	for walker in range(start, stop+binsize, binsize):
-		try:
-			redbwlist.append(math.log(redbwopen.stats(chrom, walker, walker+binsize)[0]))
-		except ValueError:
-			redbwlist.append(0)
-			
+		redbwopen = pyBigWig.open(bigwig)		
+		redpeaksignal = []
+
+		if peaks == "NULL":
+			redbwmin = float(min)
+			redbwmax = float(max)
+		else:
+			with open(peaks, 'r') as rp:
+				for line in rp:
+					li = line.strip().split('\t')
+					#myredpeakslistchr.append(str(li[0]))
+					peakstart = float(li[1])
+					peakend = float(li[2])
+					peakdist = peakend - peakstart
+					try:
+						peakmid = (math.floor((peakstart + (peakdist/2))/binsize))*binsize
+						#myredpeaksliststarts.append(int(mid)))
+						redpeaksignal.append(math.log(redbwopen.stats(str(li[0]), peakmid, peakmid+binsize)[0]))
+					except RuntimeError:
+						continue
+		
+			#redbwmax = np.nanmean(redpeaksignal)
+			redbwmax = np.nanmedian(redpeaksignal)
+			redbwstd = np.nanstd(redpeaksignal)
+			#redbwmin = redbwmax - (redbwstd*2)
+			redbwmin = redbwmax - redbwstd
+			redbwmax = redbwmax + redbwstd
+		if redbwmin < 0:
+			redbwmin = 0
+		redbwlist = []
+		for walker in range(start, stop+binsize, binsize):
+			try:
+				redbwlist.append(math.log(redbwopen.stats(chrom, walker, walker+binsize)[0]))
+			except ValueError:
+				redbwlist.append(0)
+
+		bluebwlist="NULL"
+		bluebwmax="NULL"
+		bluebwmin="NULL"
+				
 	else:
 		
 		redbwopen = pyBigWig.open(bigwig)
@@ -194,7 +184,6 @@ def getrelative(mylist, mymax, mymin):
 	return relativelist
 
 
-############### TODO: onwards 
 
 def distanceMat(hicnumpy, redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, bluebwmin,thresh):
 	matsize = len(hicnumpy)
@@ -238,6 +227,12 @@ def distanceMat(hicnumpy, redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, 
 				bscore = 255*newscoreblue*satscore
 				bmat2[x,y] = bscore
 				bmat2[y,x] = bscore
+			else:
+				rmat2="NULL"
+				gmat2="NULL"
+				bmat2="NULL"
+				bluelist="NULL"
+				
 			
 	print("Distance complete")
 	return rmat,gmat,bmat,distnormmat,rmat2,gmat2,bmat2,redlist,bluelist
@@ -246,7 +241,9 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redna
 
 	REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1,1,1),(1,0,0)])
 
-	if rmat2 == "NULL":
+	print("plotting...")
+
+	if bluelist == "NULL":
 		fig, (ax1, ax2) = plt.subplots(1,2, sharex=False, sharey=False)
 		redmat = (np.dstack((rmat,gmat,bmat))).astype(np.uint8)
 		redimg = Image.fromarray(redmat)
@@ -345,7 +342,8 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redna
 	plt.rcParams['savefig.dpi'] = 300
 	plt.savefig(filename)
 	n1=str(redname) + " mean,stdev in peaks is " + str(round(redbwmin,2)) + "," + str(round(redbwmax,2))
-	if rmat2 != "NULL":
+	if bluelist != "NULL":
 		n2=str(bluename) + " mean,stdev in peaks is " + str(round(bluebwmin,2)) + "," + str(round(bluebwmax,2))
+		n1=n2+n1
 	#print(str(ll) + " " + str(bb) + " " + str(ww) + " " + str(hh))
-	return(n1,n2)
+	return(n1)
