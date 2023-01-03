@@ -257,8 +257,10 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redna
 
 		ax2.set_title(redname)
 		if overlayoff == True:
+			print("overlayoff step1")
 			redimg = getinversered(redimg)
-			ax2.imshow(redimg, interpolation='none', cmap="REDMAP")
+			print("overlayoff step2")
+			ax2.imshow(redimg, interpolation='none', cmap=REDMAP)
 		else:
 			ax2.imshow(distnormmat, 'gray', interpolation='none')
 			ax2.imshow(redimg, interpolation='none', alpha=0.7)
@@ -272,7 +274,7 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redna
 		ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
 		
 		#f.set_figheight(.5)
-		fig.suptitle(str(chrom) + ":" + str(start) + "-" + str(stop))
+		#fig.suptitle(str(chrom) + ":" + str(start) + "-" + str(stop))
 	else:
 		fig, ax = plt.subplots(2,2, figsize=(15,15))
 
@@ -333,7 +335,7 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redna
 		newax4.axis('off')
 		l2, b2, w2, h2 = ax[1,1].get_position().bounds
 		newax4.set_position((l2*(.97),0.04, w2*1.095, .07))
-		fig.suptitle(str(chrom) + ":" + str(start) + "-" + str(stop))
+		#fig.suptitle(str(chrom) + ":" + str(start) + "-" + str(stop))
 
 	#plt.tight_layout()
 	#plt.subplots_adjust(top=0.85)
@@ -341,9 +343,11 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redna
 	plt.rcParams['figure.dpi'] = 300
 	plt.rcParams['savefig.dpi'] = 300
 	plt.savefig(filename)
-	n1=str(redname) + " mean,stdev in peaks is " + str(round(redbwmin,2)) + "," + str(round(redbwmax,2))
+	# n1=str(redname) + " mean,stdev in peaks is " + str(round(redbwmin,2)) + "," + str(round(redbwmax,2))
 	if bluelist != "NULL":
-		n2=str(bluename) + " mean,stdev in peaks is " + str(round(bluebwmin,2)) + "," + str(round(bluebwmax,2))
-		n1=n2+n1
+		bluebwmin = "NULL"
+		bluebwmax = "NULL"
+	# 	n2=str(bluename) + " mean,stdev in peaks is " + str(round(bluebwmin,2)) + "," + str(round(bluebwmax,2))
+	# 	n1=n2+n1
 	#print(str(ll) + " " + str(bb) + " " + str(ww) + " " + str(hh))
-	return(n1)
+	return(redbwmin,redbwmax,bluebwmin,bluebwmax)

@@ -3,9 +3,9 @@ ui <- fluidPage(
 
   useShinyjs(),
   # Navbar structure for UI
-  navbarPage(title = tagList("",actionLink("sidebar_button","",icon = icon("bars"))),
+  navbarPage(title = "HiC Crayon",#tagList("",actionLink("sidebar_button","",icon = icon("bars"))),
     id="HiC Crayon",
-    theme = shinytheme("lumen"),
+    theme = shinytheme("cosmo"),
     tabPanel("Visualize",
       fluid = TRUE, icon = icon("globe-americas"),
 
@@ -15,10 +15,18 @@ ui <- fluidPage(
         sidebarPanel(
           titlePanel("Choose Parameters"),
           #fileInput("hic", label = "Upload HiC:", accept = ".hic", multiple = F),
-          shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
           fluidRow(
             column(5,
-              selectizeInput("norm", label="Normalization Scheme", choices=c("VC", "VC_SQRT", "KR", "NONE"), selected="KR")
+              shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
+            ),
+            column(5,
+              #tags$p("No file selected")
+              verbatimTextOutput('f1_hic')
+            )
+          ),
+          fluidRow(
+            column(5,
+              selectizeInput("norm", label="Normalization", choices=c("VC", "VC_SQRT", "KR", "NONE"), selected="KR")
             ),
             column(5,
               numericInput("thresh", label="Threshold", value=2)
@@ -30,12 +38,29 @@ ui <- fluidPage(
             tabPanel(
               "Bigwig",
               textInput("n1", label = "Name"),
-              #fileInput("bw1", label = "Upload bigwig:", accept = ".bw", multiple = F),
-              shinyFilesButton('bw1', label='Select bigwig', title='Please select a .bigwig/.bw file', multiple=FALSE),
+
+              fluidRow(
+                column(5,
+                  shinyFilesButton('bw1', label='Select bigwig', title='Please select a .bigwig/.bw file', multiple=FALSE),
+                ),
+                column(5,
+                  #tags$p("No file selected")
+                  verbatimTextOutput('f1_bw1')
+                )
+              ),
               conditionalPanel(
                 condition = "input.setminmax == false",
                 #fileInput("p1", label = "Upload bed:", accept = ".bed", multiple = F),
-                shinyFilesButton('p1', label='Select bed', title='Please select a .bed file', multiple=FALSE),
+                #shinyFilesButton('p1', label='Select bed', title='Please select a .bed file', multiple=FALSE),
+                fluidRow(
+                column(5,
+                  shinyFilesButton('p1', label='Select bed', title='Please select a .bed file', multiple=FALSE),
+                ),
+                column(5,
+                  #tags$p("No file selected")
+                  verbatimTextOutput('f1_p1')
+                )
+              ),
               ),
               conditionalPanel(
                 condition = "input.setminmax == true",
@@ -57,11 +82,29 @@ ui <- fluidPage(
               "Bigwig 2",
               textInput("n2", label = "Name"),
               #fileInput("bw2", label = "Upload bigwig 2:", accept = ".bw", multiple = F),
-              shinyFilesButton('bw2', label='Select bigwig', title='Please select a .bigwig/.bw file', multiple=FALSE),
+              #shinyFilesButton('bw2', label='Select bigwig', title='Please select a .bigwig/.bw file', multiple=FALSE),
+              fluidRow(
+                column(5,
+                  shinyFilesButton('bw2', label='Select bigwig', title='Please select a .bigwig/.bw file', multiple=FALSE),
+                ),
+                column(5,
+                  #tags$p("No file selected")
+                  verbatimTextOutput('f1_bw2')
+                )
+              ),
               conditionalPanel(
                 condition = "input.setminmax2 == false",
                 #fileInput("p2", label = "Upload bed:", accept = ".bed", multiple = F),
-                shinyFilesButton('p2', label='Select bed', title='Please select a .bed file', multiple=FALSE),
+                #shinyFilesButton('p2', label='Select bed', title='Please select a .bed file', multiple=FALSE),
+                fluidRow(
+                column(5,
+                  shinyFilesButton('p2', label='Select bed', title='Please select a .bed file', multiple=FALSE),
+                ),
+                column(5,
+                  #tags$p("No file selected")
+                  verbatimTextOutput('f1_p2')
+                )
+              ),
               ),
               conditionalPanel(
                 condition = "input.setminmax2 == true",
@@ -99,10 +142,15 @@ ui <- fluidPage(
         )
       
       ),
+
+        ########################################
+        # Main
+        ########################################
+
         mainPanel(
           fluidRow(
             column(7,
-              textOutput("colinfo")
+              #textOutput("colinfo")
             ),
             column(3,
               offset = 9,
@@ -118,8 +166,8 @@ ui <- fluidPage(
           fluidRow(
             column(12,
             imageOutput("matPlot") %>% withSpinner()
+              )
             )
-          ),
         )
       )
     )

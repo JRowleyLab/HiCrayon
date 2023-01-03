@@ -15,14 +15,74 @@ observeEvent(input$bw2check, {
 
 
 ## Server side file-selection
-shinyFileChoose(input, "hic", root = c(wd = "/"))
+shinyFileChoose(input, 'hic', root = c(wd = '/'))
 shinyFileChoose(input, "p1", root = c(wd = "/"))
 shinyFileChoose(input, "bw1", root = c(wd = "/"))
 shinyFileChoose(input, "p2", root = c(wd = "/"))
 shinyFileChoose(input, "bw2", root = c(wd = "/"))
 
+###############################
+## display path for shinyFileChoose
+###############################
+
+## print path to textbox with verbatimTextOutput
+output$f1_hic <- renderPrint({
+    #cat("text")
+    #print(input$hic)
+if (is.integer(input$hic[1])) {
+    cat("No file has been selected")
+} else {
+    x <- parseFilePaths(roots = c(wd = "/"), input$hic)
+    as.character(x$datapath[1])
+}
+})
+
+output$f1_bw1 <- renderPrint({
+    #cat("text")
+    #print(input$hic)
+if (is.integer(input$bw1[1])) {
+    cat("No file has been selected")
+} else {
+    x <- parseFilePaths(roots = c(wd = "/"), input$bw1)
+    as.character(x$datapath[1])
+}
+})
+
+output$f1_p1 <- renderPrint({
+    #cat("text")
+    #print(input$hic)
+if (is.integer(input$p1[1])) {
+    cat("No file has been selected")
+} else {
+    x <- parseFilePaths(roots = c(wd = "/"), input$p1)
+    as.character(x$datapath[1])
+}
+})
+
+output$f1_bw2 <- renderPrint({
+    #cat("text")
+    #print(input$hic)
+if (is.integer(input$bw2[1])) {
+    cat("No file has been selected")
+} else {
+    x <- parseFilePaths(roots = c(wd = "/"), input$bw2)
+    as.character(x$datapath[1])
+}
+})
+
+output$f1_p2 <- renderPrint({
+    #cat("text")
+    #print(input$hic)
+if (is.integer(input$p2[1])) {
+    cat("No file has been selected")
+} else {
+    x <- parseFilePaths(roots = c(wd = "/"), input$p2)
+    as.character(x$datapath[1])
+}
+})
+
 # hic file handling
-hicv <- reactiveValues(y = NULL)
+hicv <- reactiveValues(y = "NULL")
 observeEvent(input$hic, {
     inFile <- parseFilePaths(roots = c(wd = "/"), input$hic)
     hicv$y <- inFile$datapath
@@ -57,10 +117,7 @@ observe({
 })
 # bw2 file handling
 bw2v <- reactiveValues(y = "NULL")
-# observeEvent(input$bw2, {
-#     inFile <- parseFilePaths(roots = c(wd = "/"), input$bw2)
-#     bw2v$y <- inFile$datapath
-# })
+
 observe(
     if (input$bw2check) {
         inFile <- parseFilePaths(roots = c(wd = "/"), input$bw2)
@@ -71,7 +128,7 @@ observe(
 )
 
 # min max reactivevalue (global variable)
-minmax <- reactiveValues(min = NULL, max = NULL)
+minmax <- reactiveValues(min = "NULL", max = "NULL")
 observe(
     if (input$setminmax){
         minmax$min=as.numeric(input$min)
@@ -83,7 +140,7 @@ observe(
 )
 
 # min max2 reactivevalue (global variable)
-minmax2 <- reactiveValues(min = NULL, max = NULL)
+minmax2 <- reactiveValues(min = "NULL", max = "NULL")
 observe(
     if (input$setminmax2) {
         minmax2$min=as.numeric(input$min2)
@@ -105,8 +162,9 @@ observe(
 )
 
 
-#### Functional
 HiCmatrix <- reactive({
+    #validate(need(input$hic!="NULL", "Please upload a HiC file"))
+
     matrix <- readHiCasNumpy(
         hicfile = hicv$y,
         chrom = input$chr,
@@ -119,7 +177,6 @@ HiCmatrix <- reactive({
 }) %>% shiny::bindEvent(input$run)
 
 
-# Functional
 bwlists <- reactive({
 
     objectBigWig <- processBigwigs(
@@ -212,21 +269,64 @@ finalPlot <- reactive({
              overlayoff=input$HiC_check
              )
 
-    return(objectPlot)
-}) 
+        #redbwmin,redbwmax,bluebwmin,bluebwmax
+        redbwmin <- tuple(objectPlot, convert=T)[0]
+        redbwmax <- tuple(objectPlot, convert=T)[1]
+        bluebwmin <- tuple(objectPlot, convert=T)[2]
+        bluebwmax <- tuple(objectPlot, convert=T)[3]
+        
 
-output$colinfo <- renderText({
-    paste(finalPlot())
-}) 
+    return(list(
+        redbwmin=redbwmin,
+        redbwmax=redbwmax,
+        bluebwmin=bluebwmin,
+        bluebwmax=bluebwmax
+    ))
+}) %>% shiny::bindEvent(input$run, input$HiC_check)
+
+# output$colinfo <- renderText({
+#     paste(finalPlot())
+# }) 
 
 output$matPlot <- renderImage({
-     finalPlot()
-     list(src = "HiCcrayon.png", width = "100%")
-   }, deleteFile = FALSE) 
+
+    #### Validation and Error handling
+
+    validate(need(input$hic, "Please upload a HiC file"))
+
+    validate(need(input$bw1, "Please upload a bigwig file"))
+    if(input$setminmax){
+        validate(
+            need(input$min, "Please select a minimum value"),
+            need(input$max, "Please select a maximum value")
+            )
+    }else{
+        validate(need(input$p1, "Please upload a .bed file"))
+    }
+    
+
+    if(input$bw2check){
+        validate(need(input$bw2!="NULL", "Please upload a bigwig file"))
+        validate(need(input$p2!="NULL", "Please upload a .bed file"))
+
+        if(input$setminmax2){
+        validate(
+            need(input$min2, "Please select a minimum value"),
+            need(input$max2, "Please select a maximum value")
+            )
+    }else{
+        validate(need(input$p1, "Please upload a .bed file"))
+    }
+    }
+    
+
+    finalPlot()
+    list(src = "HiCcrayon.png", width = "100%")
+   }, deleteFile = FALSE) %>% shiny::bindEvent(input$run, input$HiC_check)
 
 
-# Toggle sidebar
-observeEvent(input$sidebar_button,{
-    shinyjs::toggle(selector = ".sidebar")
-  })
+# # Toggle sidebar
+# observeEvent(input$sidebar_button,{
+#     shinyjs::toggle(selector = ".sidebar")
+#   })
 
