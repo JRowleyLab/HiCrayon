@@ -321,7 +321,11 @@ output$matPlot <- renderImage({
     
 
     finalPlot()
-    list(src = "HiCcrayon.png", width = "100%")
+    list(src = "HiCrayon.svg", 
+         contentType = 'image/svg+xml',
+         width='100%',
+         height='100%'
+         )
    }, deleteFile = FALSE) %>% shiny::bindEvent(input$run, input$HiC_check)
 
 

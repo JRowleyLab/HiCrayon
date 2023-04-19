@@ -5,4 +5,11 @@ python/HiC_Crayon_v0.1.py
 data/
 
 # test python script
-test.py
+*test*
+
+# any images
+*.png
+*.svg
+
+# workshop files
+workshop

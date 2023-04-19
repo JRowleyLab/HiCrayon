@@ -1,6 +1,5 @@
 source("global.R")
 
-reticulate::source_python("test.py")
 reticulate::source_python("python/functions.py")
 
 ui <- shinyUI({

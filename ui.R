@@ -29,8 +29,16 @@ ui <- fluidPage(
               selectizeInput("norm", label="Normalization", choices=c("VC", "VC_SQRT", "KR", "NONE"), selected="KR")
             ),
             column(5,
-              numericInput("thresh", label="Threshold", value=2)
-            )
+              #numericInput("thresh", label="Threshold", value=2),
+              sliderInput("thresh",
+                        label = "Intensity Threshold",
+                        min = 0,
+                        max = 10,
+                        value = 2,
+                        step = .1,
+                        round = FALSE,
+                        ticks = TRUE)
+                        )
           ),
           tabsetPanel(
             id = "parameters",

@@ -232,14 +232,14 @@ def distanceMat(hicnumpy, redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, 
 				gmat2="NULL"
 				bmat2="NULL"
 				bluelist="NULL"
-				
-			
+					
 	print("Distance complete")
 	return rmat,gmat,bmat,distnormmat,rmat2,gmat2,bmat2,redlist,bluelist
 
 def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redname,bluename,thresh,redbwmin,redbwmax,bluebwmin,bluebwmax,redlist,bluelist,overlayoff):
 
-	REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1,1,1),(1,0,0)])
+	#REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1,1,1),(1,0,0)])
+	REDMAP = "YlOrRd"
 
 	print("plotting...")
 
@@ -339,10 +339,10 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redna
 
 	#plt.tight_layout()
 	#plt.subplots_adjust(top=0.85)
-	filename="HiCcrayon.png"
+	filename="HiCrayon.svg"
 	plt.rcParams['figure.dpi'] = 300
 	plt.rcParams['savefig.dpi'] = 300
-	plt.savefig(filename)
+	plt.savefig(filename, bbox_inches='tight')
 	# n1=str(redname) + " mean,stdev in peaks is " + str(round(redbwmin,2)) + "," + str(round(redbwmax,2))
 	if bluelist != "NULL":
 		bluebwmin = "NULL"
