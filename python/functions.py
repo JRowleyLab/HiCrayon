@@ -183,8 +183,34 @@ def getrelative(mylist, mymax, mymin):
 	print("Get relative")
 	return relativelist
 
+# Cut down version of distanceMat() to work for just HiC Map
+def distanceMatHiC(hicnumpy, thresh):
+	print("Beginning distance matrix HiC")
+	matsize = len(hicnumpy)
+
+	mydiags=[]
+	for i in range(0,len(hicnumpy)):
+		mydiags.append(np.nanmean(np.diag(hicnumpy, k=i)))
+
+	distnormmat = np.zeros((matsize,matsize))
+	for x in range(0,matsize):
+		for y in range(x,matsize):
+			distance=y-x
+			hicscore = (hicnumpy[x,y] + 1)/(mydiags[distance]+1)
+			if hicscore > thresh:
+				distnormmat[x,y] = thresh
+				distnormmat[y,x] = thresh
+				satscore = 1
+			else:
+				distnormmat[x,y] = hicscore
+				distnormmat[y,x] = hicscore
+				satscore = hicscore/thresh
+	print("HiC distance created")
+	return(distnormmat)
 
 
+# Calculates distance matrix for hic and both chipseq sets if selected. 
+# Redo to be more flexible
 def distanceMat(hicnumpy, redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, bluebwmin,thresh):
 	matsize = len(hicnumpy)
 
@@ -236,23 +262,52 @@ def distanceMat(hicnumpy, redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, 
 	print("Distance complete")
 	return rmat,gmat,bmat,distnormmat,rmat2,gmat2,bmat2,redlist,bluelist
 
+
+def hic_plot(REDMAP, figname, thresh, distnormmat):
+
+	print("Plotting HiC")
+	# Save distance normalized HiC plot and display. This is base functionality of the app and 
+	# only requires a HiC file.
+	fig, (ax1) = plt.subplots(ncols=1)
+
+	#ax1.set_title('Hi-C')
+	ax1.matshow(distnormmat, cmap=REDMAP, vmin=0, vmax=thresh)
+	ax1.xaxis.set_visible(False)
+	ax1.yaxis.set_visible(False)
+	plt.savefig(figname, bbox_inches='tight')
+	print("Plot Created")
+	
+
+
+# redistribute the below 'plotting' function into separate functions for creating plots
+
 def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redname,bluename,thresh,redbwmin,redbwmax,bluebwmin,bluebwmax,redlist,bluelist,overlayoff):
 
 	#REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1,1,1),(1,0,0)])
 	REDMAP = "YlOrRd"
 
-	print("plotting...")
+	# Save distance normalized HiC plot and display. This is base functionality of the app and 
+	# only requires a HiC file.
+	fig, (ax1) = plt.subplots(ncols=1)
+	redmat = (np.dstack((rmat,gmat,bmat))).astype(np.uint8)
+	redimg = Image.fromarray(redmat)
+
+	#ax1.set_title('Hi-C')
+	ax1.matshow(distnormmat, cmap=REDMAP, vmin=0, vmax=thresh)
+	ax1.xaxis.set_visible(False)
+	ax1.yaxis.set_visible(False)
+	plt.savefig("HiC.svg", bbox_inches='tight')
 
 	if bluelist == "NULL":
 		fig, (ax1, ax2) = plt.subplots(1,2, sharex=False, sharey=False)
 		redmat = (np.dstack((rmat,gmat,bmat))).astype(np.uint8)
 		redimg = Image.fromarray(redmat)
 
-		ax1.set_title('Hi-C')
+		#ax1.set_title('Hi-C')
 		ax1.matshow(distnormmat, cmap=REDMAP, vmin=0, vmax=thresh)
 		ax1.xaxis.set_visible(False)
 		ax1.yaxis.set_visible(False)
-		#plt.savefig("distnorm.png")
+		#plt.savefig("distnorm.svg", bbox_inches='tight')
 		#ax1.set_xlabel(str(chrom) + ":" + str(start) + "-" + str(end))
 
 		ax2.set_title(redname)
@@ -340,8 +395,8 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redna
 	#plt.tight_layout()
 	#plt.subplots_adjust(top=0.85)
 	filename="HiCrayon.svg"
-	plt.rcParams['figure.dpi'] = 300
-	plt.rcParams['savefig.dpi'] = 300
+	# plt.rcParams['figure.dpi'] = 300
+	# plt.rcParams['savefig.dpi'] = 300
 	plt.savefig(filename, bbox_inches='tight')
 	# n1=str(redname) + " mean,stdev in peaks is " + str(round(redbwmin,2)) + "," + str(round(redbwmax,2))
 	if bluelist != "NULL":

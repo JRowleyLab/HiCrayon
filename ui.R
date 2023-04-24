@@ -40,6 +40,65 @@ ui <- fluidPage(
                         ticks = TRUE)
                         )
           ),
+          # Dropdown to select colour scheme for HiC Map
+          fluidRow(
+            column(6,
+              selectizeInput(
+                "map_colour", 
+                "Colour Scheme", 
+                choices = c(
+                  "YlOrRd", "Blues", "RdPu",
+                  "RdYlBu_r", "Reds", "binary",
+                  "gist_heat", "gist_heat_r"),
+                selected = "YlOrRd"
+              )
+            )
+          ),
+                fluidRow(
+            column(4,
+              ofset = 2,
+              textInput("chr", "Chr:", value="chr1")
+            ),
+            column(
+              4,
+              numericInput("start", "Start:",
+              value = 65000000, 
+              min = 0, 
+              max = 10000000),
+            ),
+            column(4,
+              ofset = 2,
+              numericInput("stop", "Stop:",
+              value = 70000000, 
+              min = 0, 
+              max = 10000000)
+            )
+          ),
+          numericInput("bin", "Bin Size:", 
+          value = 5000, 
+          min = 5000, 
+          max = 50000),
+          # Button to generate HiC image
+          fluidRow(
+            column(3,
+              actionButton("generate_hic", label = "Generate HiC")
+          )),
+
+
+          # Turn off overlay for images. Aim is to be able to
+          # turn off overlay for each image individually
+          # The overlay is handled in the python function.
+          fluidRow(
+            column(3,
+              strong(h4("Overlay Off")),
+              checkboxInput(inputId = "HiC_check", label = "HiC"),
+              checkboxInput(inputId = "bw_check", label = "Bigwig"),
+              conditionalPanel(
+                condition = "input.bw2check == true",
+                checkboxInput(inputId = "bw_check2", label = "Bigwig 2"),
+              )
+            )
+          ),
           tabsetPanel(
             id = "parameters",
             #### Bigwig Tab 1
@@ -131,24 +190,8 @@ ui <- fluidPage(
             )
           ),
           checkboxInput("bw2check", "Second Bigwig?"),
-          fluidRow(
-            column(4,
-              ofset = 2,
-              textInput("chr", "Chr:", value="chr1")
-            ),
-            column(
-              4,
-              numericInput("start", "Start:", value = 5000000, min = 0, max = 10000000),
-            ),
-            column(4,
-              ofset = 2,
-              numericInput("stop", "Stop:", value = 6000000, min = 0, max = 10000000)
-            )
-          ),
-          numericInput("bin", "Bin Size:", value = 5000, min = 5000, max = 50000),
           actionButton("run", label = "Run!")
         )
-      
       ),
 
         ########################################
@@ -156,26 +199,16 @@ ui <- fluidPage(
         ########################################
 
         mainPanel(
-          fluidRow(
-            column(7,
-              #textOutput("colinfo")
-            ),
-            column(3,
-              offset = 9,
-              strong(h4("Overlay Off")),
-              checkboxInput(inputId = "HiC_check", label = "HiC")
-              # checkboxInput(inputId = "bw_check", label = "Bigwig"),
-              # conditionalPanel(
-              #   condition = "input.bw2check == true",
-              #   checkboxInput(inputId = "bw_check2", label = "Bigwig 2"),
-              # )
+          tabsetPanel(
+            tabPanel(
+              "HiC",
+                fluidRow(
+                  column(12,
+                    imageOutput("matPlot") %>% withSpinner()
+                    )
+                  )
             )
-          ),
-          fluidRow(
-            column(12,
-            imageOutput("matPlot") %>% withSpinner()
-              )
-            )
+          )
         )
       )
     )
