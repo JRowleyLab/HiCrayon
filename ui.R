@@ -1,6 +1,11 @@
 # Define UI
 ui <- fluidPage(
 
+  # Import CSS stylesheet
+  tags$head(
+    tags$link(rel = "stylesheet", type = "text/css", href = "styles.css")
+  ),
+
   useShinyjs(),
   # Navbar structure for UI
   navbarPage(title = "HiC Crayon",
@@ -46,10 +51,7 @@ ui <- fluidPage(
               selectizeInput(
                 "map_colour", 
                 "Colour Scheme", 
-                choices = c(
-                  "YlOrRd", "Blues", "RdPu",
-                  "RdYlBu_r", "Reds", "binary",
-                  "gist_heat", "gist_heat_r"),
+                choices = "",
                 selected = "YlOrRd"
               )
             )
@@ -201,7 +203,20 @@ ui <- fluidPage(
         mainPanel(
                 fluidRow(
                   column(12,
-                    imageOutput("matPlot") %>% withSpinner()
+                    uiOutput("gallery"),
+                    #######################
+                    # weird behaviour where when uiOutput is
+                    # updated, the HTML below is removed
+                    # from webpage. Below HTML needed for
+                    # modal to work after 1st time.
+                    #######################
+                    tags$div(HTML('
+                      <div id="sps-gallery-modal" class="gallery-modal" onclick="galModalClose()">
+                        <span class="gallery-modal-close"></span>
+                        <img id="sps-gallery-modal-content" class="gallery-modal-content"/>
+                      <div class="gallery-caption"></div>
+                    ')
+                    )
                     )
                   )
         )

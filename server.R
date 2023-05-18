@@ -306,9 +306,10 @@ hic_distance <- reactive({
 # }) 
 
 
+
 hicplot <- reactive({
     hic_plot(REDMAP = input$map_colour,
-             figname = "HiC.svg",
+             #figname = "HiC.svg",
              thresh = input$thresh,
              distnormmat = hic_distance()
              )
@@ -353,3 +354,49 @@ output$matPlot <- renderImage({
          height = "200%"
          )
 }, deleteFile = FALSE) %>% shiny::bindEvent(input$generate_hic, input$HiC_check)
+
+
+
+###################################
+# Reactive Values to store texts, hrefs, images
+# for updating gallery
+###################################
+
+images = reactiveValues(hic = 0, nothic = 0)
+
+
+output$gallery <- renderUI({
+
+    validate(need(input$hic, "Please upload a HiC file"))
+
+    print(hicplot())
+
+    texts <- c("HiC",
+               "p2")
+    hrefs <- c(hicplot(),
+                "https://github.com/lz100/spsComps/blob/master/img/2.jpg?raw=true")
+    images <- c(hicplot(),
+                "https://github.com/lz100/spsComps/blob/master/img/2.jpg?raw=true")
+
+    gallery(
+        texts = texts,
+        hrefs = hrefs,
+        images = images,
+        enlarge = TRUE,
+        image_frame_size = 6,
+        title = "HiCrayon Image Overlay",
+        enlarge_method = "modal"
+        )
+}) %>% shiny::bindEvent(input$generate_hic, input$HiC_check)
+
+
+
+observe({
+    updateSelectizeInput(
+        session, "map_colour",
+        choices = matplot_colors(),
+        selected = "YlOrRd",
+        server = TRUE
+        )
+})
+

@@ -1,5 +1,3 @@
-import sys
-import argparse
 import numpy as np
 import hicstraw
 from matplotlib.colors import LinearSegmentedColormap
@@ -7,8 +5,15 @@ import matplotlib.pyplot as plt
 import pyBigWig
 import math
 from PIL import Image
+import os
+import glob
 
+#random string generation
+import string
+import random
 
+# Read in HiC file and output selected coordinates + binsize
+# as matrix
 def readHiCasNumpy(hicfile, chrom, start, stop, norm, binsize):
 	hicdump = hicstraw.HiCFile(hicfile)
 	nochr = chrom.strip('chr')
@@ -23,14 +28,16 @@ def readHiCasNumpy(hicfile, chrom, start, stop, norm, binsize):
 	return hicnumpy
 	
 
-# helper function for plotting
 
-def plot_hic_map(dense_matrix, maxcolor):
-	# Get normalization factors
-	REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1, 1, 1), (1, 0, 0)])
-	plt.matshow(dense_matrix, cmap=REDMAP, vmin=0, vmax=maxcolor)
-	plt.show()
+# Not sure if this is used, if not then DELETE
+# def plot_hic_map(dense_matrix, maxcolor):
+# 	# Get normalization factors
+# 	REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1, 1, 1), (1, 0, 0)])
+# 	plt.matshow(dense_matrix, cmap=REDMAP, vmin=0, vmax=maxcolor)
+# 	plt.show()
 
+
+# Gets inverse of an image in RED.
 def getinversered(myimg):
 	r, g, b = myimg.split()
 	g = r.point(lambda i: (255-i))
@@ -40,6 +47,7 @@ def getinversered(myimg):
 	return(wimg)
 
 
+# Gets inverse of an image in BLUE.
 def getinverseblue(myimg):
 	r, g, b = myimg.split()
 	g = b.point(lambda i: (255-i))
@@ -49,6 +57,11 @@ def getinverseblue(myimg):
 	return(wimg)
 
 
+
+###################################
+# Tidy and split into smaller helper 
+# functions
+###################################
 def processBigwigs(bigwig,min,max,peaks,binsize,chrom,start,stop,bigwig2,min2,max2,peaks2):
 
 	start=int(start)
@@ -263,7 +276,22 @@ def distanceMat(hicnumpy, redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, 
 	return rmat,gmat,bmat,distnormmat,rmat2,gmat2,bmat2,redlist,bluelist
 
 
-def hic_plot(REDMAP, figname, thresh, distnormmat):
+# Return a list of all possible sequential
+# matplotlib colormaps
+def matplot_colors():
+	return plt.colormaps()
+
+
+# Return a matrix of 
+def hic_plot(REDMAP, thresh, distnormmat):
+	# Remove previous versions of svg images
+	# to prevent bloat in images directory.
+	# NOTE: the file cannot be overwritten
+	# as webpage doesn't recognise it has
+	# changed if this is the case.
+	for f in glob.glob('./www/images/HiC_*.svg'):
+		print(f'Removing image: {f}')
+		os.remove(f)
 
 	print("Plotting HiC")
 	# Save distance normalized HiC plot and display. This is base functionality of the app and 
@@ -274,8 +302,23 @@ def hic_plot(REDMAP, figname, thresh, distnormmat):
 	ax1.matshow(distnormmat, cmap=REDMAP, vmin=0, vmax=thresh)
 	ax1.xaxis.set_visible(False)
 	ax1.yaxis.set_visible(False)
-	plt.savefig(figname, bbox_inches='tight')
-	print("Plot Created")
+
+	# random string for name
+	# using random.choices()
+	# generating random strings
+	res = ''.join(random.choices(string.ascii_uppercase +
+								string.digits, k=8))
+	figname = "HiC_" + str(res) + ".svg"
+	#figname = "HiC.svg"
+
+	directory = "images/"
+	wwwlocation = "www/" + directory + figname
+	notwwwlocation = directory + figname
+	print(wwwlocation)
+	plt.savefig(wwwlocation, bbox_inches='tight')
+	plt.close()
+	print("HiC Created: " + wwwlocation)
+	return notwwwlocation
 	
 
 
@@ -394,10 +437,13 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redna
 
 	#plt.tight_layout()
 	#plt.subplots_adjust(top=0.85)
+	directory = "www/images/"
 	filename="HiCrayon.svg"
+	wwwlocation = "images/" + filename
+	filelocation = directory + "/" + filename
 	# plt.rcParams['figure.dpi'] = 300
 	# plt.rcParams['savefig.dpi'] = 300
-	plt.savefig(filename, bbox_inches='tight')
+	plt.savefig(filelocation, bbox_inches='tight')
 	# n1=str(redname) + " mean,stdev in peaks is " + str(round(redbwmin,2)) + "," + str(round(redbwmax,2))
 	if bluelist != "NULL":
 		bluebwmin = "NULL"
@@ -405,4 +451,4 @@ def plotting(rmat,gmat,bmat,distnormmat,chrom,start,stop,rmat2,gmat2,bmat2,redna
 	# 	n2=str(bluename) + " mean,stdev in peaks is " + str(round(bluebwmin,2)) + "," + str(round(bluebwmax,2))
 	# 	n1=n2+n1
 	#print(str(ll) + " " + str(bb) + " " + str(ww) + " " + str(hh))
-	return(redbwmin,redbwmax,bluebwmin,bluebwmax)
+	return(wwwlocation)
