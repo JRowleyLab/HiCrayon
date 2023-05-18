@@ -13,3 +13,7 @@ data/
 
 # workshop files
 workshop
+python/segfault.py
+python/functions.ipynb
+hover_image_app/www/createHoverLines.js
+settings.json

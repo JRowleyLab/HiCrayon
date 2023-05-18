@@ -27,7 +27,7 @@ def readHiCasNumpy(hicfile, chrom, start, stop, norm, binsize):
 
 def plot_hic_map(dense_matrix, maxcolor):
 	# Get normalization factors
-	REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1,1,1),(1,0,0)])
+	REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1, 1, 1), (1, 0, 0)])
 	plt.matshow(dense_matrix, cmap=REDMAP, vmin=0, vmax=maxcolor)
 	plt.show()
 

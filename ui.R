@@ -3,7 +3,7 @@ ui <- fluidPage(
 
   useShinyjs(),
   # Navbar structure for UI
-  navbarPage(title = "HiC Crayon",#tagList("",actionLink("sidebar_button","",icon = icon("bars"))),
+  navbarPage(title = "HiC Crayon",
     id="HiC Crayon",
     theme = shinytheme("cosmo"),
     tabPanel("Visualize",
@@ -199,16 +199,11 @@ ui <- fluidPage(
         ########################################
 
         mainPanel(
-          tabsetPanel(
-            tabPanel(
-              "HiC",
                 fluidRow(
                   column(12,
                     imageOutput("matPlot") %>% withSpinner()
                     )
                   )
-            )
-          )
         )
       )
     )

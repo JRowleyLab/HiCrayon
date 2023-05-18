@@ -166,17 +166,20 @@ observe(
 
 # Take HiC file from user and output a HiC Matrix using straw
 HiCmatrix <- reactive({
-    #validate(need(input$hic!="NULL", "Please upload a HiC file"))
 
+    # Error: segfault from C stack overflow
+    # There is no way to catch a segmentation fault: core dumped
+    # error. Just inform the user to reload the app if there
+    # is a crash
     matrix <- readHiCasNumpy(
         hicfile = hicv$y,
         chrom = input$chr,
         start = input$start,
         stop = input$stop,
         norm = input$norm,
-        binsize = input$bin
-    )
-    return(matrix)
+        binsize = input$bin)
+
+        return(matrix)
 }) %>% shiny::bindEvent(input$generate_hic)
 
 
@@ -326,7 +329,6 @@ output$matPlot <- renderImage({
     # }else{
     #     validate(need(input$p1, "Please upload a .bed file"))
     # }
-    
     # If user selected a second bigwig file checkbox
     # if(input$bw2check){
     #     validate(need(input$bw2!="NULL", "Please upload a bigwig file"))
@@ -342,7 +344,7 @@ output$matPlot <- renderImage({
     # }
 # }
 
-hicplot()
+    hicplot()
 
     # HiC only SVG image
     list(src = "HiC.svg",
