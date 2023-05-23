@@ -31,7 +31,7 @@ ui <- fluidPage(
           ),
           fluidRow(
             column(5,
-              selectizeInput("norm", label="Normalization", choices=c("VC", "VC_SQRT", "KR", "NONE"), selected="KR")
+              selectizeInput("norm", label="Normalization", choices=c("VC", "VC_SQRT", "KR", "NONE"), selected="NONE")
             ),
             column(5,
               #numericInput("thresh", label="Threshold", value=2),
@@ -50,11 +50,33 @@ ui <- fluidPage(
             column(6,
               selectizeInput(
                 "map_colour", 
-                "Colour Scheme", 
+                "HiC Color", 
                 choices = "",
                 selected = "YlOrRd"
               )
+            ),
+            column(6,
+              selectizeInput(
+                "p1_cmap", 
+                "HiC (Dark) Color", 
+                choices = "",
+                selected = "gray"
+              )
             )
+          ),
+          fluidRow(
+            column(
+              6,
+              offset = 6,
+              sliderInput("alpha",
+                        label = "HiC (Dark) Alpha",
+                        min = 0,
+                        max = 1,
+                        value = 0.7,
+                        step = .05,
+                        round = FALSE,
+                        ticks = TRUE)
+                        )
           ),
                 fluidRow(
             column(4,

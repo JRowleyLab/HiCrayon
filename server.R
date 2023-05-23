@@ -164,91 +164,104 @@ observe(
     }
 )
 
-# Take HiC file from user and output a HiC Matrix using straw
-HiCmatrix <- reactive({
+##################
+# Based on the conditional button input$yes,
+# run HiCmatrix. how to do this
+######################
 
-    # Error: segfault from C stack overflow
-    # There is no way to catch a segmentation fault: core dumped
-    # error. Just inform the user to reload the app if there
-    # is a crash
+HiCmatrix <- reactive({
     matrix <- readHiCasNumpy(
         hicfile = hicv$y,
         chrom = input$chr,
         start = input$start,
         stop = input$stop,
         norm = input$norm,
-        binsize = input$bin)
+        binsize = input$bin
+    )
 
-        return(matrix)
-}) %>% shiny::bindEvent(input$generate_hic)
+    return(matrix)
+}) %>% shiny::bindEvent(input$HiC_check,
+                        input$generate_hic)
 
 
-bwlists <- reactive({
 
-    objectBigWig <- processBigwigs(
-            bigwig = bw1v$y,
-            min = minmax$min,
-            max = minmax$max,
-            peaks = p1v$y,
-            binsize = input$bin,
-            chrom = input$chr,
-            start = input$start,
-            stop = input$stop,
-            bigwig2 = bw2v$y,
-            min2 = minmax2$min,
-            max2 = minmax2$max,
-            peaks2 = p2v$y
+# ################################################
+# ################################################
+# # WORK IN PROGRESS;
+# # TO CATCH SEGMENTATION FAULTS BY OFFERING
+# # MODAL POPUP IF MATRIX SIZE IS TOO BIG
+# matsize <- reactiveValues()
+
+# observe({
+#     matsize$size <- (input$stop - input$start) / input$bin
+# })
+
+# observeEvent(input$yes, {
+#     removeModal()
+#   })
+
+# observe({
+#     # is matrix too big?
+#     if( matsize$size > 1200 ){
+#         showModal(modalDialog(
+#         title = "WARNING",
+#         "MATRIX SIZE IS LARGE:
+#         POTENTIAL SEGMENTATION FAULT.
+#         (the app will crash and must be 
+#         refreshed).
+        
+#         Do you want to proceed?",
+#         easyClose = TRUE,
+#         footer = tagList(
+#           actionButton("yes", "Yes"),
+#           modalButton("No")
+#         )
+#         ))
+#     } 
+# }) %>% bindEvent(input$generate_hic, input$HiC_check)
+# ################################################
+# ################################################
+
+
+# Step through bigwig file and
+# record bigwig value for each
+# binsize across selected genomic
+# region
+bwlist <- reactive({
+    bwlist <- processBigwigs(
+        bigwig = bw1v$y,
+        binsize = input$bin,
+        chrom = input$chr,
+        start = input$start,
+        stop = input$stop
         )
 
-    redbwlist <- tuple(objectBigWig, convert=T)[0]
-    redbwmax <- tuple(objectBigWig, convert=T)[1]
-    redbwmin <- tuple(objectBigWig, convert=T)[2]
-    bluebwlist <- tuple(objectBigWig, convert=T)[3]
-    bluebwmax <- tuple(objectBigWig, convert=T)[4]
-    bluebwmin <- tuple(objectBigWig, convert=T)[5]
-
-    return(list(redbwlist=redbwlist,
-                redbwmax=redbwmax,
-                redbwmin=redbwmin,
-                bluebwlist=bluebwlist,
-                bluebwmax=bluebwmax,
-                bluebwmin=bluebwmin
-                ))
-}) %>% shiny::bindEvent(input$run)
+    return(bwlist)
+}) %>% shiny::bindEvent(input$generate_hic, input$HiC_check) # %>% shiny::bindEvent(input$run)
 
 
-# distance <- reactive({
-#     distObject <- distanceMat(hicnumpy=HiCmatrix(), 
-#              redbwlist=bwlists()$redbwlist, 
-#              redbwmax=bwlists()$redbwmax, 
-#              redbwmin=bwlists()$redbwmin, 
-#              bluebwlist=bwlists()$bluebwlist, 
-#              bluebwmax=bwlists()$bluebwmax, 
-#              bluebwmin=bwlists()$bluebwmin,
-#              thresh=input$thresh)
+# Calulate ...
+distance <- reactive({
+    distObject <- distanceMat(
+             hicnumpy=HiCmatrix(),
+             mymin=input$min,
+             mymax=input$max,
+             bwlist=bwlist(),
+             thresh=input$thresh
+             )
 
-#     rmat <- tuple(distObject, convert=T)[0]
-#     gmat <- tuple(distObject, convert=T)[1]
-#     bmat <- tuple(distObject, convert=T)[2]
-#     distnormmat <- tuple(distObject, convert=T)[3]
-#     rmat2 <- tuple(distObject, convert=T)[4]
-#     gmat2 <- tuple(distObject, convert=T)[5]
-#     bmat2 <- tuple(distObject, convert=T)[6]
-#     redlist <- tuple(distObject, convert=T)[7]
-#     bluelist <- tuple(distObject, convert=T)[8]
+    rmat <- tuple(distObject, convert=T)[0]
+    gmat <- tuple(distObject, convert=T)[1]
+    bmat <- tuple(distObject, convert=T)[2]
+    bwlist_norm <- tuple(distObject, convert=T)[3]
 
-#     return(list(
-#         rmat=rmat,
-#         gmat=gmat,
-#         bmat=bmat,
-#         distnormmat=distnormmat,
-#         rmat2=rmat2,
-#         gmat2=gmat2,
-#         bmat2=bmat2,
-#         redlist=redlist,
-#         bluelist=bluelist
-#     ))
-# }) %>% shiny::bindEvent(input$run)
+    return(list(
+        rmat=rmat,
+        gmat=gmat,
+        bmat=bmat,
+        bwlist_norm=bwlist_norm
+    ))
+}) %>% shiny::bindEvent(input$generate_hic, input$HiC_check) # %>% shiny::bindEvent(input$run)
 
 
 hic_distance <- reactive({
@@ -261,122 +274,43 @@ hic_distance <- reactive({
 
 }) %>% shiny::bindEvent(input$generate_hic)
 
-# finalPlot <- reactive({
-#     #validate(need(HiCmatrix(), "Please Select parameters and select run"))
-
-#     objectPlot <- plotting(rmat=distance()$rmat,
-#              gmat=distance()$gmat,
-#              bmat=distance()$bmat,
-#              distnormmat=distance()$distnormmat,
-#              chrom=input$chr,
-#              start=input$start,
-#              stop=input$stop,
-#              rmat2=distance()$rmat2,
-#              gmat2=distance()$gmat2,
-#              bmat2=distance()$bmat2,
-#              redname=input$n1,
-#              bluename=bname$n,
-#              thresh=input$thresh,
-#              redbwmin=bwlists()$redbwmin,
-#              redbwmax=bwlists()$redbwmax,
-#              bluebwmin=bwlists()$bluebwmin,
-#              bluebwmax=bwlists()$bluebwmax,
-#              redlist=distance()$redlist,
-#              bluelist=distance()$bluelist,
-#              overlayoff=input$HiC_check
-#              )
-
-#         #redbwmin,redbwmax,bluebwmin,bluebwmax
-#         redbwmin <- tuple(objectPlot, convert=T)[0]
-#         redbwmax <- tuple(objectPlot, convert=T)[1]
-#         bluebwmin <- tuple(objectPlot, convert=T)[2]
-#         bluebwmax <- tuple(objectPlot, convert=T)[3]
-        
-
-#     return(list(
-#         redbwmin=redbwmin,
-#         redbwmax=redbwmax,
-#         bluebwmin=bluebwmin,
-#         bluebwmax=bluebwmax
-#     ))
-# }) %>% shiny::bindEvent(input$run, input$HiC_check)
-
-# output$colinfo <- renderText({
-#     paste(finalPlot())
-# }) 
-
-
 
 hicplot <- reactive({
     hic_plot(REDMAP = input$map_colour,
-             #figname = "HiC.svg",
              thresh = input$thresh,
              distnormmat = hic_distance()
              )
 }) %>% shiny::bindEvent(input$generate_hic, input$HiC_check)
 
-output$matPlot <- renderImage({
-
-    #### Validation and Error handling
-
-    validate(need(input$hic, "Please upload a HiC file"))
-
-    # validate(need(input$bw1, "Please upload a bigwig file"))
-    # if(input$setminmax){
-    #     validate(
-    #         need(input$min, "Please select a minimum value"),
-    #         need(input$max, "Please select a maximum value")
-    #         )
-    # }else{
-    #     validate(need(input$p1, "Please upload a .bed file"))
-    # }
-    # If user selected a second bigwig file checkbox
-    # if(input$bw2check){
-    #     validate(need(input$bw2!="NULL", "Please upload a bigwig file"))
-    #     validate(need(input$p2!="NULL", "Please upload a .bed file"))
-
-    #     if(input$setminmax2){
-    #     validate(
-    #         need(input$min2, "Please select a minimum value"),
-    #         need(input$max2, "Please select a maximum value")
-    #         )
-    # }else{
-    #     validate(need(input$p1, "Please upload a .bed file"))
-    # }
-# }
-
-    hicplot()
-
-    # HiC only SVG image
-    list(src = "HiC.svg",
-         contentType = "image/svg+xml",
-         width = "100%",
-         height = "200%"
-         )
-}, deleteFile = FALSE) %>% shiny::bindEvent(input$generate_hic, input$HiC_check)
 
 
 
-###################################
-# Reactive Values to store texts, hrefs, images
-# for updating gallery
-###################################
+p1plot <- reactive({
+    p1_plot <- p1_plot(
+        hicmatrix = hic_distance(),
+        rmat = distance()$rmat,
+        gmat = distance()$gmat,
+        bmat = distance()$bmat,
+        bwlist = distance()$bwlist_norm,
+        cmap = input$p1_cmap,
+        alpha = input$alpha)
 
-images = reactiveValues(hic = 0, nothic = 0)
+}) %>% shiny::bindEvent(input$generate_hic, input$HiC_check) #%>% shiny::bindEvent(input$run)
 
 
+# Gallery function  that takes
+# local images to display.
+# Local images are generated using
+# python functions.
 output$gallery <- renderUI({
 
     validate(need(input$hic, "Please upload a HiC file"))
 
     print(hicplot())
 
-    texts <- c("HiC",
-               "p2")
-    hrefs <- c(hicplot(),
-                "https://github.com/lz100/spsComps/blob/master/img/2.jpg?raw=true")
-    images <- c(hicplot(),
-                "https://github.com/lz100/spsComps/blob/master/img/2.jpg?raw=true")
+    texts <- c("HiC", "CTCF")
+    hrefs <- c(hicplot(), p1plot())
+    images <- c(hicplot(), p1plot())
 
     gallery(
         texts = texts,
@@ -390,12 +324,20 @@ output$gallery <- renderUI({
 }) %>% shiny::bindEvent(input$generate_hic, input$HiC_check)
 
 
-
+# Update dropdown with all possible sequential
+# matplotlib colormaps
 observe({
     updateSelectizeInput(
         session, "map_colour",
         choices = matplot_colors(),
         selected = "YlOrRd",
+        server = TRUE
+        )
+
+    updateSelectizeInput(
+        session, "p1_cmap",
+        choices = matplot_colors(),
+        selected = "gray",
         server = TRUE
         )
 })

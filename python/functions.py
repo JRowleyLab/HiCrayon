@@ -13,20 +13,329 @@ import string
 import random
 
 # Read in HiC file and output selected coordinates + binsize
-# as matrix
+# as matrix. 
 def readHiCasNumpy(hicfile, chrom, start, stop, norm, binsize):
 	hicdump = hicstraw.HiCFile(hicfile)
 	nochr = chrom.strip('chr')
 	wchr = "chr" + str(nochr)
+	# Try with "1" then "chr1" if an execption is made.
 	try:
 		hicobject = hicdump.getMatrixZoomData(nochr, nochr, "observed", norm, "BP", binsize)
-	except MemoryError:
+	except:
 		hicobject = hicdump.getMatrixZoomData(wchr, wchr, "observed", norm, "BP", binsize)
 
 	hicnumpy = hicobject.getRecordsAsMatrix(start, stop, start, stop)
-	print("HiC Complete")
+
 	return hicnumpy
+
+# Cut down version of distanceMat() to work for just HiC Map
+# Obtain distance matrix of HiC map,
+# Normalized using threshold value
+def distanceMatHiC(hicnumpy, thresh):
+	print("Beginning distance matrix HiC")
+	matsize = len(hicnumpy)
+
+	mydiags=[]
+	for i in range(0,len(hicnumpy)):
+		mydiags.append(np.nanmean(np.diag(hicnumpy, k=i)))
+
+	distnormmat = np.zeros((matsize,matsize))
+	for x in range(0,matsize):
+		for y in range(x,matsize):
+			distance=y-x
+			hicscore = (hicnumpy[x,y] + 1)/(mydiags[distance]+1)
+			if hicscore > thresh:
+				distnormmat[x,y] = thresh
+				distnormmat[y,x] = thresh
+				satscore = 1
+			else:
+				distnormmat[x,y] = hicscore
+				distnormmat[y,x] = hicscore
+				satscore = hicscore/thresh
+
+	return(distnormmat)
+
+
+
+# Read in bigwig file and return a list of
+# 
+def processBigwigs(bigwig,binsize,chrom,start,stop):
+
+	print("processing bigwigs...")
+	start=int(start)
+	binsize=int(binsize)
+	stop=int(stop)
+
+	bwopen = pyBigWig.open(bigwig)		
+
+	bwlist = []
 	
+	for walker in range(start, stop+binsize, binsize):
+		try:
+			bwlist.append(math.log(bwopen.stats(chrom, walker, walker+binsize)[0]))
+		except ValueError:
+			bwlist.append(0)
+	
+	return bwlist
+
+
+def getrelative(mylist, mymin, mymax):
+	relativelist = []
+	for h in range(0, len(mylist)):
+		myscore=mylist[h]
+		relscore = ((myscore-mymin)/(mymax-mymin))
+		if relscore > 1:
+			relativelist.append(1)
+		elif relscore < 0:
+			relativelist.append(0)
+		else:
+			relativelist.append(relscore)
+	print("Get relative")
+	return relativelist
+
+# Builds distance matrix 
+# ...
+
+
+
+def distanceMat(hicnumpy, mymin, mymax, bwlist, thresh):
+	print("p1 distance...")
+	matsize = len(hicnumpy)
+
+	bwlist_norm = getrelative(bwlist, mymin, mymax) #NOTE: this needs to be replaced by peaks file
+	rmat = np.zeros((matsize,matsize))
+	gmat = np.zeros((matsize,matsize))
+	bmat = np.zeros((matsize,matsize))
+	
+	mydiags=[]
+	for i in range(0,len(hicnumpy)):
+		mydiags.append(np.nanmean(np.diag(hicnumpy, k=i)))
+
+	for x in range(0,matsize):
+		for y in range(x,matsize):
+			distance=y-x
+			hicscore = (hicnumpy[x,y] + 1)/(mydiags[distance]+1)
+			if hicscore > thresh:
+				satscore = 1
+			else:
+				satscore = hicscore/thresh
+			
+			newscore = (bwlist_norm[x] + bwlist_norm[y])/2
+			rscore = 255*newscore*satscore
+			rmat[x,y] = rscore
+			rmat[y,x] = rscore
+					
+	return rmat,gmat,bmat,bwlist_norm
+
+
+# Return a list of all possible sequential
+# matplotlib colormaps
+def matplot_colors():
+	# Add in custom colors to list
+	#REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1,1,1),(1,0,0)])
+	return plt.colormaps()
+
+
+# Produce HiC map image saved to disk 
+def hic_plot(REDMAP, thresh, distnormmat):
+	# Remove previous versions of svg images
+	# to prevent bloat in images directory.
+	# NOTE: the file cannot be overwritten
+	# as webpage doesn't recognise it has
+	# changed if the filename hasn't changed.
+	for f in glob.glob('./www/images/HiC_*.svg'):
+		print(f'Removing image: {f}')
+		os.remove(f)
+
+	# Save distance normalized HiC plot and display. This is base functionality of the app and 
+	# only requires a HiC file.
+	fig, (ax1) = plt.subplots(ncols=1)
+
+	#ax1.set_title('Hi-C')
+	ax1.matshow(distnormmat, cmap=REDMAP, vmin=0, vmax=thresh)
+	ax1.xaxis.set_visible(False)
+	ax1.yaxis.set_visible(False)
+
+	# random string for name
+	# using random.choices()
+	# generating random strings
+	res = ''.join(random.choices(string.ascii_uppercase +
+								string.digits, k=8))
+	figname = "HiC_" + str(res) + ".svg"
+	#figname = "HiC.svg"
+
+	directory = "images/"
+	wwwlocation = "www/" + directory + figname
+	notwwwlocation = directory + figname
+	plt.savefig(wwwlocation, bbox_inches='tight')
+	plt.close()
+	return notwwwlocation
+	
+
+
+# Produces a matplot of the hic matrix
+# inversed, with a lines representing the 
+# the bigwig track AND the track underneath the
+# plot
+def p1_plot(hicmatrix, rmat, gmat, bmat, bwlist, cmap, alpha):
+	print("p1 plotting...")
+
+	#remove previously generated images
+	for f in glob.glob('./www/images/P1_*.svg'):
+		print(f'Removing image: {f}')
+		os.remove(f)
+
+	fig, (ax2) = plt.subplots(ncols=1)
+	redmat = (np.dstack((rmat,gmat,bmat))).astype(np.uint8)
+	redimg = Image.fromarray(redmat)
+
+	# allow setting of 'gray' to other colors
+	ax2.imshow(hicmatrix, cmap, interpolation='none')
+	ax2.imshow(redimg, interpolation='none', alpha=alpha)
+	ax2.xaxis.set_visible(False)
+	ax2.yaxis.set_visible(False)
+
+	ax3 = fig.add_subplot()
+	ax3.plot(bwlist, color='r')
+	#ax3.axis('off')
+	l1, b1, w1, h1 = ax2.get_position().bounds
+	#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+	ax3.set_position((l1*(1),0.02, w1*1, .075))
+	ax3.margins(x=0)
+	ax3.xaxis.set_visible(False)
+	ax3.yaxis.set_visible(False)
+
+	#write image to file
+	res = ''.join(random.choices(string.ascii_uppercase +
+								string.digits, k=8))
+	figname = "P1_" + str(res) + ".svg"
+
+	directory = "images/"
+	wwwlocation = "www/" + directory + figname
+	notwwwlocation = directory + figname #this path is for 'shiny'
+	plt.savefig(wwwlocation, bbox_inches='tight')
+	plt.close()
+
+	return notwwwlocation
+
+
+def plotting(rmat,gmat,bmat,distnormmat,redname,thresh,redlist,overlayoff):
+
+	REDMAP = "YlOrRd"
+
+	# # Save distance normalized HiC plot and display. This is base functionality of the app and 
+	# # only requires a HiC file.
+	# fig, (ax1) = plt.subplots(ncols=1)
+	# redmat = (np.dstack((rmat,gmat,bmat))).astype(np.uint8)
+	# redimg = Image.fromarray(redmat)
+
+	# #ax1.set_title('Hi-C')
+	# ax1.matshow(distnormmat, cmap=REDMAP, vmin=0, vmax=thresh)
+	# ax1.xaxis.set_visible(False)
+	# ax1.yaxis.set_visible(False)
+	# plt.savefig("HiC.svg", bbox_inches='tight')
+
+	
+	fig, (ax2) = plt.subplots(ncols=1)
+	redmat = (np.dstack((rmat,gmat,bmat))).astype(np.uint8)
+	redimg = Image.fromarray(redmat)
+
+	ax2.set_title(redname)
+	
+	# allow setting of 'gray' to other colors
+	ax2.imshow(distnormmat, 'gray', interpolation='none')
+	ax2.imshow(redimg, interpolation='none', alpha=0.7)
+	ax2.xaxis.set_visible(False)
+	ax2.yaxis.set_visible(False)
+
+	ax3 = fig.add_subplot()
+	ax3.plot(redlist, color='r')
+	ax3.axis('off')
+	l1, b1, w1, h1 = ax2.get_position().bounds
+	ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+		
+		#f.set_figheight(.5)
+		#fig.suptitle(str(chrom) + ":" + str(start) + "-" + str(stop))
+	# else:
+	# 	fig, ax = plt.subplots(2,2, figsize=(15,15))
+
+
+	# 	redmat = (np.dstack((rmat,gmat,bmat))).astype(np.uint8)
+	# 	redimg = Image.fromarray(redmat)
+
+	# 	ax[0,0].set_title('Hi-C')
+	# 	ax[0,0].matshow(distnormmat, cmap=REDMAP, vmin=0, vmax=thresh)
+	# 	ax[0,0].xaxis.set_visible(False)
+	# 	ax[0,0].yaxis.set_visible(False)
+	# 	#plt.savefig("distnorm.png")
+
+	# 	ax[1,0].set_title(redname)
+	# 	if overlayoff == True:
+	# 		redimg = getinversered(redimg)
+	# 		ax[1,0].imshow(redimg, interpolation='none', cmap=REDMAP)
+	# 	else:
+	# 		ax[1,0].imshow(distnormmat, 'gray', interpolation='none')
+	# 		ax[1,0].imshow(redimg, interpolation='none', alpha=0.7)
+	# 	ax[1,0].xaxis.set_visible(False)
+	# 	ax[1,0].yaxis.set_visible(False)
+	# 	#plt.savefig("bw1_overlay.png")
+
+	# 	#if bluebw != "NULL":
+	# 	bluemat = (np.dstack((rmat2,gmat2,bmat2))).astype(np.uint8)
+	# 	blueimg = Image.fromarray(bluemat)
+	# 	ax[1,1].set_title(bluename)
+	# 	if overlayoff == True:
+	# 		blueimg = getinverseblue(blueimg)
+	# 		ax[1,1].imshow(blueimg, interpolation='none')
+	# 	else:
+	# 		ax[1,1].imshow(distnormmat, 'gray', interpolation='none')
+	# 		ax[1,1].imshow(blueimg, interpolation='none', alpha=0.7)
+	# 	ax[1,1].xaxis.set_visible(False)
+	# 	ax[1,1].yaxis.set_visible(False)
+	# 	#plt.savefig("bw2_overlay.png")
+	# 	ax[0,1].set_title(str(redname + ' + ' + bluename))
+	# 	if overlayoff == True:
+	# 		ax[0,1].imshow(redimg, interpolation='none', alpha=0.75)
+	# 		ax[0,1].imshow(blueimg, interpolation='none', alpha=0.5)
+	# 	else:
+	# 		ax[0,1].imshow(distnormmat, 'gray', interpolation='none')
+	# 		ax[0,1].imshow(redimg, interpolation='none', alpha=0.5)
+	# 		ax[0,1].imshow(blueimg, interpolation='none', alpha=0.5)
+	# 	ax[0,1].xaxis.set_visible(False)
+	# 	ax[0,1].yaxis.set_visible(False)
+	# 	#plt.savefig("bw1_bw2_overlay.png")
+	# 	#ax[0,0].set_xlabel(str(chrom) + ":" + str(start) + "-" + str(end))
+	# 	ax3 = fig.add_subplot(223)
+	# 	ax3.plot(redlist, color='r')
+	# 	ax3.axis('off')
+	# 	l1, b1, w1, h1 = ax[1,0].get_position().bounds
+	# 	ax3.set_position((l1*(.875),0.04, w1*1.095, .07))
+
+	# 	newax4 = fig.add_subplot(224)
+	# 	newax4.plot(bluelist, color='b')
+	# 	newax4.axis('off')
+	# 	l2, b2, w2, h2 = ax[1,1].get_position().bounds
+	# 	newax4.set_position((l2*(.97),0.04, w2*1.095, .07))
+	# 	#fig.suptitle(str(chrom) + ":" + str(start) + "-" + str(stop))
+
+	#plt.tight_layout()
+	#plt.subplots_adjust(top=0.85)
+	directory = "www/images/"
+	filename="HiCrayon.svg"
+	wwwlocation = "images/" + filename
+	filelocation = directory + "/" + filename
+	# plt.rcParams['figure.dpi'] = 300
+	# plt.rcParams['savefig.dpi'] = 300
+	plt.savefig(filelocation, bbox_inches='tight')
+	# n1=str(redname) + " mean,stdev in peaks is " + str(round(redbwmin,2)) + "," + str(round(redbwmax,2))
+	if bluelist != "NULL":
+		bluebwmin = "NULL"
+		bluebwmax = "NULL"
+	# 	n2=str(bluename) + " mean,stdev in peaks is " + str(round(bluebwmin,2)) + "," + str(round(bluebwmax,2))
+	# 	n1=n2+n1
+	#print(str(ll) + " " + str(bb) + " " + str(ww) + " " + str(hh))
+	return(wwwlocation)
+
 
 
 # Not sure if this is used, if not then DELETE
@@ -58,268 +367,189 @@ def getinverseblue(myimg):
 
 
 
-###################################
-# Tidy and split into smaller helper 
-# functions
-###################################
-def processBigwigs(bigwig,min,max,peaks,binsize,chrom,start,stop,bigwig2,min2,max2,peaks2):
 
-	start=int(start)
-	binsize=int(binsize)
-	stop=int(stop)
 
-	if bigwig2 == "NULL":
 
-		redbwopen = pyBigWig.open(bigwig)		
-		redpeaksignal = []
+# def processBigwigs(bigwig,min,max,peaks,binsize,chrom,start,stop,bigwig2,min2,max2,peaks2):
 
-		if peaks == "NULL":
-			redbwmin = float(min)
-			redbwmax = float(max)
-		else:
-			with open(peaks, 'r') as rp:
-				for line in rp:
-					li = line.strip().split('\t')
-					#myredpeakslistchr.append(str(li[0]))
-					peakstart = float(li[1])
-					peakend = float(li[2])
-					peakdist = peakend - peakstart
-					try:
-						peakmid = (math.floor((peakstart + (peakdist/2))/binsize))*binsize
-						#myredpeaksliststarts.append(int(mid)))
-						redpeaksignal.append(math.log(redbwopen.stats(str(li[0]), peakmid, peakmid+binsize)[0]))
-					except RuntimeError:
-						continue
+# 	start=int(start)
+# 	binsize=int(binsize)
+# 	stop=int(stop)
+
+# 	if bigwig2 == "NULL":
+
+# 		redbwopen = pyBigWig.open(bigwig)		
+# 		redpeaksignal = []
+
+# 		if peaks == "NULL":
+# 			redbwmin = float(min)
+# 			redbwmax = float(max)
+# 		else:
+# 			with open(peaks, 'r') as rp:
+# 				for line in rp:
+# 					li = line.strip().split('\t')
+# 					#myredpeakslistchr.append(str(li[0]))
+# 					peakstart = float(li[1])
+# 					peakend = float(li[2])
+# 					peakdist = peakend - peakstart
+# 					try:
+# 						peakmid = (math.floor((peakstart + (peakdist/2))/binsize))*binsize
+# 						#myredpeaksliststarts.append(int(mid)))
+# 						redpeaksignal.append(math.log(redbwopen.stats(str(li[0]), peakmid, peakmid+binsize)[0]))
+# 					except RuntimeError:
+# 						continue
 		
-			#redbwmax = np.nanmean(redpeaksignal)
-			redbwmax = np.nanmedian(redpeaksignal)
-			redbwstd = np.nanstd(redpeaksignal)
-			#redbwmin = redbwmax - (redbwstd*2)
-			redbwmin = redbwmax - redbwstd
-			redbwmax = redbwmax + redbwstd
-		if redbwmin < 0:
-			redbwmin = 0
-		redbwlist = []
-		for walker in range(start, stop+binsize, binsize):
-			try:
-				redbwlist.append(math.log(redbwopen.stats(chrom, walker, walker+binsize)[0]))
-			except ValueError:
-				redbwlist.append(0)
+# 			#redbwmax = np.nanmean(redpeaksignal)
+# 			redbwmax = np.nanmedian(redpeaksignal)
+# 			redbwstd = np.nanstd(redpeaksignal)
+# 			#redbwmin = redbwmax - (redbwstd*2)
+# 			redbwmin = redbwmax - redbwstd
+# 			redbwmax = redbwmax + redbwstd
+# 		if redbwmin < 0:
+# 			redbwmin = 0
+# 		redbwlist = []
+# 		for walker in range(start, stop+binsize, binsize):
+# 			try:
+# 				redbwlist.append(math.log(redbwopen.stats(chrom, walker, walker+binsize)[0]))
+# 			except ValueError:
+# 				redbwlist.append(0)
 
-		bluebwlist="NULL"
-		bluebwmax="NULL"
-		bluebwmin="NULL"
+# 		bluebwlist="NULL"
+# 		bluebwmax="NULL"
+# 		bluebwmin="NULL"
 				
-	else:
+# 	else:
 		
-		redbwopen = pyBigWig.open(bigwig)
-		redpeaksignal = []
-		if peaks == "NULL":
-			redbwmin = float(min)
-			redbwmax = float(max)
-		else:
-			with open(peaks, 'r') as rp:
-				for line in rp:
-					li = line.strip().split('\t')
-					peakstart = float(li[1])
-					peakend = float(li[2])
-					peakdist = peakend - peakstart
-					try:
-						peakmid = (math.floor((peakstart + (peakdist/2))/binsize))*binsize
-						redpeaksignal.append(math.log(redbwopen.stats(str(li[0]), peakmid, peakmid+binsize)[0]))
-					except RuntimeError:
-						continue
-			redbwmax = np.nanmedian(redpeaksignal)
-			redbwstd = np.nanstd(redpeaksignal)
-			redbwmin = redbwmax - redbwstd
-			redbwmax = redbwmax + redbwstd
-		if redbwmin < 0:
-			redbwmin = 0
+# 		redbwopen = pyBigWig.open(bigwig)
+# 		redpeaksignal = []
+# 		if peaks == "NULL":
+# 			redbwmin = float(min)
+# 			redbwmax = float(max)
+# 		else:
+# 			with open(peaks, 'r') as rp:
+# 				for line in rp:
+# 					li = line.strip().split('\t')
+# 					peakstart = float(li[1])
+# 					peakend = float(li[2])
+# 					peakdist = peakend - peakstart
+# 					try:
+# 						peakmid = (math.floor((peakstart + (peakdist/2))/binsize))*binsize
+# 						redpeaksignal.append(math.log(redbwopen.stats(str(li[0]), peakmid, peakmid+binsize)[0]))
+# 					except RuntimeError:
+# 						continue
+# 			redbwmax = np.nanmedian(redpeaksignal)
+# 			redbwstd = np.nanstd(redpeaksignal)
+# 			redbwmin = redbwmax - redbwstd
+# 			redbwmax = redbwmax + redbwstd
+# 		if redbwmin < 0:
+# 			redbwmin = 0
 		
-		bluebwopen = pyBigWig.open(bigwig2)
-		bluepeaksignal = []
-		if peaks2 == "NULL":
-			bluebwmin = float(min2)
-			bluebwmax = float(max2)
-		else:
-			with open(peaks2, 'r') as rp:
-				for line in rp:
-					li = line.strip().split('\t')
-					peakstart = float(li[1])
-					peakend = float(li[2])
-					peakdist = peakend - peakstart
-					try:
+# 		bluebwopen = pyBigWig.open(bigwig2)
+# 		bluepeaksignal = []
+# 		if peaks2 == "NULL":
+# 			bluebwmin = float(min2)
+# 			bluebwmax = float(max2)
+# 		else:
+# 			with open(peaks2, 'r') as rp:
+# 				for line in rp:
+# 					li = line.strip().split('\t')
+# 					peakstart = float(li[1])
+# 					peakend = float(li[2])
+# 					peakdist = peakend - peakstart
+# 					try:
 
-						peakmid = (math.floor((peakstart + (peakdist/2))/binsize))*binsize
-						bluepeaksignal.append(math.log(bluebwopen.stats(str(li[0]), peakmid, peakmid+binsize)[0]))
-					except RuntimeError:
-						continue
-			#bluebwmax = np.nanmean(bluepeaksignal)
-			bluebwmax = np.nanmedian(bluepeaksignal)
-			bluebwstd = np.nanstd(bluepeaksignal)
-			#bluebwmin = bluebwmax - (bluebwstd*2)
-			bluebwmin = bluebwmax - bluebwstd
-			bluebwmax = bluebwmax + bluebwstd
-		if bluebwmin < 0:
-			bluebwmin = 0
+# 						peakmid = (math.floor((peakstart + (peakdist/2))/binsize))*binsize
+# 						bluepeaksignal.append(math.log(bluebwopen.stats(str(li[0]), peakmid, peakmid+binsize)[0]))
+# 					except RuntimeError:
+# 						continue
+# 			#bluebwmax = np.nanmean(bluepeaksignal)
+# 			bluebwmax = np.nanmedian(bluepeaksignal)
+# 			bluebwstd = np.nanstd(bluepeaksignal)
+# 			#bluebwmin = bluebwmax - (bluebwstd*2)
+# 			bluebwmin = bluebwmax - bluebwstd
+# 			bluebwmax = bluebwmax + bluebwstd
+# 		if bluebwmin < 0:
+# 			bluebwmin = 0
 
-		#redbwopen = pyBigWig.open(redbw)
-		redbwlist = []
-		#bluebwopen = pyBigWig.open(bluebw)
-		bluebwlist = []
-		for walker in range(start, stop+binsize, binsize):
-			#redbwlist.append(redbwopen.stats(chrom, walker, walker+binsize)[0])
-			#bluebwlist.append(bluebwopen.stats(chrom, walker, walker+binsize)[0])
-			try:
-				redbwlist.append(math.log(redbwopen.stats(chrom, walker, walker+binsize)[0]))
-			except ValueError:
-				redbwlist.append(0)
-			try:
-				bluebwlist.append(math.log(bluebwopen.stats(chrom, walker, walker+binsize)[0]))
-			except ValueError:
-				bluebwlist.append(0)
-	print("BW list complete")
-	return redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, bluebwmin
+# 		#redbwopen = pyBigWig.open(redbw)
+# 		redbwlist = []
+# 		#bluebwopen = pyBigWig.open(bluebw)
+# 		bluebwlist = []
+# 		for walker in range(start, stop+binsize, binsize):
+# 			#redbwlist.append(redbwopen.stats(chrom, walker, walker+binsize)[0])
+# 			#bluebwlist.append(bluebwopen.stats(chrom, walker, walker+binsize)[0])
+# 			try:
+# 				redbwlist.append(math.log(redbwopen.stats(chrom, walker, walker+binsize)[0]))
+# 			except ValueError:
+# 				redbwlist.append(0)
+# 			try:
+# 				bluebwlist.append(math.log(bluebwopen.stats(chrom, walker, walker+binsize)[0]))
+# 			except ValueError:
+# 				bluebwlist.append(0)
+# 	print("BW list complete")
+# 	return redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, bluebwmin
 
 
-def getrelative(mylist, mymax, mymin):
-	relativelist = []
-	for h in range(0, len(mylist)):
-		myscore=mylist[h]
-		relscore = ((myscore-mymin)/(mymax-mymin))
-		if relscore > 1:
-			relativelist.append(1)
-		elif relscore < 0:
-			relativelist.append(0)
-		else:
-			relativelist.append(relscore)
-	print("Get relative")
-	return relativelist
 
-# Cut down version of distanceMat() to work for just HiC Map
-def distanceMatHiC(hicnumpy, thresh):
-	print("Beginning distance matrix HiC")
-	matsize = len(hicnumpy)
 
-	mydiags=[]
-	for i in range(0,len(hicnumpy)):
-		mydiags.append(np.nanmean(np.diag(hicnumpy, k=i)))
 
-	distnormmat = np.zeros((matsize,matsize))
-	for x in range(0,matsize):
-		for y in range(x,matsize):
-			distance=y-x
-			hicscore = (hicnumpy[x,y] + 1)/(mydiags[distance]+1)
-			if hicscore > thresh:
-				distnormmat[x,y] = thresh
-				distnormmat[y,x] = thresh
-				satscore = 1
-			else:
-				distnormmat[x,y] = hicscore
-				distnormmat[y,x] = hicscore
-				satscore = hicscore/thresh
-	print("HiC distance created")
-	return(distnormmat)
+
+
+
 
 
 # Calculates distance matrix for hic and both chipseq sets if selected. 
 # Redo to be more flexible
-def distanceMat(hicnumpy, redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, bluebwmin,thresh):
-	matsize = len(hicnumpy)
+# def distanceMat(hicnumpy, redbwlist, redbwmax, redbwmin, bluebwlist, bluebwmax, bluebwmin,thresh):
+# 	matsize = len(hicnumpy)
 
-	redlist = getrelative(redbwlist, redbwmax, redbwmin)
-	rmat = np.zeros((matsize,matsize))
-	gmat = np.zeros((matsize,matsize))
-	bmat = np.zeros((matsize,matsize))
+# 	redlist = getrelative(redbwlist, redbwmax, redbwmin)
+# 	rmat = np.zeros((matsize,matsize))
+# 	gmat = np.zeros((matsize,matsize))
+# 	bmat = np.zeros((matsize,matsize))
 
-	if bluebwlist != "NULL":
-		rmat2 = np.zeros((matsize,matsize))
-		gmat2 = np.zeros((matsize,matsize))
-		bmat2 = np.zeros((matsize,matsize))
-		bluelist = getrelative(bluebwlist, bluebwmax, bluebwmin)
+# 	if bluebwlist != "NULL":
+# 		rmat2 = np.zeros((matsize,matsize))
+# 		gmat2 = np.zeros((matsize,matsize))
+# 		bmat2 = np.zeros((matsize,matsize))
+# 		bluelist = getrelative(bluebwlist, bluebwmax, bluebwmin)
 	
-	mydiags=[]
-	for i in range(0,len(hicnumpy)):
-		mydiags.append(np.nanmean(np.diag(hicnumpy, k=i)))
+# 	mydiags=[]
+# 	for i in range(0,len(hicnumpy)):
+# 		mydiags.append(np.nanmean(np.diag(hicnumpy, k=i)))
 
-	distnormmat = np.zeros((matsize,matsize))
-	for x in range(0,matsize):
-		for y in range(x,matsize):
-			distance=y-x
-			hicscore = (hicnumpy[x,y] + 1)/(mydiags[distance]+1)
-			if hicscore > thresh:
-				distnormmat[x,y] = thresh
-				distnormmat[y,x] = thresh
-				satscore = 1
-			else:
-				distnormmat[x,y] = hicscore
-				distnormmat[y,x] = hicscore
-				satscore = hicscore/thresh
+# 	distnormmat = np.zeros((matsize,matsize))
+# 	for x in range(0,matsize):
+# 		for y in range(x,matsize):
+# 			distance=y-x
+# 			hicscore = (hicnumpy[x,y] + 1)/(mydiags[distance]+1)
+# 			if hicscore > thresh:
+# 				distnormmat[x,y] = thresh
+# 				distnormmat[y,x] = thresh
+# 				satscore = 1
+# 			else:
+# 				distnormmat[x,y] = hicscore
+# 				distnormmat[y,x] = hicscore
+# 				satscore = hicscore/thresh
 			
-			newscore = (redlist[x] + redlist[y])/2
-			rscore = 255*newscore*satscore
-			rmat[x,y] = rscore
-			rmat[y,x] = rscore
+# 			newscore = (redlist[x] + redlist[y])/2
+# 			rscore = 255*newscore*satscore
+# 			rmat[x,y] = rscore
+# 			rmat[y,x] = rscore
 
-			if bluebwlist != "NULL":
-				newscoreblue = (bluelist[x] + bluelist[y])/2
-				bscore = 255*newscoreblue*satscore
-				bmat2[x,y] = bscore
-				bmat2[y,x] = bscore
-			else:
-				rmat2="NULL"
-				gmat2="NULL"
-				bmat2="NULL"
-				bluelist="NULL"
+# 			if bluebwlist != "NULL":
+# 				newscoreblue = (bluelist[x] + bluelist[y])/2
+# 				bscore = 255*newscoreblue*satscore
+# 				bmat2[x,y] = bscore
+# 				bmat2[y,x] = bscore
+# 			else:
+# 				rmat2="NULL"
+# 				gmat2="NULL"
+# 				bmat2="NULL"
+# 				bluelist="NULL"
 					
-	print("Distance complete")
-	return rmat,gmat,bmat,distnormmat,rmat2,gmat2,bmat2,redlist,bluelist
-
-
-# Return a list of all possible sequential
-# matplotlib colormaps
-def matplot_colors():
-	return plt.colormaps()
-
-
-# Return a matrix of 
-def hic_plot(REDMAP, thresh, distnormmat):
-	# Remove previous versions of svg images
-	# to prevent bloat in images directory.
-	# NOTE: the file cannot be overwritten
-	# as webpage doesn't recognise it has
-	# changed if this is the case.
-	for f in glob.glob('./www/images/HiC_*.svg'):
-		print(f'Removing image: {f}')
-		os.remove(f)
-
-	print("Plotting HiC")
-	# Save distance normalized HiC plot and display. This is base functionality of the app and 
-	# only requires a HiC file.
-	fig, (ax1) = plt.subplots(ncols=1)
-
-	#ax1.set_title('Hi-C')
-	ax1.matshow(distnormmat, cmap=REDMAP, vmin=0, vmax=thresh)
-	ax1.xaxis.set_visible(False)
-	ax1.yaxis.set_visible(False)
-
-	# random string for name
-	# using random.choices()
-	# generating random strings
-	res = ''.join(random.choices(string.ascii_uppercase +
-								string.digits, k=8))
-	figname = "HiC_" + str(res) + ".svg"
-	#figname = "HiC.svg"
-
-	directory = "images/"
-	wwwlocation = "www/" + directory + figname
-	notwwwlocation = directory + figname
-	print(wwwlocation)
-	plt.savefig(wwwlocation, bbox_inches='tight')
-	plt.close()
-	print("HiC Created: " + wwwlocation)
-	return notwwwlocation
-	
+# 	print("Distance complete")
+# 	return rmat,gmat,bmat,distnormmat,rmat2,gmat2,bmat2,redlist,bluelist
 
 
 # redistribute the below 'plotting' function into separate functions for creating plots
