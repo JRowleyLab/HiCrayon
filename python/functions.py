@@ -25,13 +25,13 @@ def readHiCasNumpy(hicfile, chrom, start, stop, norm, binsize):
 		hicobject = hicdump.getMatrixZoomData(wchr, wchr, "observed", norm, "BP", binsize)
 
 	hicnumpy = hicobject.getRecordsAsMatrix(start, stop, start, stop)
-
 	return hicnumpy
 
 # Cut down version of distanceMat() to work for just HiC Map
 # Obtain distance matrix of HiC map,
 # Normalized using threshold value
-def distanceMatHiC(hicnumpy, thresh):
+def distanceMatHiC(hicnumpy):
+	thresh = 2
 	print("Beginning distance matrix HiC")
 	matsize = len(hicnumpy)
 
@@ -52,7 +52,7 @@ def distanceMatHiC(hicnumpy, thresh):
 				distnormmat[x,y] = hicscore
 				distnormmat[y,x] = hicscore
 				satscore = hicscore/thresh
-
+	print("done")
 	return(distnormmat)
 
 
@@ -66,17 +66,52 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
 	binsize=int(binsize)
 	stop=int(stop)
 
-	bwopen = pyBigWig.open(bigwig)		
+	nochr = chrom.strip('chr')
+	wchr = "chr" + str(nochr)
 
+	bwopen = pyBigWig.open(bigwig)		
 	bwlist = []
-	
+
 	for walker in range(start, stop+binsize, binsize):
 		try:
-			bwlist.append(math.log(bwopen.stats(chrom, walker, walker+binsize)[0]))
+			bwlist.append(math.log(bwopen.stats(nochr, walker, walker+binsize)[0]))
+		except RuntimeError:
+			bwlist.append(math.log(bwopen.stats(wchr, walker, walker+binsize)[0]))
 		except ValueError:
 			bwlist.append(0)
-	
+	print("done bigwig")
 	return bwlist
+
+
+def calc_peak_minmax(bigwig, peaks, binsize):
+
+    peaksignal = []
+    bwopen = pyBigWig.open(bigwig)	
+
+    with open(peaks, 'r') as rp:
+        for line in rp:
+            li = line.strip().split('\t')
+            peakstart = float(li[1])
+            peakend = float(li[2])
+            peakdist = peakend - peakstart
+            try:
+                peakmid = (math.floor((peakstart + (peakdist/2))/binsize))*binsize
+                #mypeaksliststarts.append(int(mid)))
+                peaksignal.append(math.log(bwopen.stats(str(li[0]), peakmid, peakmid+binsize)[0]))
+            except RuntimeError:
+                continue
+            
+
+    #bwmax = np.nanmean(peaksignal)
+    bwmax = np.nanmedian(peaksignal)
+    bwstd = np.nanstd(peaksignal)
+    #bwmin = bwmax - (bwstd*2)
+    bwmin = bwmax - bwstd
+    bwmax = bwmax + bwstd
+    if bwmin < 0:
+        bwmin = 0
+        bwlist = []
+    return bwmin, bwmax
 
 
 def getrelative(mylist, mymin, mymax):
@@ -93,16 +128,13 @@ def getrelative(mylist, mymin, mymax):
 	print("Get relative")
 	return relativelist
 
-# Builds distance matrix 
-# ...
 
-
-
-def distanceMat(hicnumpy, mymin, mymax, bwlist, thresh):
+def distanceMat(hicnumpy, mymin, mymax, bwlist, strength):
+	thresh = 2
 	print("p1 distance...")
 	matsize = len(hicnumpy)
 
-	bwlist_norm = getrelative(bwlist, mymin, mymax) #NOTE: this needs to be replaced by peaks file
+	bwlist_norm = getrelative(bwlist, mymin, mymax) 
 	rmat = np.zeros((matsize,matsize))
 	gmat = np.zeros((matsize,matsize))
 	bmat = np.zeros((matsize,matsize))
@@ -121,11 +153,28 @@ def distanceMat(hicnumpy, mymin, mymax, bwlist, thresh):
 				satscore = hicscore/thresh
 			
 			newscore = (bwlist_norm[x] + bwlist_norm[y])/2
-			rscore = 255*newscore*satscore
+			rscore = 255*newscore*satscore*strength
 			rmat[x,y] = rscore
 			rmat[y,x] = rscore
-					
+	print("done distance")
 	return rmat,gmat,bmat,bwlist_norm
+
+
+def convertBlacktoTrans(image):
+    # Given an image, converts all black
+	# pixels to transparent, allowing the 
+	# placement atop another image
+    img = image.convert("RGBA")
+    data = img.getdata()
+    newData = []
+    for item in data:
+        if item[0] == 0 and item[1] == 0 and item[2] == 0:
+            newData.append((0, 0, 0, 0))
+        else:
+            newData.append(item)
+
+    img.putdata(newData)
+    return img
 
 
 # Return a list of all possible sequential
@@ -137,7 +186,8 @@ def matplot_colors():
 
 
 # Produce HiC map image saved to disk 
-def hic_plot(REDMAP, thresh, distnormmat):
+def hic_plot(REDMAP, distnormmat):
+	thresh = 2
 	# Remove previous versions of svg images
 	# to prevent bloat in images directory.
 	# NOTE: the file cannot be overwritten
@@ -152,7 +202,7 @@ def hic_plot(REDMAP, thresh, distnormmat):
 	fig, (ax1) = plt.subplots(ncols=1)
 
 	#ax1.set_title('Hi-C')
-	ax1.matshow(distnormmat, cmap=REDMAP, vmin=0, vmax=thresh)
+	ax1.matshow(distnormmat, cmap=REDMAP, vmin=0, vmax=thresh, interpolation='none')
 	ax1.xaxis.set_visible(False)
 	ax1.yaxis.set_visible(False)
 
@@ -177,9 +227,9 @@ def hic_plot(REDMAP, thresh, distnormmat):
 # inversed, with a lines representing the 
 # the bigwig track AND the track underneath the
 # plot
-def p1_plot(hicmatrix, rmat, gmat, bmat, bwlist, cmap, alpha):
+def p1_plot(hicmatrix, rmat, gmat, bmat, bwlist, hicalpha, bedalpha, opacity):
+	thresh = 2
 	print("p1 plotting...")
-
 	#remove previously generated images
 	for f in glob.glob('./www/images/P1_*.svg'):
 		print(f'Removing image: {f}')
@@ -188,10 +238,20 @@ def p1_plot(hicmatrix, rmat, gmat, bmat, bwlist, cmap, alpha):
 	fig, (ax2) = plt.subplots(ncols=1)
 	redmat = (np.dstack((rmat,gmat,bmat))).astype(np.uint8)
 	redimg = Image.fromarray(redmat)
+	redimgtrans = convertBlacktoTrans(redimg)
+	
+	#########################
+	#black
+	r=0
+	g=0
+	b=0
+	#########################
+	background = Image.new('RGBA', (len(hicmatrix),len(hicmatrix)), (r,g,b,opacity) )
+	ax2.imshow(background)
+	ax2.imshow(hicmatrix, 'gray', vmin=0, vmax=thresh, interpolation='none', alpha = hicalpha)
+	ax2.imshow(redimgtrans, interpolation='none', alpha = bedalpha)
+	#ax2.imshow(redimg, interpolation='none', alpha = bedalpha)
 
-	# allow setting of 'gray' to other colors
-	ax2.imshow(hicmatrix, cmap, interpolation='none')
-	ax2.imshow(redimg, interpolation='none', alpha=alpha)
 	ax2.xaxis.set_visible(False)
 	ax2.yaxis.set_visible(False)
 

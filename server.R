@@ -1,18 +1,3 @@
-## Dynamically show/hide 'bigwig 2 tab'
-observeEvent(input$bw2check, {
-    if (isTRUE(input$bw2check)) {
-        shiny::showTab(
-            inputId = "parameters",
-            target = "Bigwig 2"
-        )
-    } else {
-        shiny::hideTab(
-            inputId = "parameters",
-            target = "Bigwig 2"
-        )
-    }
-})
-
 
 # variable for starting root directory
 workingdir = '/Zulu/bnolan/HiC_data'
@@ -120,9 +105,8 @@ observe({
 })
 # bw2 file handling
 bw2v <- reactiveValues(y = "NULL")
-
 observe(
-    if (input$bw2check) {
+    if (input$chip2) {
         inFile <- parseFilePaths(roots = c(wd = workingdir), input$bw2)
         bw2v$y <- inFile$datapath
     }else {
@@ -134,13 +118,13 @@ observe(
 minmax <- reactiveValues(min = "NULL", max = "NULL")
 observe(
     if (input$setminmax){
-        minmax$min=as.numeric(input$min)
-        minmax$max=as.numeric(input$max)
-    }else {
-        minmax$min="NULL"
-        minmax$min="NULL"
-    }
-)
+        minmax$min = as.numeric(input$min)
+        minmax$max = as.numeric(input$max)
+    }else if (!input$setminmax) {
+        minmax$min = p1minmax()$min
+        minmax$max = p1minmax()$max
+    } 
+) %>% bindEvent(input$generate_hic, ignoreInit = TRUE)
 
 # min max2 reactivevalue (global variable)
 minmax2 <- reactiveValues(min = "NULL", max = "NULL")
@@ -150,14 +134,14 @@ observe(
         minmax2$max=as.numeric(input$max2)
     }else {
         minmax2$min="NULL"
-        minmax2$min="NULL"
+        minmax2$max="NULL"
     }
-)
+) 
 
 # bluename reactivevalue
 bname <- reactiveValues(n = "NULL")
 observe(
-    if (!input$bw2check) {
+    if (!input$chip2) {
         bname$n <- "NULL"
     } else {
         bname$n <- input$n2
@@ -180,8 +164,7 @@ HiCmatrix <- reactive({
     )
 
     return(matrix)
-}) %>% shiny::bindEvent(input$HiC_check,
-                        input$generate_hic)
+}) %>% shiny::bindEvent(input$generate_hic)
 
 
 
@@ -218,7 +201,7 @@ HiCmatrix <- reactive({
 #         )
 #         ))
 #     } 
-# }) %>% bindEvent(input$generate_hic, input$HiC_check)
+# }) %>% bindEvent(input$generate_hic)
 # ################################################
 # ################################################
 
@@ -237,17 +220,39 @@ bwlist <- reactive({
         )
 
     return(bwlist)
-}) %>% shiny::bindEvent(input$generate_hic, input$HiC_check) # %>% shiny::bindEvent(input$run)
+}) %>% shiny::bindEvent(input$generate_hic)
 
+p1minmax <- reactive({
+
+    validate(need(p1v$y, "Upload peaks file"))
+
+    minmaxObject <- calc_peak_minmax(
+        bigwig = bw1v$y,
+        peaks = p1v$y,
+        binsize = input$bin)
+
+    min <- tuple(minmaxObject, convert = T)[0]
+    max <- tuple(minmaxObject, convert = T)[1]
+
+    return(list(
+        min = min,
+        max = max
+    ))
+}) %>% shiny::bindEvent(input$generate_hic)
 
 # Calulate ...
 distance <- reactive({
+
+    print(minmax$min)
+    print(minmax$max)
+
     distObject <- distanceMat(
              hicnumpy=HiCmatrix(),
-             mymin=input$min,
-             mymax=input$max,
+             mymin=minmax$min,
+             mymax=minmax$max,
              bwlist=bwlist(),
-             thresh=input$thresh
+             #thresh=input$thresh,
+             strength=input$strength
              )
 
     rmat <- tuple(distObject, convert=T)[0]
@@ -261,13 +266,13 @@ distance <- reactive({
         bmat=bmat,
         bwlist_norm=bwlist_norm
     ))
-}) %>% shiny::bindEvent(input$generate_hic, input$HiC_check) # %>% shiny::bindEvent(input$run)
+}) %>% shiny::bindEvent(input$generate_hic)
 
 
 hic_distance <- reactive({
     distnormmat <- distanceMatHiC(
-                    hicnumpy = HiCmatrix(),
-                    thresh = input$thresh
+                    hicnumpy = HiCmatrix()
+                   # thresh = input$thresh
                 )
 
     return(distnormmat)
@@ -277,10 +282,11 @@ hic_distance <- reactive({
 
 hicplot <- reactive({
     hic_plot(REDMAP = input$map_colour,
-             thresh = input$thresh,
+             #thresh = input$thresh,
              distnormmat = hic_distance()
              )
-}) %>% shiny::bindEvent(input$generate_hic, input$HiC_check)
+}) %>% shiny::bindEvent(input$generate_hic)
+
 
 
 
@@ -292,11 +298,13 @@ p1plot <- reactive({
         gmat = distance()$gmat,
         bmat = distance()$bmat,
         bwlist = distance()$bwlist_norm,
-        cmap = input$p1_cmap,
-        alpha = input$alpha)
+        hicalpha = input$hicalpha,
+        bedalpha = input$bedalpha,
+        #thresh = input$thresh2,
+        opacity = input$opacity
+        )
 
-}) %>% shiny::bindEvent(input$generate_hic, input$HiC_check) #%>% shiny::bindEvent(input$run)
-
+}) %>% shiny::bindEvent(input$generate_hic) #%>% shiny::bindEvent(input$run)
 
 # Gallery function  that takes
 # local images to display.
@@ -306,22 +314,41 @@ output$gallery <- renderUI({
 
     validate(need(input$hic, "Please upload a HiC file"))
 
-    print(hicplot())
+    if(input$chip1){
+        print(hicplot())
 
-    texts <- c("HiC", "CTCF")
-    hrefs <- c(hicplot(), p1plot())
-    images <- c(hicplot(), p1plot())
+        texts <- c("HiC", "CTCF")
+        hrefs <- c(hicplot(), p1plot())
+        images <- c(hicplot(), p1plot())
 
-    gallery(
-        texts = texts,
-        hrefs = hrefs,
-        images = images,
-        enlarge = TRUE,
-        image_frame_size = 6,
-        title = "HiCrayon Image Overlay",
-        enlarge_method = "modal"
-        )
-}) %>% shiny::bindEvent(input$generate_hic, input$HiC_check)
+        gallery(
+            texts = texts,
+            hrefs = hrefs,
+            images = images,
+            enlarge = TRUE,
+            image_frame_size = 6,
+            title = "HiCrayon Image Overlay",
+            enlarge_method = "modal"
+            )
+    } else {
+       print(hicplot())
+
+        texts <- c("HiC")
+        hrefs <- c(hicplot())
+        images <- c(hicplot())
+
+        gallery(
+            texts = texts,
+            hrefs = hrefs,
+            images = images,
+            enlarge = TRUE,
+            image_frame_size = 6,
+            title = "",
+            enlarge_method = "modal"
+            )
+    }
+    
+}) %>% shiny::bindEvent(input$generate_hic)
 
 
 # Update dropdown with all possible sequential
