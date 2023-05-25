@@ -131,7 +131,7 @@ def getrelative(mylist, mymin, mymax):
 
 def distanceMat(hicnumpy, mymin, mymax, bwlist, strength):
 	thresh = 2
-	print("p1 distance...")
+	print(f"Calculating ChIP 1 distance using {mymin} and {mymax} values")
 	matsize = len(hicnumpy)
 
 	bwlist_norm = getrelative(bwlist, mymin, mymax) 
@@ -277,6 +277,59 @@ def p1_plot(hicmatrix, rmat, gmat, bmat, bwlist, hicalpha, bedalpha, opacity):
 	plt.close()
 
 	return notwwwlocation
+
+
+def p2_plot(hicmatrix, rmat, gmat, bmat, bwlist, hicalpha, bedalpha, opacity):
+	thresh = 2
+	print("p1 plotting...")
+	#remove previously generated images
+	for f in glob.glob('./www/images/P2_*.svg'):
+		print(f'Removing image: {f}')
+		os.remove(f)
+
+	fig, (ax2) = plt.subplots(ncols=1)
+	redmat = (np.dstack((rmat,gmat,bmat))).astype(np.uint8)
+	redimg = Image.fromarray(redmat)
+	redimgtrans = convertBlacktoTrans(redimg)
+	
+	#########################
+	#black
+	r=0
+	g=0
+	b=0
+	#########################
+	background = Image.new('RGBA', (len(hicmatrix),len(hicmatrix)), (r,g,b,opacity) )
+	ax2.imshow(background)
+	ax2.imshow(hicmatrix, 'gray', vmin=0, vmax=thresh, interpolation='none', alpha = hicalpha)
+	ax2.imshow(redimgtrans, interpolation='none', alpha = bedalpha)
+	#ax2.imshow(redimg, interpolation='none', alpha = bedalpha)
+
+	ax2.xaxis.set_visible(False)
+	ax2.yaxis.set_visible(False)
+
+	ax3 = fig.add_subplot()
+	ax3.plot(bwlist, color='r')
+	#ax3.axis('off')
+	l1, b1, w1, h1 = ax2.get_position().bounds
+	#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+	ax3.set_position((l1*(1),0.02, w1*1, .075))
+	ax3.margins(x=0)
+	ax3.xaxis.set_visible(False)
+	ax3.yaxis.set_visible(False)
+
+	#write image to file
+	res = ''.join(random.choices(string.ascii_uppercase +
+								string.digits, k=8))
+	figname = "P2_" + str(res) + ".svg"
+
+	directory = "images/"
+	wwwlocation = "www/" + directory + figname
+	notwwwlocation = directory + figname #this path is for 'shiny'
+	plt.savefig(wwwlocation, bbox_inches='tight')
+	plt.close()
+
+	return notwwwlocation
+
 
 
 def plotting(rmat,gmat,bmat,distnormmat,redname,thresh,redlist,overlayoff):

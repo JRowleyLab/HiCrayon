@@ -115,7 +115,7 @@ observe(
 )
 
 # min max reactivevalue (global variable)
-minmax <- reactiveValues(min = "NULL", max = "NULL")
+minmax <- reactiveValues()
 observe(
     if (input$setminmax){
         minmax$min = as.numeric(input$min)
@@ -123,18 +123,15 @@ observe(
     }else if (!input$setminmax) {
         minmax$min = p1minmax()$min
         minmax$max = p1minmax()$max
-    } 
+    }
 ) %>% bindEvent(input$generate_hic, ignoreInit = TRUE)
 
 # min max2 reactivevalue (global variable)
-minmax2 <- reactiveValues(min = "NULL", max = "NULL")
+minmax2 <- reactiveValues()
 observe(
     if (input$setminmax2) {
         minmax2$min=as.numeric(input$min2)
         minmax2$max=as.numeric(input$max2)
-    }else {
-        minmax2$min="NULL"
-        minmax2$max="NULL"
     }
 ) 
 
@@ -154,6 +151,9 @@ observe(
 ######################
 
 HiCmatrix <- reactive({
+
+    validate(need(hicv$y!="NULL", "Please upload a HiC file"))
+
     matrix <- readHiCasNumpy(
         hicfile = hicv$y,
         chrom = input$chr,
@@ -211,6 +211,9 @@ HiCmatrix <- reactive({
 # binsize across selected genomic
 # region
 bwlist <- reactive({
+
+    validate(need(bw1v$y!="NULL", "Please upload a bigwig file"))
+
     bwlist <- processBigwigs(
         bigwig = bw1v$y,
         binsize = input$bin,
@@ -224,7 +227,13 @@ bwlist <- reactive({
 
 p1minmax <- reactive({
 
-    validate(need(p1v$y, "Upload peaks file"))
+    print(minmax$min)
+    print(minmax$max)
+
+    validate(need(minmax$min!="NULL", "Please enter values for min/max or upload a bed file"))
+    validate(need(minmax$max!="NULL", "Please enter values for min/max or upload a bed file"))
+
+    validate(need(p1v$y!="NULL", "Please enter values for min/max or upload a bed file"))
 
     minmaxObject <- calc_peak_minmax(
         bigwig = bw1v$y,
@@ -238,13 +247,14 @@ p1minmax <- reactive({
         min = min,
         max = max
     ))
-}) %>% shiny::bindEvent(input$generate_hic)
+}) %>% shiny::bindEvent(input$generate_hic, input$chip1)
 
 # Calulate ...
 distance <- reactive({
 
-    print(minmax$min)
-    print(minmax$max)
+    validate(need(minmax$min!="NULL", "Please enter values for min/max or upload a bed file"))
+    validate(need(minmax$max!="NULL", "Please enter values for min/max or upload a bed file"))
+
 
     distObject <- distanceMat(
              hicnumpy=HiCmatrix(),
@@ -312,7 +322,7 @@ p1plot <- reactive({
 # python functions.
 output$gallery <- renderUI({
 
-    validate(need(input$hic, "Please upload a HiC file"))
+    validate(need(hicv$y!="NULL", "Please upload a HiC file"))
 
     if(input$chip1){
         print(hicplot())
@@ -327,7 +337,7 @@ output$gallery <- renderUI({
             images = images,
             enlarge = TRUE,
             image_frame_size = 6,
-            title = "HiCrayon Image Overlay",
+            title = "",
             enlarge_method = "modal"
             )
     } else {

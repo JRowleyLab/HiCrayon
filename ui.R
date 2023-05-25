@@ -21,6 +21,7 @@ ui <- fluidPage(
         div(class="sidebar",
         sidebarPanel(
           width = 3,
+          style = "overflow-y:scroll; height: 400px; max-height: 400px; position:relative;",
           #titlePanel("Choose Parameters"),
           fluidRow(
             column(4,
@@ -82,7 +83,43 @@ ui <- fluidPage(
           #     )
           #   )
           # ),
-          checkboxInput("advancedparameters", "Advanced Parameters"),
+            fluidRow(
+              column(6,
+                textInput("chr", "Chr:", value="chr1")
+              ),
+              column(6,
+              numericInput("bin", "Bin Size:", 
+                value = 5000, 
+                min = 5000, 
+                max = 1000000)
+              ),
+              column(
+                6,
+                numericInput("start", "Start:",
+                value = 68500000, 
+                min = 0, 
+                max = 1000000000),
+              ),
+              column(6,
+                numericInput("stop", "Stop:",
+                value = 69000000, 
+                min = 0, 
+                max = 1000000000)
+              )
+          ),
+          checkboxInput("chip1", "Include ChIP"),
+          conditionalPanel(
+                condition = "input.chip1 == true",
+                textInput("n1", label = "Name"),
+              fluidRow(
+                column(5,
+                  shinyFilesButton('bw1', label='Select bigwig', title='Please select a .bigwig/.bw file', multiple=FALSE),
+                ),
+                column(5,
+                  verbatimTextOutput('f1_bw1')
+                )
+              ),
+              checkboxInput("advancedparameters", "Advanced Parameters"),
           conditionalPanel(
                 condition = "input.advancedparameters == true",
                 fluidRow(
@@ -138,74 +175,10 @@ ui <- fluidPage(
                   )
           ),
               ),
-            fluidRow(
-              column(6,
-                textInput("chr", "Chr:", value="chr1")
-              ),
-              column(6,
-              numericInput("bin", "Bin Size:", 
-                value = 5000, 
-                min = 5000, 
-                max = 1000000)
-              ),
-              column(
-                6,
-                numericInput("start", "Start:",
-                value = 68500000, 
-                min = 0, 
-                max = 1000000000),
-              ),
-              column(6,
-                numericInput("stop", "Stop:",
-                value = 69000000, 
-                min = 0, 
-                max = 1000000000)
-              )
-          ),
-          
-          # Button to generate HiC image
-          fluidRow(
-            column(12,
-              actionBttn(
-                inputId = "generate_hic", 
-                label = "Generate HiC!"),
-                color = "success",
-                style = "material-flat",
-                 icon = icon("sliders"),
-                 block = TRUE
-          )
-          ),
-
-          # # Turn off overlay for images. Aim is to be able to
-          # # turn off overlay for each image individually
-          # # The overlay is handled in the python function.
-          # fluidRow(
-          #   column(3,
-          #     strong(h4("Overlay Off")),
-          #     checkboxInput(inputId = "HiC_check", label = "HiC"),
-          #     checkboxInput(inputId = "bw_check", label = "Bigwig"),
-          #     conditionalPanel(
-          #       condition = "input.bw2check == true",
-          #       checkboxInput(inputId = "bw_check2", label = "Bigwig 2"),
-          #     )
-          #   )
-          # ),
-          br(),
-          br(),
-          checkboxInput("chip1", "Include ChIP"),
-          conditionalPanel(
-                condition = "input.chip1 == true",
-                textInput("n1", label = "Name"),
               fluidRow(
-                column(5,
-                  shinyFilesButton('bw1', label='Select bigwig', title='Please select a .bigwig/.bw file', multiple=FALSE),
-                ),
-                column(5,
-                  verbatimTextOutput('f1_bw1')
-                )
-              ),
-              column(5,
-                checkboxInput("setminmax", "Set Min/Max")
+                column(6,
+                  checkboxInput("setminmax", "Set Min/Max")
+                  ),
               ),
               conditionalPanel(
                 condition = "input.setminmax == false",
@@ -226,8 +199,8 @@ ui <- fluidPage(
                     5,
                     numericInput("min", "Min:", value = 0, min = 0, max = 1)
                   ),
-                  column(5,
-                    ofset = 3,
+                  column(
+                    5,
                     numericInput("max", "Max:", value = .9, min = 0, max = 1)
                   )
                 )
@@ -278,7 +251,21 @@ ui <- fluidPage(
                   )
                 ),
                 
-              )
+              ),
+              # Button to generate HiC image
+                fluidRow(
+                  column(12,
+                  tags$div(style="position: fixed; bottom: 45vh;",
+                        actionBttn(
+                          inputId = "generate_hic",
+                          label = "Generate HiC!",
+                          color = "success",
+                          style = "material-flat",
+                          icon = icon("sliders"),
+                          block = TRUE)
+                  )
+                )
+                )
             )
         ),
         ########################################
@@ -304,9 +291,9 @@ ui <- fluidPage(
                     ')
                     )
                     )
-                  )
-        )
-      )
+                  ),
+        ),
+      ),
     )
   )
 )
