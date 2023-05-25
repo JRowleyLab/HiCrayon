@@ -121,8 +121,8 @@ observe(
         minmax$min = as.numeric(input$min)
         minmax$max = as.numeric(input$max)
     }else if (!input$setminmax) {
-        minmax$min = p1minmax()$min
-        minmax$max = p1minmax()$max
+        minmax$min = minmax_ChIP1()$min
+        minmax$max = minmax_ChIP1()$max
     }
 ) %>% bindEvent(input$generate_hic, ignoreInit = TRUE)
 
@@ -132,6 +132,9 @@ observe(
     if (input$setminmax2) {
         minmax2$min=as.numeric(input$min2)
         minmax2$max=as.numeric(input$max2)
+    }else if (!input$setminmax2) {
+        minmax2$min = minmax_ChIP2()$min
+        minmax2$max = minmax_ChIP2()$max
     }
 ) 
 
@@ -210,7 +213,7 @@ HiCmatrix <- reactive({
 # record bigwig value for each
 # binsize across selected genomic
 # region
-bwlist <- reactive({
+bwlist_ChIP1 <- reactive({
 
     validate(need(bw1v$y!="NULL", "Please upload a bigwig file"))
 
@@ -225,7 +228,27 @@ bwlist <- reactive({
     return(bwlist)
 }) %>% shiny::bindEvent(input$generate_hic)
 
-p1minmax <- reactive({
+
+# Step through bigwig file and
+# record bigwig value for each
+# binsize across selected genomic
+# region
+bwlist_ChIP2 <- reactive({
+
+    validate(need(bw2v$y!="NULL", "Please upload a bigwig file"))
+
+    bwlist <- processBigwigs(
+        bigwig = bw2v$y,
+        binsize = input$bin,
+        chrom = input$chr,
+        start = input$start,
+        stop = input$stop
+        )
+
+    return(bwlist)
+}) %>% shiny::bindEvent(input$generate_hic)
+
+minmax_ChIP1 <- reactive({
 
     print(minmax$min)
     print(minmax$max)
@@ -249,8 +272,32 @@ p1minmax <- reactive({
     ))
 }) %>% shiny::bindEvent(input$generate_hic, input$chip1)
 
+minmax_ChIP2 <- reactive({
+
+    print(minmax2$min)
+    print(minmax2$max)
+
+    validate(need(minmax2$min!="NULL", "Please enter values for min/max or upload a bed file"))
+    validate(need(minmax2$max!="NULL", "Please enter values for min/max or upload a bed file"))
+
+    validate(need(p2v$y!="NULL", "Please enter values for min/max or upload a bed file"))
+
+    minmaxObject <- calc_peak_minmax(
+        bigwig = bw2v$y,
+        peaks = p2v$y,
+        binsize = input$bin)
+
+    min <- tuple(minmaxObject, convert = T)[0]
+    max <- tuple(minmaxObject, convert = T)[1]
+
+    return(list(
+        min = min,
+        max = max
+    ))
+}) %>% shiny::bindEvent(input$generate_hic, input$chip2)
+
 # Calulate ...
-distance <- reactive({
+distance_ChIP1 <- reactive({
 
     validate(need(minmax$min!="NULL", "Please enter values for min/max or upload a bed file"))
     validate(need(minmax$max!="NULL", "Please enter values for min/max or upload a bed file"))
@@ -260,9 +307,39 @@ distance <- reactive({
              hicnumpy=HiCmatrix(),
              mymin=minmax$min,
              mymax=minmax$max,
-             bwlist=bwlist(),
+             bwlist=bwlist_ChIP1(),
              #thresh=input$thresh,
-             strength=input$strength
+             strength=input$strength,
+             sample = "ChIP1"
+             )
+
+    rmat <- tuple(distObject, convert=T)[0]
+    gmat <- tuple(distObject, convert=T)[1]
+    bmat <- tuple(distObject, convert=T)[2]
+    bwlist_norm <- tuple(distObject, convert=T)[3]
+
+    return(list(
+        rmat=rmat,
+        gmat=gmat,
+        bmat=bmat,
+        bwlist_norm=bwlist_norm
+    ))
+}) %>% shiny::bindEvent(input$generate_hic)
+
+distance_ChIP2 <- reactive({
+
+    validate(need(minmax2$min!="NULL", "Please enter values for min/max or upload a bed file"))
+    validate(need(minmax2$max!="NULL", "Please enter values for min/max or upload a bed file"))
+
+
+    distObject <- distanceMat(
+             hicnumpy=HiCmatrix(),
+             mymin=minmax2$min,
+             mymax=minmax2$max,
+             bwlist=bwlist_ChIP2(),
+             #thresh=input$thresh,
+             strength=input$strength2,
+             sample = "ChIP2"
              )
 
     rmat <- tuple(distObject, convert=T)[0]
@@ -298,23 +375,60 @@ hicplot <- reactive({
 }) %>% shiny::bindEvent(input$generate_hic)
 
 
-
-
-
 p1plot <- reactive({
-    p1_plot <- p1_plot(
+    p1_plot <- ChIP_plot(
         hicmatrix = hic_distance(),
-        rmat = distance()$rmat,
-        gmat = distance()$gmat,
-        bmat = distance()$bmat,
-        bwlist = distance()$bwlist_norm,
+        rmat = distance_ChIP1()$rmat,
+        gmat = distance_ChIP1()$gmat,
+        bmat = distance_ChIP1()$bmat,
+        bwlist = distance_ChIP1()$bwlist_norm,
+        bwlist2 = "NULL",
         hicalpha = input$hicalpha,
         bedalpha = input$bedalpha,
         #thresh = input$thresh2,
-        opacity = input$opacity
+        opacity = input$opacity,
+        sample = "ChIP1"
         )
 
-}) %>% shiny::bindEvent(input$generate_hic) #%>% shiny::bindEvent(input$run)
+}) %>% shiny::bindEvent(input$generate_hic) 
+
+
+p2plot <- reactive({
+    p2_plot <- ChIP_plot(
+        hicmatrix = hic_distance(),
+        rmat = distance_ChIP2()$rmat,
+        gmat = distance_ChIP2()$gmat,
+        bmat = distance_ChIP2()$bmat,
+        bwlist = distance_ChIP2()$bwlist_norm,
+        bwlist2 = "NULL",
+        hicalpha = input$hicalpha2,
+        bedalpha = input$bedalpha2,
+        #thresh = input$thresh2,
+        opacity = input$opacity2,
+        sample = "ChIP2"
+        )
+
+}) %>% shiny::bindEvent(input$generate_hic) 
+
+
+p1and2plot <- reactive({
+    # Combine ChIP data from protein 1
+    # and protein 2
+    p2_plot <- ChIP_plot(
+        hicmatrix = hic_distance(),
+        rmat = distance_ChIP1()$rmat,
+        gmat = distance_ChIP2()$gmat,
+        bmat = distance_ChIP2()$bmat,
+        bwlist = distance_ChIP1()$bwlist_norm,
+        bwlist2 = distance_ChIP2()$bwlist_norm,
+        hicalpha = input$hicalpha2,
+        bedalpha = input$bedalpha2,
+        #thresh = input$thresh2,
+        opacity = input$opacity2,
+        sample = "ChIP_combined"
+        )
+
+}) %>% shiny::bindEvent(input$generate_hic) 
 
 # Gallery function  that takes
 # local images to display.
@@ -324,8 +438,25 @@ output$gallery <- renderUI({
 
     validate(need(hicv$y!="NULL", "Please upload a HiC file"))
 
-    if(input$chip1){
+    if(input$chip2){
         print(hicplot())
+
+        texts <- c("HiC", "CTCF", "RAD21", "CTCF + RAD21")
+        hrefs <- c(hicplot(), p1plot(), p2plot(), p1and2plot())
+        images <- c(hicplot(), p1plot(), p2plot(), p1and2plot())
+
+        gallery(
+            texts = texts,
+            hrefs = hrefs,
+            images = images,
+            enlarge = TRUE,
+            image_frame_size = 6,
+            title = "",
+            enlarge_method = "modal",
+            style = "height: 100vh;"
+            )
+    }else if (input$chip1) {
+       print(hicplot())
 
         texts <- c("HiC", "CTCF")
         hrefs <- c(hicplot(), p1plot())
@@ -338,7 +469,8 @@ output$gallery <- renderUI({
             enlarge = TRUE,
             image_frame_size = 6,
             title = "",
-            enlarge_method = "modal"
+            enlarge_method = "modal",
+            style = "height: 100vh;"
             )
     } else {
        print(hicplot())
@@ -354,7 +486,8 @@ output$gallery <- renderUI({
             enlarge = TRUE,
             image_frame_size = 6,
             title = "",
-            enlarge_method = "modal"
+            enlarge_method = "modal",
+            style = "height: 100vh;"
             )
     }
     

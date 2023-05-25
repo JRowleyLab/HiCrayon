@@ -55,8 +55,6 @@ def distanceMatHiC(hicnumpy):
 	print("done")
 	return(distnormmat)
 
-
-
 # Read in bigwig file and return a list of
 # 
 def processBigwigs(bigwig,binsize,chrom,start,stop):
@@ -129,9 +127,9 @@ def getrelative(mylist, mymin, mymax):
 	return relativelist
 
 
-def distanceMat(hicnumpy, mymin, mymax, bwlist, strength):
+def distanceMat(hicnumpy, mymin, mymax, bwlist, strength, sample):
 	thresh = 2
-	print(f"Calculating ChIP 1 distance using {mymin} and {mymax} values")
+	print(f"Calculating {sample} distance using {mymin} and {mymax} values")
 	matsize = len(hicnumpy)
 
 	bwlist_norm = getrelative(bwlist, mymin, mymax) 
@@ -153,9 +151,18 @@ def distanceMat(hicnumpy, mymin, mymax, bwlist, strength):
 				satscore = hicscore/thresh
 			
 			newscore = (bwlist_norm[x] + bwlist_norm[y])/2
-			rscore = 255*newscore*satscore*strength
-			rmat[x,y] = rscore
-			rmat[y,x] = rscore
+			# If first ChIP-seq, increase red channel
+			if(sample=="ChIP1"):
+				rscore = 255*newscore*satscore*strength
+				rmat[x,y] = rscore
+				rmat[y,x] = rscore
+			# If second ChIP-seq, increase blue channel
+			elif(sample=="ChIP2"):
+				bscore = 255*newscore*satscore*strength
+				bmat[x,y] = bscore
+				bmat[y,x] = bscore
+
+
 	print("done distance")
 	return rmat,gmat,bmat,bwlist_norm
 
@@ -227,11 +234,12 @@ def hic_plot(REDMAP, distnormmat):
 # inversed, with a lines representing the 
 # the bigwig track AND the track underneath the
 # plot
-def p1_plot(hicmatrix, rmat, gmat, bmat, bwlist, hicalpha, bedalpha, opacity):
+def ChIP_plot(hicmatrix, rmat, gmat, bmat, bwlist, bwlist2, hicalpha, bedalpha, opacity, sample):
 	thresh = 2
-	print("p1 plotting...")
+	print(f"Plotting {sample}...")
 	#remove previously generated images
-	for f in glob.glob('./www/images/P1_*.svg'):
+
+	for f in glob.glob(f'./www/images/{sample}_*.svg'):
 		print(f'Removing image: {f}')
 		os.remove(f)
 
@@ -255,20 +263,48 @@ def p1_plot(hicmatrix, rmat, gmat, bmat, bwlist, hicalpha, bedalpha, opacity):
 	ax2.xaxis.set_visible(False)
 	ax2.yaxis.set_visible(False)
 
-	ax3 = fig.add_subplot()
-	ax3.plot(bwlist, color='r')
-	#ax3.axis('off')
-	l1, b1, w1, h1 = ax2.get_position().bounds
-	#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
-	ax3.set_position((l1*(1),0.02, w1*1, .075))
-	ax3.margins(x=0)
-	ax3.xaxis.set_visible(False)
-	ax3.yaxis.set_visible(False)
+	# Adding ChIP track underneath matrix
+	# ChIP1 includes red track
+	if(sample=="ChIP1"):
+		ax3 = fig.add_subplot()
+		ax3.plot(bwlist, color='r')
+		#ax3.axis('off')
+		l1, b1, w1, h1 = ax2.get_position().bounds
+		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+		ax3.set_position((l1*(1),0.02, w1*1, .075))
+		ax3.margins(x=0)
+		ax3.xaxis.set_visible(False)
+		ax3.yaxis.set_visible(False)
+	#ChIP2 includes blue track
+	elif(sample=="ChIP2"):
+		ax3 = fig.add_subplot()
+		ax3.plot(bwlist, color='b')
+		#ax3.axis('off')
+		l1, b1, w1, h1 = ax2.get_position().bounds
+		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+		ax3.set_position((l1*(1),0.02, w1*1, .075))
+		ax3.margins(x=0)
+		ax3.xaxis.set_visible(False)
+		ax3.yaxis.set_visible(False)
+	#ChIP1 and ChIP2 red and blue tracks together
+	elif(sample=="ChIP_combined"):
+		ax3 = fig.add_subplot()
+		ax3.plot(bwlist, color='r')
+		ax3.plot(bwlist2, color='b')
+		#ax3.axis('off')
+		l1, b1, w1, h1 = ax2.get_position().bounds
+		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+		ax3.set_position((l1*(1),0.02, w1*1, .075))
+		ax3.margins(x=0)
+		ax3.xaxis.set_visible(False)
+		ax3.yaxis.set_visible(False)
+
+
 
 	#write image to file
 	res = ''.join(random.choices(string.ascii_uppercase +
 								string.digits, k=8))
-	figname = "P1_" + str(res) + ".svg"
+	figname = f"{sample}_" + str(res) + ".svg"
 
 	directory = "images/"
 	wwwlocation = "www/" + directory + figname
@@ -278,57 +314,6 @@ def p1_plot(hicmatrix, rmat, gmat, bmat, bwlist, hicalpha, bedalpha, opacity):
 
 	return notwwwlocation
 
-
-def p2_plot(hicmatrix, rmat, gmat, bmat, bwlist, hicalpha, bedalpha, opacity):
-	thresh = 2
-	print("p1 plotting...")
-	#remove previously generated images
-	for f in glob.glob('./www/images/P2_*.svg'):
-		print(f'Removing image: {f}')
-		os.remove(f)
-
-	fig, (ax2) = plt.subplots(ncols=1)
-	redmat = (np.dstack((rmat,gmat,bmat))).astype(np.uint8)
-	redimg = Image.fromarray(redmat)
-	redimgtrans = convertBlacktoTrans(redimg)
-	
-	#########################
-	#black
-	r=0
-	g=0
-	b=0
-	#########################
-	background = Image.new('RGBA', (len(hicmatrix),len(hicmatrix)), (r,g,b,opacity) )
-	ax2.imshow(background)
-	ax2.imshow(hicmatrix, 'gray', vmin=0, vmax=thresh, interpolation='none', alpha = hicalpha)
-	ax2.imshow(redimgtrans, interpolation='none', alpha = bedalpha)
-	#ax2.imshow(redimg, interpolation='none', alpha = bedalpha)
-
-	ax2.xaxis.set_visible(False)
-	ax2.yaxis.set_visible(False)
-
-	ax3 = fig.add_subplot()
-	ax3.plot(bwlist, color='r')
-	#ax3.axis('off')
-	l1, b1, w1, h1 = ax2.get_position().bounds
-	#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
-	ax3.set_position((l1*(1),0.02, w1*1, .075))
-	ax3.margins(x=0)
-	ax3.xaxis.set_visible(False)
-	ax3.yaxis.set_visible(False)
-
-	#write image to file
-	res = ''.join(random.choices(string.ascii_uppercase +
-								string.digits, k=8))
-	figname = "P2_" + str(res) + ".svg"
-
-	directory = "images/"
-	wwwlocation = "www/" + directory + figname
-	notwwwlocation = directory + figname #this path is for 'shiny'
-	plt.savefig(wwwlocation, bbox_inches='tight')
-	plt.close()
-
-	return notwwwlocation
 
 
 
