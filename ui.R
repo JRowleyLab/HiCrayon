@@ -335,7 +335,7 @@ ui <- fluidPage(
                 fluidRow(
                   column(12,
 
-                    uiOutput("gallery"),
+                    uiOutput("gallery") %>% withSpinner( type = 2, color.background = "white", color = "black"),
                     #######################
                     # weird behaviour where when uiOutput is
                     # updated, the HTML below is removed

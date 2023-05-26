@@ -136,7 +136,7 @@ observe(
         minmax2$min = minmax_ChIP2()$min
         minmax2$max = minmax_ChIP2()$max
     }
-) 
+) %>% bindEvent(input$generate_hic, ignoreInit = TRUE)
 
 # bluename reactivevalue
 bname <- reactiveValues(n = "NULL")
@@ -215,6 +215,8 @@ HiCmatrix <- reactive({
 # region
 bwlist_ChIP1 <- reactive({
 
+    req(input$chip1)
+
     validate(need(bw1v$y!="NULL", "Please upload a bigwig file"))
 
     bwlist <- processBigwigs(
@@ -226,7 +228,7 @@ bwlist_ChIP1 <- reactive({
         )
 
     return(bwlist)
-}) %>% shiny::bindEvent(input$generate_hic)
+}) %>% shiny::bindEvent(input$generate_hic, input$chip1)
 
 
 # Step through bigwig file and
@@ -234,6 +236,8 @@ bwlist_ChIP1 <- reactive({
 # binsize across selected genomic
 # region
 bwlist_ChIP2 <- reactive({
+
+    req(input$chip2)
 
     validate(need(bw2v$y!="NULL", "Please upload a bigwig file"))
 
@@ -246,17 +250,13 @@ bwlist_ChIP2 <- reactive({
         )
 
     return(bwlist)
-}) %>% shiny::bindEvent(input$generate_hic)
+}) %>% shiny::bindEvent(input$generate_hic, input$chip2)
 
 minmax_ChIP1 <- reactive({
 
-    print(minmax$min)
-    print(minmax$max)
+    req(input$chip1)
 
-    validate(need(minmax$min!="NULL", "Please enter values for min/max or upload a bed file"))
-    validate(need(minmax$max!="NULL", "Please enter values for min/max or upload a bed file"))
-
-    validate(need(p1v$y!="NULL", "Please enter values for min/max or upload a bed file"))
+    validate(need(!rlang::is_empty(p1v$y) & !input$setminmax, "Please enter values for min/max or upload a bed file"))
 
     minmaxObject <- calc_peak_minmax(
         bigwig = bw1v$y,
@@ -274,13 +274,9 @@ minmax_ChIP1 <- reactive({
 
 minmax_ChIP2 <- reactive({
 
-    print(minmax2$min)
-    print(minmax2$max)
+    req(input$chip2)
 
-    validate(need(minmax2$min!="NULL", "Please enter values for min/max or upload a bed file"))
-    validate(need(minmax2$max!="NULL", "Please enter values for min/max or upload a bed file"))
-
-    validate(need(p2v$y!="NULL", "Please enter values for min/max or upload a bed file"))
+    validate(need(!rlang::is_empty(p2v$y) & !input$setminmax2, "Please enter values for min/max or upload a bed file"))
 
     minmaxObject <- calc_peak_minmax(
         bigwig = bw2v$y,
@@ -298,6 +294,8 @@ minmax_ChIP2 <- reactive({
 
 # Calulate ...
 distance_ChIP1 <- reactive({
+
+    req(input$chip1)
 
     validate(need(minmax$min!="NULL", "Please enter values for min/max or upload a bed file"))
     validate(need(minmax$max!="NULL", "Please enter values for min/max or upload a bed file"))
@@ -324,9 +322,11 @@ distance_ChIP1 <- reactive({
         bmat=bmat,
         bwlist_norm=bwlist_norm
     ))
-}) %>% shiny::bindEvent(input$generate_hic)
+}) %>% shiny::bindEvent(input$generate_hic, input$chip1)
 
 distance_ChIP2 <- reactive({
+
+    req(input$chip2)
 
     validate(need(minmax2$min!="NULL", "Please enter values for min/max or upload a bed file"))
     validate(need(minmax2$max!="NULL", "Please enter values for min/max or upload a bed file"))
@@ -353,7 +353,7 @@ distance_ChIP2 <- reactive({
         bmat=bmat,
         bwlist_norm=bwlist_norm
     ))
-}) %>% shiny::bindEvent(input$generate_hic)
+}) %>% shiny::bindEvent(input$generate_hic, input$chip2)
 
 
 hic_distance <- reactive({
@@ -376,6 +376,9 @@ hicplot <- reactive({
 
 
 p1plot <- reactive({
+
+    req(input$chip1)
+
     p1_plot <- ChIP_plot(
         hicmatrix = hic_distance(),
         rmat = distance_ChIP1()$rmat,
@@ -390,10 +393,13 @@ p1plot <- reactive({
         sample = "ChIP1"
         )
 
-}) %>% shiny::bindEvent(input$generate_hic) 
+}) %>% shiny::bindEvent(input$generate_hic, input$chip1) 
 
 
 p2plot <- reactive({
+
+    req(input$chip2)
+
     p2_plot <- ChIP_plot(
         hicmatrix = hic_distance(),
         rmat = distance_ChIP2()$rmat,
@@ -408,12 +414,15 @@ p2plot <- reactive({
         sample = "ChIP2"
         )
 
-}) %>% shiny::bindEvent(input$generate_hic) 
+}) %>% shiny::bindEvent(input$generate_hic, input$chip2) 
 
 
 p1and2plot <- reactive({
+
+    req(input$chip1)
     # Combine ChIP data from protein 1
     # and protein 2
+
     p2_plot <- ChIP_plot(
         hicmatrix = hic_distance(),
         rmat = distance_ChIP1()$rmat,
