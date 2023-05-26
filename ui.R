@@ -21,7 +21,7 @@ ui <- fluidPage(
         div(class="sidebar",
         sidebarPanel(
           width = 3,
-          style = "overflow-y:scroll; height: 400px; max-height: 400px; position:relative;",
+          style = "overflow-y:scroll; height: 60vh; max-height: 60vh; position:relative;",
           #titlePanel("Choose Parameters"),
           fluidRow(
             column(4,
@@ -308,12 +308,10 @@ ui <- fluidPage(
                 )
               ),
           ),
-
-
               # Button to generate HiC image
                 fluidRow(
                   column(12,
-                  tags$div(style="position: fixed; bottom: 45vh;",
+                  tags$div(style="position: fixed; bottom: 5vh;",
                         actionBttn(
                           inputId = "generate_hic",
                           label = "Generate HiC!",
@@ -331,11 +329,16 @@ ui <- fluidPage(
         ########################################
 
         mainPanel(
+          tags$head(
+            tags$style(
+              "body {overflow-y: hidden;}"
+            )
+          ),
           width = 9,
                 fluidRow(
                   column(12,
 
-                    uiOutput("gallery") %>% withSpinner( type = 2, color.background = "white", color = "black"),
+                    uiOutput("gallery") %>% withSpinner(type = 2, color.background = "white", color = "black"),
                     #######################
                     # weird behaviour where when uiOutput is
                     # updated, the HTML below is removed

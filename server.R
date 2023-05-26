@@ -459,7 +459,7 @@ output$gallery <- renderUI({
             hrefs = hrefs,
             images = images,
             enlarge = TRUE,
-            image_frame_size = 6,
+            image_frame_size = 3,
             title = "",
             enlarge_method = "modal",
             style = "height: 100vh;"
