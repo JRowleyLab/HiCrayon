@@ -3,16 +3,17 @@ source("global.R")
 
 # Call separate UI components
 source("ui/gallery_ui.R", local = TRUE)
-source("ui/generateHiCbutton_ui.R", local = TRUE)
 source("ui/selectHiCoptions_ui.R", local = TRUE)
 source("ui/chiponeOptions_ui.R", local = TRUE)
 source("ui/chiptwoOptions_ui.R", local = TRUE)
+source("radiobuttonswithimages.R", local = TRUE)
 
 
 reticulate::source_python("python/functions.py")
 
 ui <- shinyUI({
-  source("ui/ui.R", local = TRUE)[1]
+  #source("ui/ui.R", local = TRUE)[1]
+  source("ui_shinydashboard.R", local = TRUE)[1]
 })
 
 server <- function(input, output, session) {
