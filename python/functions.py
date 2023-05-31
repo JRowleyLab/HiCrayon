@@ -275,6 +275,19 @@ def ChIP_plot(hicmatrix, rmat, gmat, bmat, bwlist, bwlist2, hicalpha, bedalpha, 
 		ax3.margins(x=0)
 		ax3.xaxis.set_visible(False)
 		ax3.yaxis.set_visible(False)
+
+		ax4 = fig.add_subplot()
+		a = [x for x in range(len(bwlist))]
+		ax4.plot(bwlist[::-1], a, color='r')
+		
+		#ax3.axis('off')
+		l2, b2, w2, h2 = ax2.get_position().bounds
+		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+		ax4.set_position((l2*(.7),b2, w2*.1, h2*(1)))
+		ax4.margins(y=0)
+		ax4.xaxis.set_visible(False)
+		ax4.yaxis.set_visible(False)
+
 	#ChIP2 includes blue track
 	elif(sample=="ChIP2"):
 		ax3 = fig.add_subplot()
@@ -286,6 +299,19 @@ def ChIP_plot(hicmatrix, rmat, gmat, bmat, bwlist, bwlist2, hicalpha, bedalpha, 
 		ax3.margins(x=0)
 		ax3.xaxis.set_visible(False)
 		ax3.yaxis.set_visible(False)
+
+		ax4 = fig.add_subplot()
+		a = [x for x in range(len(bwlist))]
+		ax4.plot(bwlist[::-1], a, color='b')
+		
+		#ax3.axis('off')
+		l2, b2, w2, h2 = ax2.get_position().bounds
+		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+		ax4.set_position((l2*(.7),b2, w2*.1, h2*(1)))
+		ax4.margins(y=0)
+		ax4.xaxis.set_visible(False)
+		ax4.yaxis.set_visible(False)
+
 	#ChIP1 and ChIP2 red and blue tracks together
 	elif(sample=="ChIP_combined"):
 		ax3 = fig.add_subplot()
@@ -298,6 +324,30 @@ def ChIP_plot(hicmatrix, rmat, gmat, bmat, bwlist, bwlist2, hicalpha, bedalpha, 
 		ax3.margins(x=0)
 		ax3.xaxis.set_visible(False)
 		ax3.yaxis.set_visible(False)
+
+		ax4 = fig.add_subplot()
+		a = [x for x in range(len(bwlist))]
+		ax4.plot(bwlist[::-1], a, color='r')
+		
+		#ax3.axis('off')
+		l2, b2, w2, h2 = ax2.get_position().bounds
+		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+		ax4.set_position((l2*(.7),b2, w2*.1, h2*(1)))
+		ax4.margins(y=0)
+		ax4.xaxis.set_visible(False)
+		ax4.yaxis.set_visible(False)
+
+		ax5 = fig.add_subplot()
+		a = [x for x in range(len(bwlist2))]
+		ax5.plot(bwlist2[::-1], a, color='b')
+		
+		#ax3.axis('off')
+		l2, b2, w2, h2 = ax2.get_position().bounds
+		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+		ax5.set_position((l2*(.7),b2, w2*.1, h2*(1)))
+		ax5.margins(y=0)
+		ax5.xaxis.set_visible(False)
+		ax5.yaxis.set_visible(False)
 
 
 

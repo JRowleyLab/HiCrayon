@@ -8,8 +8,7 @@ data/
 *test*
 
 # any images
-*.png
-*.svg
+www/images
 
 # workshop files
 workshop
