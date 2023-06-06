@@ -5,21 +5,21 @@ hicplot <- reactive({
              )
 }) %>% shiny::bindEvent(input$generate_hic)
 
+#chip1, 255, 0, 0, disthic, "ChIP1", "NULL", .3, 1, 255
 
 p1plot <- reactive({
 
     req(input$chip1)
 
     p1_plot <- ChIP_plot(
-        hicmatrix = hic_distance(),
-        rmat = distance_ChIP1()$rmat,
-        gmat = distance_ChIP1()$gmat,
-        bmat = distance_ChIP1()$bmat,
-        bwlist = distance_ChIP1()$bwlist_norm,
-        bwlist2 = "NULL",
+        disthic = hic_distance(),
+        r = 255,
+        g = 0,
+        b = 0,
+        chip = bwlist_ChIP1(),
+        chip2 = "NULL",
         hicalpha = input$hicalpha,
         bedalpha = input$bedalpha,
-        #thresh = input$thresh2,
         opacity = input$opacity,
         sample = "ChIP1"
         )
@@ -32,20 +32,19 @@ p2plot <- reactive({
     req(input$chip2)
 
     p2_plot <- ChIP_plot(
-        hicmatrix = hic_distance(),
-        rmat = distance_ChIP2()$rmat,
-        gmat = distance_ChIP2()$gmat,
-        bmat = distance_ChIP2()$bmat,
-        bwlist = distance_ChIP2()$bwlist_norm,
-        bwlist2 = "NULL",
+        disthic = hic_distance(),
+        r = 0,  
+        g = 0, 
+        b = 255,
+        chip = bwlist_ChIP2(),
+        chip2 = "NULL",
         hicalpha = input$hicalpha2,
         bedalpha = input$bedalpha2,
-        #thresh = input$thresh2,
         opacity = input$opacity2,
         sample = "ChIP2"
         )
 
-}) %>% shiny::bindEvent(input$generate_hic, input$chip2) 
+}) %>% shiny::bindEvent(input$generate_hic, input$chip2)
 
 
 p1and2plot <- reactive({
@@ -53,17 +52,17 @@ p1and2plot <- reactive({
     req(input$chip1)
     # Combine ChIP data from protein 1
     # and protein 2
+    #chip, r, g, b, disthic, sample, chip2, hicalpha, opacity
 
     p2_plot <- ChIP_plot(
-        hicmatrix = hic_distance(),
-        rmat = distance_ChIP1()$rmat,
-        gmat = distance_ChIP2()$gmat,
-        bmat = distance_ChIP2()$bmat,
-        bwlist = distance_ChIP1()$bwlist_norm,
-        bwlist2 = distance_ChIP2()$bwlist_norm,
+        disthic = hic_distance(),
+        r = 0, #distance_ChIP1()$rmat,
+        g = 0, #distance_ChIP2()$gmat,
+        b = 255, #distance_ChIP2()$bmat,
+        chip = bwlist_ChIP1(), #distance_ChIP1()$bwlist_norm,
+        chip2 = bwlist_ChIP2(), # distance_ChIP2()$bwlist_norm,
         hicalpha = input$hicalpha2,
         bedalpha = input$bedalpha2,
-        #thresh = input$thresh2,
         opacity = input$opacity2,
         sample = "ChIP_combined"
         )

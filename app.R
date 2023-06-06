@@ -19,7 +19,7 @@ ui <- shinyUI({
 server <- function(input, output, session) {
   source("server/fileChoose_server.R", local = TRUE)
   source("server/calcDistance_server.R", local = TRUE)
-  source("server/minmax_server.R", local = TRUE)
+  #source("server/minmax_server.R", local = TRUE)
   source("server/processBigwigs_server.R", local = TRUE)
   source("server/plotting_server.R", local = TRUE)
   source("server/readHiCmatrix_server.R", local = TRUE)

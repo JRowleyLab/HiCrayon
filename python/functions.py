@@ -19,6 +19,8 @@ def readHiCasNumpy(hicfile, chrom, start, stop, norm, binsize):
 	nochr = chrom.strip('chr')
 	wchr = "chr" + str(nochr)
 	# Try with "1" then "chr1" if an execption is made.
+	# This doesn't catch the crash. Need to find a way to open a hicdump file and check
+	# resolutions/ chromosome used/ normalizations
 	try:
 		hicobject = hicdump.getMatrixZoomData(nochr, nochr, "observed", norm, "BP", binsize)
 	except:
@@ -184,6 +186,42 @@ def convertBlacktoTrans(image):
     return img
 
 
+def calcAlphaMatrix(chip,r,g,b):
+    print("calculating alpha matrix")
+    matsize = len(chip)
+    # Normalize chip list to between 0 and 1
+    chip_arr = np.array(chip)
+    chip_norm = (chip_arr-np.min(chip_arr))/(np.max(chip_arr)-np.min(chip_arr))
+
+    # RGBA
+    rmat = np.zeros((matsize,matsize))
+    gmat = np.zeros((matsize,matsize))
+    bmat = np.zeros((matsize,matsize))
+    amat = np.zeros((matsize,matsize))
+
+    # Alter r,g,b for desired color
+    rmat.fill(r)
+    gmat.fill(g)
+    bmat.fill(b)
+
+    # Calculate alpha value based on chip-seq
+    # intersection combined score
+    # x * y * 255
+    # result is a normalized range from 0-255
+    for x in range(0,matsize):
+            for y in range(x,matsize):
+                if x==y:
+                    newscore = 255
+                else:
+                    newscore = (chip_norm[x] * chip_norm[y])*255
+                #alpha value
+                amat[x,y] = newscore
+                amat[y,x] = newscore
+
+    mat = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
+    print("done alpha")
+    return mat
+
 # Return a list of all possible sequential
 # matplotlib colormaps
 def matplot_colors():
@@ -230,12 +268,8 @@ def hic_plot(REDMAP, distnormmat):
 	
 
 
-# Produces a matplot of the hic matrix
-# inversed, with a lines representing the 
-# the bigwig track AND the track underneath the
-# plot
-def ChIP_plot(hicmatrix, rmat, gmat, bmat, bwlist, bwlist2, hicalpha, bedalpha, opacity, sample):
-	thresh = 2
+def ChIP_plot(chip, r, g, b, disthic, sample, chip2, hicalpha, bedalpha, opacity):
+
 	print(f"Plotting {sample}...")
 	#remove previously generated images
 
@@ -243,10 +277,12 @@ def ChIP_plot(hicmatrix, rmat, gmat, bmat, bwlist, bwlist2, hicalpha, bedalpha, 
 		print(f'Removing image: {f}')
 		os.remove(f)
 
+	mat = calcAlphaMatrix(chip, r, g, b)
+	print(f"length matrix: {len(mat)}")
+
+	img = Image.fromarray(mat)
+				
 	fig, (ax2) = plt.subplots(ncols=1)
-	redmat = (np.dstack((rmat,gmat,bmat))).astype(np.uint8)
-	redimg = Image.fromarray(redmat)
-	redimgtrans = convertBlacktoTrans(redimg)
 	
 	#########################
 	#black
@@ -254,20 +290,23 @@ def ChIP_plot(hicmatrix, rmat, gmat, bmat, bwlist, bwlist2, hicalpha, bedalpha, 
 	g=0
 	b=0
 	#########################
-	background = Image.new('RGBA', (len(hicmatrix),len(hicmatrix)), (r,g,b,opacity) )
+	background = Image.new('RGBA', (len(disthic),len(disthic)), (r,g,b,opacity) )
+	# Show black background
 	ax2.imshow(background)
-	ax2.imshow(hicmatrix, 'gray', vmin=0, vmax=thresh, interpolation='none', alpha = hicalpha)
-	ax2.imshow(redimgtrans, interpolation='none', alpha = bedalpha)
-	#ax2.imshow(redimg, interpolation='none', alpha = bedalpha)
+	# Show distance normalized HiC
+	ax2.imshow(disthic, 'gray', vmin=0, vmax=2, interpolation='none', alpha = hicalpha)
+	# Show ChIP-seq matrix
+	ax2.imshow(img, interpolation='none', alpha = bedalpha)
 
 	ax2.xaxis.set_visible(False)
 	ax2.yaxis.set_visible(False)
+
 
 	# Adding ChIP track underneath matrix
 	# ChIP1 includes red track
 	if(sample=="ChIP1"):
 		ax3 = fig.add_subplot()
-		ax3.plot(bwlist, color='r')
+		ax3.plot(chip, color='r')
 		#ax3.axis('off')
 		l1, b1, w1, h1 = ax2.get_position().bounds
 		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
@@ -277,8 +316,8 @@ def ChIP_plot(hicmatrix, rmat, gmat, bmat, bwlist, bwlist2, hicalpha, bedalpha, 
 		ax3.yaxis.set_visible(False)
 
 		ax4 = fig.add_subplot()
-		a = [x for x in range(len(bwlist))]
-		ax4.plot(bwlist[::-1], a, color='r')
+		a = [x for x in range(len(chip))]
+		ax4.plot(chip[::-1], a, color='r')
 		
 		#ax3.axis('off')
 		l2, b2, w2, h2 = ax2.get_position().bounds
@@ -291,7 +330,7 @@ def ChIP_plot(hicmatrix, rmat, gmat, bmat, bwlist, bwlist2, hicalpha, bedalpha, 
 	#ChIP2 includes blue track
 	elif(sample=="ChIP2"):
 		ax3 = fig.add_subplot()
-		ax3.plot(bwlist, color='b')
+		ax3.plot(chip2, color='b')
 		#ax3.axis('off')
 		l1, b1, w1, h1 = ax2.get_position().bounds
 		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
@@ -301,8 +340,8 @@ def ChIP_plot(hicmatrix, rmat, gmat, bmat, bwlist, bwlist2, hicalpha, bedalpha, 
 		ax3.yaxis.set_visible(False)
 
 		ax4 = fig.add_subplot()
-		a = [x for x in range(len(bwlist))]
-		ax4.plot(bwlist[::-1], a, color='b')
+		a = [x for x in range(len(chip2))]
+		ax4.plot(chip2[::-1], a, color='b')
 		
 		#ax3.axis('off')
 		l2, b2, w2, h2 = ax2.get_position().bounds
@@ -315,8 +354,8 @@ def ChIP_plot(hicmatrix, rmat, gmat, bmat, bwlist, bwlist2, hicalpha, bedalpha, 
 	#ChIP1 and ChIP2 red and blue tracks together
 	elif(sample=="ChIP_combined"):
 		ax3 = fig.add_subplot()
-		ax3.plot(bwlist, color='r')
-		ax3.plot(bwlist2, color='b')
+		ax3.plot(chip, color='r')
+		ax3.plot(chip2, color='b')
 		#ax3.axis('off')
 		l1, b1, w1, h1 = ax2.get_position().bounds
 		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
@@ -326,8 +365,8 @@ def ChIP_plot(hicmatrix, rmat, gmat, bmat, bwlist, bwlist2, hicalpha, bedalpha, 
 		ax3.yaxis.set_visible(False)
 
 		ax4 = fig.add_subplot()
-		a = [x for x in range(len(bwlist))]
-		ax4.plot(bwlist[::-1], a, color='r')
+		a = [x for x in range(len(chip2))]
+		ax4.plot(chip[::-1], a, color='r')
 		
 		#ax3.axis('off')
 		l2, b2, w2, h2 = ax2.get_position().bounds
@@ -338,8 +377,8 @@ def ChIP_plot(hicmatrix, rmat, gmat, bmat, bwlist, bwlist2, hicalpha, bedalpha, 
 		ax4.yaxis.set_visible(False)
 
 		ax5 = fig.add_subplot()
-		a = [x for x in range(len(bwlist2))]
-		ax5.plot(bwlist2[::-1], a, color='b')
+		a = [x for x in range(len(chip2))]
+		ax5.plot(chip2[::-1], a, color='b')
 		
 		#ax3.axis('off')
 		l2, b2, w2, h2 = ax2.get_position().bounds
