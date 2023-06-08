@@ -71,35 +71,5 @@ chiponeOptionsUI <- div(
                   )
           ),
               ),
-              fluidRow(
-                column(6,
-                  checkboxInput("setminmax", "Set Min/Max")
-                  ),
-              ),
-              conditionalPanel(
-                condition = "input.setminmax == false",
-                fluidRow(
-                column(5,
-                  shinyFilesButton('p1', label='Select bed', title='Please select a .bed file', multiple=FALSE),
-                ),
-                column(5,
-                  #tags$p("No file selected")
-                  verbatimTextOutput('f1_p1')
-                )
-              ),
-              ),
-              conditionalPanel(
-                condition = "input.setminmax == true",
-                fluidRow(
-                  column(
-                    5,
-                    numericInput("min", "Min:", value = 0, min = 0, max = 1)
-                  ),
-                  column(
-                    5,
-                    numericInput("max", "Max:", value = .9, min = 0, max = 1)
-                  )
-                )
-              ),
           )
 )

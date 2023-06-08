@@ -57,6 +57,7 @@ def distanceMatHiC(hicnumpy):
 	print("done")
 	return(distnormmat)
 
+
 # Read in bigwig file and return a list of
 # 
 def processBigwigs(bigwig,binsize,chrom,start,stop):
@@ -81,52 +82,6 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
 			bwlist.append(0)
 	print("done bigwig")
 	return bwlist
-
-
-def calc_peak_minmax(bigwig, peaks, binsize):
-
-    peaksignal = []
-    bwopen = pyBigWig.open(bigwig)	
-
-    with open(peaks, 'r') as rp:
-        for line in rp:
-            li = line.strip().split('\t')
-            peakstart = float(li[1])
-            peakend = float(li[2])
-            peakdist = peakend - peakstart
-            try:
-                peakmid = (math.floor((peakstart + (peakdist/2))/binsize))*binsize
-                #mypeaksliststarts.append(int(mid)))
-                peaksignal.append(math.log(bwopen.stats(str(li[0]), peakmid, peakmid+binsize)[0]))
-            except RuntimeError:
-                continue
-            
-
-    #bwmax = np.nanmean(peaksignal)
-    bwmax = np.nanmedian(peaksignal)
-    bwstd = np.nanstd(peaksignal)
-    #bwmin = bwmax - (bwstd*2)
-    bwmin = bwmax - bwstd
-    bwmax = bwmax + bwstd
-    if bwmin < 0:
-        bwmin = 0
-        bwlist = []
-    return bwmin, bwmax
-
-
-def getrelative(mylist, mymin, mymax):
-	relativelist = []
-	for h in range(0, len(mylist)):
-		myscore=mylist[h]
-		relscore = ((myscore-mymin)/(mymax-mymin))
-		if relscore > 1:
-			relativelist.append(1)
-		elif relscore < 0:
-			relativelist.append(0)
-		else:
-			relativelist.append(relscore)
-	print("Get relative")
-	return relativelist
 
 
 def distanceMat(hicnumpy, mymin, mymax, bwlist, strength, sample):
@@ -168,24 +123,6 @@ def distanceMat(hicnumpy, mymin, mymax, bwlist, strength, sample):
 	print("done distance")
 	return rmat,gmat,bmat,bwlist_norm
 
-
-def convertBlacktoTrans(image):
-    # Given an image, converts all black
-	# pixels to transparent, allowing the 
-	# placement atop another image
-    img = image.convert("RGBA")
-    data = img.getdata()
-    newData = []
-    for item in data:
-        if item[0] == 0 and item[1] == 0 and item[2] == 0:
-            newData.append((0, 0, 0, 0))
-        else:
-            newData.append(item)
-
-    img.putdata(newData)
-    return img
-
-
 def calcAlphaMatrix(chip,r,g,b):
     print("calculating alpha matrix")
     matsize = len(chip)
@@ -220,6 +157,30 @@ def calcAlphaMatrix(chip,r,g,b):
 
     mat = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
     print("done alpha")
+    return mat
+
+
+def lnerp_matrices(m1, m2):
+    # Use Linear interpolation to calculate
+    # the alpha weighted color mixing ratio
+    print("LNERP...")
+    # Alpha values normalized to 1
+    a1 = m1[:,:,3:4]/255
+    a2 = m2[:,:,3:4]/255
+
+    # Blend ratio
+    br = a1 / (a1 + a2)
+
+    # Linear interpolation for color mixing
+    r = (m1[:,:,:1] * br) + (m2[:,:,:1] * (1 - br))
+    g = (m1[:,:,1:2] * br) + (m2[:,:,1:2] * (1 - br))
+    b = (m1[:,:,2:3] * br) + (m2[:,:,2:3] * (1 - br))
+    # Calculate average alpha value
+    fa = (m1[:,:,3:4] + m2[:,:,3:4])
+
+    # Stack R,G,B,A channels
+    mat = (np.dstack((r,g,b,fa))).astype(np.uint8)
+
     return mat
 
 # Return a list of all possible sequential
@@ -268,7 +229,14 @@ def hic_plot(REDMAP, distnormmat):
 	
 
 
-def ChIP_plot(chip, r, g, b, disthic, sample, chip2, hicalpha, bedalpha, opacity):
+
+def ChIP_plot(chip, chip2, mat, col1, col2, disthic, sample, hicalpha, bedalpha, opacity):
+	# NOTES: the issue here is that the matrix is generated inside the plotting function with calcAlphaMatrix.
+	# Before, i was passing the r,g,b matrices inside, which can be 1 chip or 2 chips depending. I need to do this again,
+	# but instead having alpha value as well.
+	# The chosen colour needs to be passed to calcAlphaMatrix and then I can pass the rmat ,gmat ,bmat  to this function again
+	#color can be hexidecimal
+	mat = mat.astype(np.uint8)
 
 	print(f"Plotting {sample}...")
 	#remove previously generated images
@@ -277,20 +245,19 @@ def ChIP_plot(chip, r, g, b, disthic, sample, chip2, hicalpha, bedalpha, opacity
 		print(f'Removing image: {f}')
 		os.remove(f)
 
-	mat = calcAlphaMatrix(chip, r, g, b)
+	#this needs to be replaced by the line when I have successfully modified calcAlphaMatrix
+	#mat = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
+	#mat = calcAlphaMatrix(chip, r, g, b) #m1 instead
 	print(f"length matrix: {len(mat)}")
 
 	img = Image.fromarray(mat)
 				
 	fig, (ax2) = plt.subplots(ncols=1)
 	
+	print(f"check_maybe {sample}")
+	
 	#########################
-	#black
-	r=0
-	g=0
-	b=0
-	#########################
-	background = Image.new('RGBA', (len(disthic),len(disthic)), (r,g,b,opacity) )
+	background = Image.new('RGBA', (len(disthic),len(disthic)), (0,0,0,opacity) )
 	# Show black background
 	ax2.imshow(background)
 	# Show distance normalized HiC
@@ -301,12 +268,11 @@ def ChIP_plot(chip, r, g, b, disthic, sample, chip2, hicalpha, bedalpha, opacity
 	ax2.xaxis.set_visible(False)
 	ax2.yaxis.set_visible(False)
 
-
 	# Adding ChIP track underneath matrix
 	# ChIP1 includes red track
 	if(sample=="ChIP1"):
 		ax3 = fig.add_subplot()
-		ax3.plot(chip, color='r')
+		ax3.plot(chip, color=col1)
 		#ax3.axis('off')
 		l1, b1, w1, h1 = ax2.get_position().bounds
 		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
@@ -317,7 +283,7 @@ def ChIP_plot(chip, r, g, b, disthic, sample, chip2, hicalpha, bedalpha, opacity
 
 		ax4 = fig.add_subplot()
 		a = [x for x in range(len(chip))]
-		ax4.plot(chip[::-1], a, color='r')
+		ax4.plot(chip[::-1], a, color=col1)
 		
 		#ax3.axis('off')
 		l2, b2, w2, h2 = ax2.get_position().bounds
@@ -330,7 +296,7 @@ def ChIP_plot(chip, r, g, b, disthic, sample, chip2, hicalpha, bedalpha, opacity
 	#ChIP2 includes blue track
 	elif(sample=="ChIP2"):
 		ax3 = fig.add_subplot()
-		ax3.plot(chip2, color='b')
+		ax3.plot(chip2, color=col2)
 		#ax3.axis('off')
 		l1, b1, w1, h1 = ax2.get_position().bounds
 		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
@@ -341,7 +307,7 @@ def ChIP_plot(chip, r, g, b, disthic, sample, chip2, hicalpha, bedalpha, opacity
 
 		ax4 = fig.add_subplot()
 		a = [x for x in range(len(chip2))]
-		ax4.plot(chip2[::-1], a, color='b')
+		ax4.plot(chip2[::-1], a, color=col2)
 		
 		#ax3.axis('off')
 		l2, b2, w2, h2 = ax2.get_position().bounds
@@ -353,9 +319,11 @@ def ChIP_plot(chip, r, g, b, disthic, sample, chip2, hicalpha, bedalpha, opacity
 
 	#ChIP1 and ChIP2 red and blue tracks together
 	elif(sample=="ChIP_combined"):
+
+		print("combined inside python")
 		ax3 = fig.add_subplot()
-		ax3.plot(chip, color='r')
-		ax3.plot(chip2, color='b')
+		ax3.plot(chip, color=col1)
+		ax3.plot(chip2, color=col2)
 		#ax3.axis('off')
 		l1, b1, w1, h1 = ax2.get_position().bounds
 		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
@@ -364,9 +332,10 @@ def ChIP_plot(chip, r, g, b, disthic, sample, chip2, hicalpha, bedalpha, opacity
 		ax3.xaxis.set_visible(False)
 		ax3.yaxis.set_visible(False)
 
+		print("checkpoint")
 		ax4 = fig.add_subplot()
 		a = [x for x in range(len(chip2))]
-		ax4.plot(chip[::-1], a, color='r')
+		ax4.plot(chip[::-1], a, color=col1)
 		
 		#ax3.axis('off')
 		l2, b2, w2, h2 = ax2.get_position().bounds
@@ -378,7 +347,7 @@ def ChIP_plot(chip, r, g, b, disthic, sample, chip2, hicalpha, bedalpha, opacity
 
 		ax5 = fig.add_subplot()
 		a = [x for x in range(len(chip2))]
-		ax5.plot(chip2[::-1], a, color='b')
+		ax5.plot(chip2[::-1], a, color=col2)
 		
 		#ax3.axis('off')
 		l2, b2, w2, h2 = ax2.get_position().bounds

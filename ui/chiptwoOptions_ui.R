@@ -70,35 +70,5 @@ chiptwoOptionsUI <- div(
                   )
           ),
               ),
-              fluidRow(
-                column(6,
-                  checkboxInput("setminmax2", "Set Min/Max")
-                  ),
-              ),
-              conditionalPanel(
-                condition = "input.setminmax2 == false",
-                fluidRow(
-                column(5,
-                  shinyFilesButton('p2', label='Select bed', title='Please select a .bed file', multiple=FALSE),
-                ),
-                column(5,
-                  #tags$p("No file selected")
-                  verbatimTextOutput('f1_p2')
-                )
-              ),
-              ),
-              conditionalPanel(
-                condition = "input.setminmax2 == true",
-                fluidRow(
-                  column(
-                    5,
-                    numericInput("min2", "Min:", value = 0, min = 0, max = 1)
-                  ),
-                  column(
-                    5,
-                    numericInput("max2", "Max:", value = .9, min = 0, max = 1)
-                  )
-                )
-              )
           )
 )

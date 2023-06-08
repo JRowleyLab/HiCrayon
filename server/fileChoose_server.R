@@ -3,9 +3,7 @@ workingdir = '/Zulu/bnolan/HiC_data/'
 
 ## Server side file-selection
 shinyFileChoose(input, 'hic', root = c(wd = workingdir))
-shinyFileChoose(input, "p1", root = c(wd = workingdir))
 shinyFileChoose(input, "bw1", root = c(wd = workingdir))
-shinyFileChoose(input, "p2", root = c(wd = workingdir))
 shinyFileChoose(input, "bw2", root = c(wd = workingdir))
 
 ###############################
@@ -35,17 +33,6 @@ if (is.integer(input$bw1[1])) {
 }
 })
 
-output$f1_p1 <- renderPrint({
-    #cat("text")
-    #print(input$hic)
-if (is.integer(input$p1[1])) {
-    cat("No file has been selected")
-} else {
-    x <- parseFilePaths(roots = c(wd = workingdir), input$p1)
-    as.character(x$datapath[1])
-}
-})
-
 output$f1_bw2 <- renderPrint({
     #cat("text")
     #print(input$hic)
@@ -57,32 +44,14 @@ if (is.integer(input$bw2[1])) {
 }
 })
 
-output$f1_p2 <- renderPrint({
-    #cat("text")
-    #print(input$hic)
-if (is.integer(input$p2[1])) {
-    cat("No file has been selected")
-} else {
-    x <- parseFilePaths(roots = c(wd = workingdir), input$p2)
-    as.character(x$datapath[1])
-}
-})
-
+##################################
+# Store file paths as reactiveValue
+##################################
 # hic file handling
 hicv <- reactiveValues(y = "NULL")
 observeEvent(input$hic, {
     inFile <- parseFilePaths(roots = c(wd = workingdir), input$hic)
     hicv$y <- inFile$datapath
-})
-# p1 file handling
-p1v <- reactiveValues(y = "NULL")
-observe({
-    if(!input$setminmax){
-        inFile <- parseFilePaths(roots = c(wd = workingdir), input$p1)
-        p1v$y <- inFile$datapath
-    }else {
-        p1v$y <- "NULL"
-    }
 })
 
 # bw1 file handling
@@ -92,16 +61,6 @@ observeEvent(input$bw1, {
     bw1v$y <- inFile$datapath
 })
 
-# p2 file handling
-p2v <- reactiveValues(y = "NULL")
-observe({
-    if(!input$setminmax2){
-        inFile <- parseFilePaths(roots = c(wd = workingdir), input$p2)
-        p2v$y <- inFile$datapath
-    }else{
-        p2v$y <- "NULL"
-    }
-})
 # bw2 file handling
 bw2v <- reactiveValues(y = "NULL")
 observe(
