@@ -10,7 +10,7 @@ chiptwoOptionsUI <- div(
                   textInput("n2", label = "Name"),
                 ),
                 column(5,
-                  colourInput("colchip2", "Select colour", "blue"),
+                  colourInput("colchip2", "Select colour", "black"),
                 )
               ),
               fluidRow(
@@ -24,32 +24,32 @@ chiptwoOptionsUI <- div(
               checkboxInput("advancedparameters2", "Advanced Parameters"),
           conditionalPanel(
                 condition = "input.advancedparameters2 == true",
-                fluidRow(
-            column(
-              6,
-              sliderInput("strength2",
-                        label = "Bed Strength",
-                        min = 0,
-                        max = 2,
-                        value = 1,
-                        step = .05,
-                        round = FALSE,
-                        ticks = TRUE
-                        )
-                  ),
-            column(
-              6,
-              sliderInput("opacity2",
-                        label = "Opacity",
-                        min = 0,
-                        max = 255,
-                        value = 255,
-                        step = 1,
-                        round = FALSE,
-                        ticks = TRUE
-                        )
-                  ),
-          ),
+          #       fluidRow(
+          #   column(
+          #     6,
+          #     sliderInput("strength2",
+          #               label = "Bed Strength",
+          #               min = 0,
+          #               max = 2,
+          #               value = 1,
+          #               step = .05,
+          #               round = FALSE,
+          #               ticks = TRUE
+          #               )
+          #         ),
+          #   column(
+          #     6,
+          #     sliderInput("opacity2",
+          #               label = "Opacity",
+          #               min = 0,
+          #               max = 255,
+          #               value = 255,
+          #               step = 1,
+          #               round = FALSE,
+          #               ticks = TRUE
+          #               )
+          #         ),
+          # ),
           fluidRow(
             column(
               6,
@@ -69,7 +69,7 @@ chiptwoOptionsUI <- div(
                         label = "HiC Alpha",
                         min = 0,
                         max = 1,
-                        value = .3,
+                        value = 1,
                         step = .05,
                         round = FALSE,
                         ticks = TRUE

@@ -85,46 +85,6 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
 	print("done bigwig")
 	return bwlist
 
-
-def distanceMat(hicnumpy, mymin, mymax, bwlist, strength, sample):
-	thresh = 2
-	print(f"Calculating {sample} distance using {mymin} and {mymax} values")
-	matsize = len(hicnumpy)
-
-	bwlist_norm = getrelative(bwlist, mymin, mymax) 
-	rmat = np.zeros((matsize,matsize))
-	gmat = np.zeros((matsize,matsize))
-	bmat = np.zeros((matsize,matsize))
-	
-	mydiags=[]
-	for i in range(0,len(hicnumpy)):
-		mydiags.append(np.nanmean(np.diag(hicnumpy, k=i)))
-
-	for x in range(0,matsize):
-		for y in range(x,matsize):
-			distance=y-x
-			hicscore = (hicnumpy[x,y] + 1)/(mydiags[distance]+1)
-			if hicscore > thresh:
-				satscore = 1
-			else:
-				satscore = hicscore/thresh
-			
-			newscore = (bwlist_norm[x] + bwlist_norm[y])/2
-			# If first ChIP-seq, increase red channel
-			if(sample=="ChIP1"):
-				rscore = 255*newscore*satscore*strength
-				rmat[x,y] = rscore
-				rmat[y,x] = rscore
-			# If second ChIP-seq, increase blue channel
-			elif(sample=="ChIP2"):
-				bscore = 255*newscore*satscore*strength
-				bmat[x,y] = bscore
-				bmat[y,x] = bscore
-
-
-	print("done distance")
-	return rmat,gmat,bmat,bwlist_norm
-
 def calcAlphaMatrix(chip,r,g,b):
     print("calculating alpha matrix")
     matsize = len(chip)
@@ -161,10 +121,9 @@ def calcAlphaMatrix(chip,r,g,b):
     print("done alpha")
     return mat
 
-
+# Use Linear interpolation to calculate
+# the alpha weighted color mixing ratio
 def lnerp_matrices(m1, m2):
-    # Use Linear interpolation to calculate
-    # the alpha weighted color mixing ratio
     print("LNERP...")
     # Alpha values normalized to 1
     a1 = m1[:,:,3:4]/255
@@ -238,9 +197,7 @@ def hic_plot(cmap, distnormmat):
 	return notwwwlocation
 	
 
-
-
-def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hicalpha, bedalpha, opacity):
+def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hicalpha, bedalpha):
 	# NOTES: the issue here is that the matrix is generated inside the plotting function with calcAlphaMatrix.
 	# Before, i was passing the r,g,b matrices inside, which can be 1 chip or 2 chips depending. I need to do this again,
 	# but instead having alpha value as well.
@@ -273,11 +230,11 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hical
 	
 	print(f"check_maybe {sample}")
 	
-	#########################
-	background = Image.new('RGBA', (len(disthic),len(disthic)), (0,0,0,opacity) )
-	# Show black background
-	ax2.imshow(background)
-	# Colour map for HiC underlay
+	# #########################
+	# background = Image.new('RGBA', (len(disthic),len(disthic)), (0,0,0,opacity) )
+	# # Show black background
+	# ax2.imshow(background)
+	# # Colour map for HiC underlay
 
 	# Show distance normalized HiC
 	ax2.imshow(disthic, disthic_cmap, vmin=0, vmax=2, interpolation='none', alpha = hicalpha)

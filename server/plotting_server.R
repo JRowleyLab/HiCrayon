@@ -27,7 +27,6 @@ p1plot <- reactive({
         disthic_cmap = input$chip_cmap,
         hicalpha = input$hicalpha,
         bedalpha = input$bedalpha,
-        opacity = input$opacity,
         sample = "ChIP1"
         )
 
@@ -56,7 +55,6 @@ p2plot <- reactive({
         disthic_cmap = input$chip_cmap,
         hicalpha = input$hicalpha2,
         bedalpha = input$bedalpha2,
-        opacity = input$opacity2,
         sample = "ChIP2"
         )
 
@@ -89,7 +87,6 @@ p1and2plot <- reactive({
         disthic_cmap = input$chip_cmap,
         hicalpha = input$hicalpha2,
         bedalpha = input$bedalpha2,
-        opacity = input$opacity2,
         sample = "ChIP_combined"
         )
 
