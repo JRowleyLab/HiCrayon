@@ -2,7 +2,14 @@ chiponeOptionsUI <- div(
         checkboxInput("chip1", "Include ChIP"),
           conditionalPanel(
                 condition = "input.chip1 == true",
-                textInput("n1", label = "Name"),
+              fluidRow(
+                column(5,
+                  textInput("n1", label = "Name"),
+                ),
+                column(5,
+                  colourInput("colchip1", "Select colour", "red"),
+                )
+              ),
               fluidRow(
                 column(5,
                   shinyFilesButton(

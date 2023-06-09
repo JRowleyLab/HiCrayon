@@ -7,6 +7,8 @@ import math
 from PIL import Image
 import os
 import glob
+from coolbox.core.track.hicmat.plot import cmaps as coolboxcmaps
+
 
 #random string generation
 import string
@@ -188,11 +190,19 @@ def lnerp_matrices(m1, m2):
 def matplot_colors():
 	# Add in custom colors to list
 	#REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1,1,1),(1,0,0)])
-	return plt.colormaps()
+	cmaps = plt.colormaps()
+	cmaps = cmaps + [i for i in coolboxcmaps.keys()]
+	return cmaps
 
 
 # Produce HiC map image saved to disk 
-def hic_plot(REDMAP, distnormmat):
+def hic_plot(cmap, distnormmat):
+
+	if cmap in [i for i in coolboxcmaps.keys()]:
+		cmap = coolboxcmaps[cmap]
+	else:
+		cmap
+
 	thresh = 2
 	# Remove previous versions of svg images
 	# to prevent bloat in images directory.
@@ -208,7 +218,7 @@ def hic_plot(REDMAP, distnormmat):
 	fig, (ax1) = plt.subplots(ncols=1)
 
 	#ax1.set_title('Hi-C')
-	ax1.matshow(distnormmat, cmap=REDMAP, vmin=0, vmax=thresh, interpolation='none')
+	ax1.matshow(distnormmat, cmap=cmap, vmin=0, vmax=thresh, interpolation='none')
 	ax1.xaxis.set_visible(False)
 	ax1.yaxis.set_visible(False)
 
@@ -230,7 +240,7 @@ def hic_plot(REDMAP, distnormmat):
 
 
 
-def ChIP_plot(chip, chip2, mat, col1, col2, disthic, sample, hicalpha, bedalpha, opacity):
+def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hicalpha, bedalpha, opacity):
 	# NOTES: the issue here is that the matrix is generated inside the plotting function with calcAlphaMatrix.
 	# Before, i was passing the r,g,b matrices inside, which can be 1 chip or 2 chips depending. I need to do this again,
 	# but instead having alpha value as well.
@@ -244,6 +254,13 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, sample, hicalpha, bedalpha,
 	for f in glob.glob(f'./www/images/{sample}_*.svg'):
 		print(f'Removing image: {f}')
 		os.remove(f)
+
+
+	# Set up CMAP for HiC background
+	if disthic_cmap in [i for i in coolboxcmaps.keys()]:
+		disthic_cmap = coolboxcmaps[disthic_cmap]
+	else:
+		disthic_cmap
 
 	#this needs to be replaced by the line when I have successfully modified calcAlphaMatrix
 	#mat = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
@@ -260,8 +277,10 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, sample, hicalpha, bedalpha,
 	background = Image.new('RGBA', (len(disthic),len(disthic)), (0,0,0,opacity) )
 	# Show black background
 	ax2.imshow(background)
+	# Colour map for HiC underlay
+
 	# Show distance normalized HiC
-	ax2.imshow(disthic, 'gray', vmin=0, vmax=2, interpolation='none', alpha = hicalpha)
+	ax2.imshow(disthic, disthic_cmap, vmin=0, vmax=2, interpolation='none', alpha = hicalpha)
 	# Show ChIP-seq matrix
 	ax2.imshow(img, interpolation='none', alpha = bedalpha)
 
@@ -272,7 +291,7 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, sample, hicalpha, bedalpha,
 	# ChIP1 includes red track
 	if(sample=="ChIP1"):
 		ax3 = fig.add_subplot()
-		ax3.plot(chip, color=col1)
+		ax3.plot(chip, color=col1, linewidth = 1)
 		#ax3.axis('off')
 		l1, b1, w1, h1 = ax2.get_position().bounds
 		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
@@ -283,11 +302,9 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, sample, hicalpha, bedalpha,
 
 		ax4 = fig.add_subplot()
 		a = [x for x in range(len(chip))]
-		ax4.plot(chip[::-1], a, color=col1)
+		ax4.plot(chip[::-1], a, color=col1, linewidth = 1)
 		
-		#ax3.axis('off')
 		l2, b2, w2, h2 = ax2.get_position().bounds
-		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
 		ax4.set_position((l2*(.7),b2, w2*.1, h2*(1)))
 		ax4.margins(y=0)
 		ax4.xaxis.set_visible(False)
@@ -296,7 +313,7 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, sample, hicalpha, bedalpha,
 	#ChIP2 includes blue track
 	elif(sample=="ChIP2"):
 		ax3 = fig.add_subplot()
-		ax3.plot(chip2, color=col2)
+		ax3.plot(chip2, color=col2, linewidth = 1)
 		#ax3.axis('off')
 		l1, b1, w1, h1 = ax2.get_position().bounds
 		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
@@ -307,7 +324,7 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, sample, hicalpha, bedalpha,
 
 		ax4 = fig.add_subplot()
 		a = [x for x in range(len(chip2))]
-		ax4.plot(chip2[::-1], a, color=col2)
+		ax4.plot(chip2[::-1], a, color=col2, linewidth = 1)
 		
 		#ax3.axis('off')
 		l2, b2, w2, h2 = ax2.get_position().bounds
@@ -320,10 +337,9 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, sample, hicalpha, bedalpha,
 	#ChIP1 and ChIP2 red and blue tracks together
 	elif(sample=="ChIP_combined"):
 
-		print("combined inside python")
 		ax3 = fig.add_subplot()
-		ax3.plot(chip, color=col1)
-		ax3.plot(chip2, color=col2)
+		ax3.plot(chip, color=col1, linewidth = 1)
+		ax3.plot(chip2, color=col2, linewidth = 1)
 		#ax3.axis('off')
 		l1, b1, w1, h1 = ax2.get_position().bounds
 		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
@@ -346,9 +362,13 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, sample, hicalpha, bedalpha,
 		ax4.yaxis.set_visible(False)
 
 		ax5 = fig.add_subplot()
-		a = [x for x in range(len(chip2))]
-		ax5.plot(chip2[::-1], a, color=col2)
+
+		b = [x for x in range(len(chip))]
+		ax5.plot(chip[::-1], b, color=col1, linewidth = 1)
 		
+		a = [x for x in range(len(chip2))]
+		ax5.plot(chip2[::-1], a, color=col2, linewidth = 1)
+
 		#ax3.axis('off')
 		l2, b2, w2, h2 = ax2.get_position().bounds
 		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
@@ -356,6 +376,7 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, sample, hicalpha, bedalpha,
 		ax5.margins(y=0)
 		ax5.xaxis.set_visible(False)
 		ax5.yaxis.set_visible(False)
+
 
 
 

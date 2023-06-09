@@ -9,12 +9,20 @@ selectHiCoptionsUI <- div(fluidRow(
                                 column(4,
                                 selectizeInput("norm", label="Normalization", choices=c("VC", "VC_SQRT", "KR", "NONE"), selected="NONE")
                                 ),
-                                column(6,
+                                column(4,
                                 selectizeInput(
                                     "map_colour", 
                                     "HiC Color", 
                                     choices = "",
-                                    selected = "YlOrRd"
+                                    selected = "JuiceBoxLike"
+                                )
+                                ),
+                                column(4,
+                                selectizeInput(
+                                    "chip_cmap", 
+                                    "HiC Color (ChIP)", 
+                                    choices = "",
+                                    selected = "JuiceBoxLike"
                                 )
                                 )
                             ),

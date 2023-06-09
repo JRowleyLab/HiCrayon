@@ -5,7 +5,14 @@ chiptwoOptionsUI <- div(
           ),
           conditionalPanel(
                 condition = "input.chip2 == true",
-                textInput("n2", label = "Name"),
+                fluidRow(
+                column(5,
+                  textInput("n2", label = "Name"),
+                ),
+                column(5,
+                  colourInput("colchip2", "Select colour", "blue"),
+                )
+              ),
               fluidRow(
                 column(5,
                   shinyFilesButton('bw2', label='Select bigwig', title='Please select a .bigwig/.bw file', multiple=FALSE),
