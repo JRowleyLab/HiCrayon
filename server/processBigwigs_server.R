@@ -10,10 +10,11 @@ bwlist_ChIP1 <- reactive({
 
     bwlist <- processBigwigs(
         bigwig = bw1v$y,
-        binsize = input$bin,
+        binsize = as.integer(input$bin),
         chrom = input$chr,
         start = input$start,
-        stop = input$stop
+        stop = input$stop,
+        log = input$log
         )
 
     return(bwlist)
@@ -32,10 +33,11 @@ bwlist_ChIP2 <- reactive({
 
     bwlist <- processBigwigs(
         bigwig = bw2v$y,
-        binsize = input$bin,
+        binsize = as.integer(input$bin),
         chrom = input$chr,
         start = input$start,
-        stop = input$stop
+        stop = input$stop,
+        log = input$log
         )
 
     return(bwlist)

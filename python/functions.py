@@ -14,22 +14,51 @@ from coolbox.core.track.hicmat.plot import cmaps as coolboxcmaps
 import string
 import random
 
+
+def getHiCmetadata(hicfile):
+	# Given a hic file upload, return
+	# multiple lists of metadata
+	# Chr name, resolutions, normalizations
+	hicdump = hicstraw.HiCFile(hicfile)
+
+	# Chromosome list
+	chroms = hicdump.getChromosomes()[1:]
+	chrlist = []
+	for x in chroms:
+		chrlist.append(x.name)
+	
+	# Resolution list
+	res = hicdump.getResolutions()
+
+	return chrlist, res
+
 # Read in HiC file and output selected coordinates + binsize
 # as matrix. 
 def readHiCasNumpy(hicfile, chrom, start, stop, norm, binsize):
-	hicdump = hicstraw.HiCFile(hicfile)
-	nochr = chrom.strip('chr')
-	wchr = "chr" + str(nochr)
-	# Try with "1" then "chr1" if an execption is made.
-	# This doesn't catch the crash. Need to find a way to open a hicdump file and check
-	# resolutions/ chromosome used/ normalizations
-	try:
-		hicobject = hicdump.getMatrixZoomData(nochr, nochr, "observed", norm, "BP", binsize)
-	except:
-		hicobject = hicdump.getMatrixZoomData(wchr, wchr, "observed", norm, "BP", binsize)
 
-	hicnumpy = hicobject.getRecordsAsMatrix(start, stop, start, stop)
-	return hicnumpy
+	print(chrom)
+	print(start)
+	print(stop)
+	print(norm)
+	print(binsize)
+
+	hicdump = hicstraw.HiCFile(hicfile)
+	
+	hicobject = hicdump.getMatrixZoomData(chrom, chrom, "observed", norm, "BP", binsize)
+
+	#hicnumpy = hicobject.getRecordsAsMatrix(start, stop, start, stop)
+	hiclist = hicobject.getRecords(start, stop, start, stop)
+
+	size = int((stop-start)/binsize)
+	mat = np.zeros((size+1, size+1))	
+
+	for cr in hiclist:
+		r = int((cr.binX - start) / binsize)
+		c = int((cr.binY - start) / binsize)
+		mat[r,c] = cr.counts
+		mat[c,r] = cr.counts
+
+	return mat
 
 # Cut down version of distanceMat() to work for just HiC Map
 # Obtain distance matrix of HiC map,
@@ -62,7 +91,7 @@ def distanceMatHiC(hicnumpy):
 
 # Read in bigwig file and return a list of
 # 
-def processBigwigs(bigwig,binsize,chrom,start,stop):
+def processBigwigs(bigwig,binsize,chrom,start,stop, log):
 
 	print("processing bigwigs...")
 	start=int(start)
@@ -75,13 +104,24 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
 	bwopen = pyBigWig.open(bigwig)		
 	bwlist = []
 
-	for walker in range(start, stop+binsize, binsize):
-		try:
-			bwlist.append(math.log(bwopen.stats(nochr, walker, walker+binsize)[0]))
-		except RuntimeError:
-			bwlist.append(math.log(bwopen.stats(wchr, walker, walker+binsize)[0]))
-		except ValueError:
-			bwlist.append(0)
+
+	if(log==True):
+		for walker in range(start, stop+binsize, binsize):
+			try:
+				bwlist.append(math.log(bwopen.stats(nochr, walker, walker+binsize)[0]+0.01))
+			except RuntimeError:
+				bwlist.append(math.log(bwopen.stats(wchr, walker, walker+binsize)[0]+0.01))
+			except ValueError:
+				bwlist.append(0)
+	else:
+		for walker in range(start, stop+binsize, binsize):
+			try:
+				bwlist.append(bwopen.stats(nochr, walker, walker+binsize)[0])
+			except RuntimeError:
+				bwlist.append(bwopen.stats(wchr, walker, walker+binsize)[0])
+			except ValueError:
+				bwlist.append(0)
+			
 	print("done bigwig")
 	return bwlist
 
@@ -107,6 +147,8 @@ def calcAlphaMatrix(chip,r,g,b):
     # intersection combined score
     # x * y * 255
     # result is a normalized range from 0-255
+	# TODO: add in log and 0-1 normalized hic data 
+	# and multiply alpha
     for x in range(0,matsize):
             for y in range(x,matsize):
                 if x==y:

@@ -28,26 +28,30 @@ selectHiCoptionsUI <- div(fluidRow(
                             ),
                             fluidRow(
                             column(6,
-                                textInput("chr", "Chr:", value="chr1")
+                                selectizeInput("chr", "Chr:", choices="")
                             ),
                             column(6,
-                            numericInput("bin", "Bin Size:", 
-                                value = 5000, 
-                                min = 5000, 
-                                max = 1000000)
+                                selectizeInput("bin", "Resolution:", choices="")
                             ),
                             column(
                                 6,
-                                numericInput("start", "Start:",
-                                value = 68500000, 
-                                min = 0, 
-                                max = 1000000000),
+                                shinyWidgets::autonumericInput("start", "Start:",
+                                    value = 68500000, 
+                                    minimumValue = 0, 
+                                    maximumValue = 1000000000,
+                                    allowDecimalPadding = FALSE),
                             ),
                             column(6,
-                                numericInput("stop", "Stop:",
-                                value = 69000000, 
-                                min = 0, 
-                                max = 1000000000)
+                                shinyWidgets::autonumericInput("stop", "Stop:",
+                                    value = 69000000, 
+                                    minimumValue = 0, 
+                                    maximumValue = 1000000000,
+                                    allowDecimalPadding = FALSE)
+                            )
+                        ),
+                        fluidRow(
+                            column(3,
+                                checkboxInput("log", "Log Scale")
                             )
                         )
 )

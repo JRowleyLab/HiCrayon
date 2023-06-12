@@ -36,3 +36,16 @@ observe(
         bname$n <- input$n2
     }
 )
+
+# Update chromsome list
+observe(
+    updateSelectizeInput(session, "chr",
+        choices = HiCmetadata()$chrs)
+)
+
+# Update resolution list
+observe(
+    updateSelectizeInput(session, "bin",
+        choices = HiCmetadata()$res,
+        selected = "10000")
+)
