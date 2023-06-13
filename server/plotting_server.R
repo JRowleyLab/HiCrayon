@@ -12,7 +12,9 @@ p1plot <- reactive({
     rgb <- col2rgb(input$colchip1)
 
     m1 <- calcAlphaMatrix(
-        bwlist_ChIP1(), 
+        bwlist_ChIP1(),
+        hic_distance(),
+        input$chipscale,
         rgb[1], 
         rgb[2], 
         rgb[3])
@@ -41,6 +43,8 @@ p2plot <- reactive({
 
     m2 <- calcAlphaMatrix(
         bwlist_ChIP2(),
+        hic_distance(),
+        input$chipscale,
         rgb[1],
         rgb[2], 
         rgb[3])
@@ -73,8 +77,8 @@ p1and2plot <- reactive({
     rgb <- col2rgb(input$colchip1)
     rgb2 <- col2rgb(input$colchip2)
 
-    m1 <- calcAlphaMatrix(bwlist_ChIP1(), rgb[1], rgb[2],rgb[3])
-    m2 <- calcAlphaMatrix(bwlist_ChIP2(), rgb2[1], rgb2[2],rgb2[3])
+    m1 <- calcAlphaMatrix(bwlist_ChIP1(), hic_distance(), input$chipscale, rgb[1], rgb[2],rgb[3])
+    m2 <- calcAlphaMatrix(bwlist_ChIP2(), hic_distance(), input$chipscale, rgb2[1], rgb2[2],rgb2[3])
     m3 <- lnerp_matrices(m1, m2)
 
     p2_plot <- ChIP_plot(
@@ -82,8 +86,8 @@ p1and2plot <- reactive({
         col1 = input$colchip1,
         col2 = input$colchip2,
         mat = m3,
-        chip = bwlist_ChIP1(), #distance_ChIP1()$bwlist_norm,
-        chip2 = bwlist_ChIP2(), # distance_ChIP2()$bwlist_norm,
+        chip = bwlist_ChIP1(),
+        chip2 = bwlist_ChIP2(),
         disthic_cmap = input$chip_cmap,
         hicalpha = input$hicalpha2,
         bedalpha = input$bedalpha2,

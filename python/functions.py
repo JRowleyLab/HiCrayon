@@ -8,6 +8,8 @@ from PIL import Image
 import os
 import glob
 from coolbox.core.track.hicmat.plot import cmaps as coolboxcmaps
+import h5py
+import cooler
 
 
 #random string generation
@@ -15,8 +17,18 @@ import string
 import random
 
 
+def coolerMetadata(mcool):
+    h5 = h5py.File(mcool, 'r')
+    res = list(h5['resolutions'].keys())
+    res = sorted([int(x) for x in res], reverse=True)
+    cool = f"{mcool}::/resolutions/{res[0]}"
+    c = cooler.Cooler(cool)
+    chrlist = c.chromnames
+    
+    return chrlist, res
+
 def getHiCmetadata(hicfile):
-	# Given a hic file upload, return
+	# Given a hic-pro file upload, return
 	# multiple lists of metadata
 	# Chr name, resolutions, normalizations
 	hicdump = hicstraw.HiCFile(hicfile)
@@ -32,21 +44,32 @@ def getHiCmetadata(hicfile):
 
 	return chrlist, res
 
+
+def readCoolHiC(mcool, chrom, start, stop, norm, binsize):
+    print(f"{mcool} + {chrom} + {start}+ {stop}+ {binsize}")
+    h5 = h5py.File(mcool, 'r')
+    res = list(h5['resolutions'].keys())
+    cool = f"{mcool}::/resolutions/{binsize}"
+    print(cool)
+    c = cooler.Cooler(cool)
+    string = f"{chrom}:{str(start)}-{str(stop)}"
+    print(string)
+    mat = c.matrix().fetch(string)
+    return mat
+
+
 # Read in HiC file and output selected coordinates + binsize
 # as matrix. 
 def readHiCasNumpy(hicfile, chrom, start, stop, norm, binsize):
-
-	print(chrom)
-	print(start)
-	print(stop)
-	print(norm)
-	print(binsize)
 
 	hicdump = hicstraw.HiCFile(hicfile)
 	
 	hicobject = hicdump.getMatrixZoomData(chrom, chrom, "observed", norm, "BP", binsize)
 
-	#hicnumpy = hicobject.getRecordsAsMatrix(start, stop, start, stop)
+	# .getRecordsAsMatrix results in a segmentation fault when a matrix of
+	# too great a size is provided. ie. hicnumpy = hicobject.getRecordsAsMatrix(x1,y1,x2,y2)
+	# The below method uses .getRecords which creates a list of contacts, which allows 
+	# streaming of data in a way that doesn't load into memory all at once.
 	hiclist = hicobject.getRecords(start, stop, start, stop)
 
 	size = int((stop-start)/binsize)
@@ -90,7 +113,7 @@ def distanceMatHiC(hicnumpy):
 
 
 # Read in bigwig file and return a list of
-# 
+# bigwig peak values
 def processBigwigs(bigwig,binsize,chrom,start,stop, log):
 
 	print("processing bigwigs...")
@@ -125,12 +148,22 @@ def processBigwigs(bigwig,binsize,chrom,start,stop, log):
 	print("done bigwig")
 	return bwlist
 
-def calcAlphaMatrix(chip,r,g,b):
-    print("calculating alpha matrix")
+# Convert bigwig values to an RGBA array
+# with the A value scaled by bigwig value
+# TODO: have an option to also use HiC value
+# scale the alpha.
+def calcAlphaMatrix(chip,disthic,showhic,r,g,b):
     matsize = len(chip)
     # Normalize chip list to between 0 and 1
     chip_arr = np.array(chip)
     chip_norm = (chip_arr-np.min(chip_arr))/(np.max(chip_arr)-np.min(chip_arr))
+
+
+    if(showhic==True):
+        # Normalize hic matrix to between 0 and 1
+        distscaled = (disthic-np.min(disthic))/(np.max(disthic)-np.min(disthic))
+    else:
+         distscaled = np.ones((len(disthic), len(disthic)))
 
     # RGBA
     rmat = np.zeros((matsize,matsize))
@@ -147,20 +180,21 @@ def calcAlphaMatrix(chip,r,g,b):
     # intersection combined score
     # x * y * 255
     # result is a normalized range from 0-255
-	# TODO: add in log and 0-1 normalized hic data 
-	# and multiply alpha
+	
     for x in range(0,matsize):
             for y in range(x,matsize):
-                if x==y:
-                    newscore = 255
-                else:
-                    newscore = (chip_norm[x] * chip_norm[y])*255
+                # if x==y:
+                #     newscore = 255
+                # else:
+                newscore = (chip_norm[x] * chip_norm[y])*255
+                # Multiply by distance-normalized and 0-1 scaled
+                newscore = newscore * distscaled[x,y]
                 #alpha value
                 amat[x,y] = newscore
                 amat[y,x] = newscore
 
     mat = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
-    print("done alpha")
+
     return mat
 
 # Use Linear interpolation to calculate
@@ -204,7 +238,7 @@ def hic_plot(cmap, distnormmat):
 	else:
 		cmap
 
-	thresh = 2
+	
 	# Remove previous versions of svg images
 	# to prevent bloat in images directory.
 	# NOTE: the file cannot be overwritten
@@ -219,7 +253,7 @@ def hic_plot(cmap, distnormmat):
 	fig, (ax1) = plt.subplots(ncols=1)
 
 	#ax1.set_title('Hi-C')
-	ax1.matshow(distnormmat, cmap=cmap, vmin=0, vmax=thresh, interpolation='none')
+	ax1.matshow(distnormmat, cmap=cmap, interpolation='none')
 	ax1.xaxis.set_visible(False)
 	ax1.yaxis.set_visible(False)
 

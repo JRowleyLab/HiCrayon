@@ -52,6 +52,9 @@ selectHiCoptionsUI <- div(fluidRow(
                         fluidRow(
                             column(3,
                                 checkboxInput("log", "Log Scale")
+                            ),
+                            column(3,
+                                checkboxInput("chipscale", "Scale ChIP w/ HiC")
                             )
                         )
 )

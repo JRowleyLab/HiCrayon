@@ -1,16 +1,20 @@
-
-
-
 HiCmetadata <- reactive({
 
     validate(need(hicv$y!="NULL", "Please upload a HiC file"))
-    print("starting")
+    print(hicv$type)
 
-    hicfile = hicv$y
-    metadata = getHiCmetadata(hicfile)
+    if(hicv$type=='hic'){
+        hicfile = hicv$y
+        metadata = getHiCmetadata(hicfile)
 
-    chrs = tuple(metadata, convert = T)[0]
-    res = tuple(metadata, convert = T)[1]
+        chrs = tuple(metadata, convert = T)[0]
+        res = tuple(metadata, convert = T)[1]
+    }else if (hicv$type=='mcool') {
+       mcoolfile = hicv$y
+       metadata = coolerMetadata(mcoolfile)
+       chrs = tuple(metadata, convert = T)[0]
+       res = tuple(metadata, convert = T)[1]
+    }
 
     print("metadata done")
 
@@ -28,7 +32,8 @@ HiCmatrix <- reactive({
 
     validate(need(hicv$y!="NULL", "Please upload a HiC file"))
 
-    matrix <- readHiCasNumpy(
+    if(hicv$type=='hic'){
+        matrix <- readHiCasNumpy(
         hicfile = hicv$y,
         chrom = input$chr,
         start = input$start,
@@ -36,6 +41,16 @@ HiCmatrix <- reactive({
         norm = input$norm,
         binsize = as.integer(input$bin)
     )
+    }else if (hicv$type=='mcool') {
+       matrix <- readCoolHiC(
+        mcool = hicv$y,
+        chrom = input$chr,
+        start = input$start,
+        stop = input$stop,
+        norm = input$norm,
+        binsize = as.integer(input$bin)
+        )
+    }
 
     return(matrix)
 }) %>% shiny::bindEvent(input$generate_hic)

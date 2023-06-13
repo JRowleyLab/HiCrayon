@@ -71,3 +71,7 @@ observe(
         bw2v$y <- "NULL"
     }
 )
+
+observe(
+    hicv$type <- file_ext(hicv$y)
+)
