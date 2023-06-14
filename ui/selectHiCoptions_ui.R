@@ -55,6 +55,9 @@ selectHiCoptionsUI <- div(fluidRow(
                             ),
                             column(3,
                                 checkboxInput("chipscale", "Scale ChIP w/ HiC")
+                            ),
+                            column(3,
+                                checkboxInput("disthic", "Distance normalize HiC")
                             )
                         )
 )

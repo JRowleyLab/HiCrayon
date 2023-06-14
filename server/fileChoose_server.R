@@ -1,10 +1,11 @@
 # variable for starting root directory
+# When used by others: TODO: change to root
 workingdir = '/Zulu/bnolan/HiC_data/'
 
 ## Server side file-selection
-shinyFileChoose(input, 'hic', root = c(wd = workingdir))
-shinyFileChoose(input, "bw1", root = c(wd = workingdir))
-shinyFileChoose(input, "bw2", root = c(wd = workingdir))
+shinyFileChoose(input, 'hic', root = c(wd = workingdir), filetypes=c('hic', 'mcool'))
+shinyFileChoose(input, "bw1", root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
+shinyFileChoose(input, "bw2", root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
 
 ###############################
 ## display path for shinyFileChoose
@@ -72,6 +73,7 @@ observe(
     }
 )
 
+# Store HiC file type as reactive value
 observe(
     hicv$type <- file_ext(hicv$y)
 )

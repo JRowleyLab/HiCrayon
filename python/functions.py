@@ -52,7 +52,7 @@ def readCoolHiC(mcool, chrom, start, stop, norm, binsize):
     cool = f"{mcool}::/resolutions/{binsize}"
     print(cool)
     c = cooler.Cooler(cool)
-    string = f"{chrom}:{str(start)}-{str(stop)}"
+    string = f"{chrom}:{str(start)}-{str(stop+1)}"
     print(string)
     mat = c.matrix().fetch(string)
     return mat
@@ -90,7 +90,7 @@ def distanceMatHiC(hicnumpy):
 	thresh = 2
 	print("Beginning distance matrix HiC")
 	matsize = len(hicnumpy)
-
+	print(matsize)
 	mydiags=[]
 	for i in range(0,len(hicnumpy)):
 		mydiags.append(np.nanmean(np.diag(hicnumpy, k=i)))
@@ -183,11 +183,14 @@ def calcAlphaMatrix(chip,disthic,showhic,r,g,b):
 	
     for x in range(0,matsize):
             for y in range(x,matsize):
+				# TO have a diagonal line, 
+				# uncomment the below:
+				# if x==y line
                 # if x==y:
                 #     newscore = 255
                 # else:
                 newscore = (chip_norm[x] * chip_norm[y])*255
-                # Multiply by distance-normalized and 0-1 scaled
+                # Multiply by HiC distance-normalized and 0-1 scaled
                 newscore = newscore * distscaled[x,y]
                 #alpha value
                 amat[x,y] = newscore
@@ -295,9 +298,7 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hical
 	else:
 		disthic_cmap
 
-	#this needs to be replaced by the line when I have successfully modified calcAlphaMatrix
-	#mat = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
-	#mat = calcAlphaMatrix(chip, r, g, b) #m1 instead
+
 	print(f"length matrix: {len(mat)}")
 
 	img = Image.fromarray(mat)
@@ -313,7 +314,7 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hical
 	# # Colour map for HiC underlay
 
 	# Show distance normalized HiC
-	ax2.imshow(disthic, disthic_cmap, vmin=0, vmax=2, interpolation='none', alpha = hicalpha)
+	ax2.imshow(disthic, disthic_cmap, interpolation='none', alpha = hicalpha)
 	# Show ChIP-seq matrix
 	ax2.imshow(img, interpolation='none', alpha = bedalpha)
 
