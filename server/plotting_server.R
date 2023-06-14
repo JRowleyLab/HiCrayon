@@ -101,60 +101,71 @@ p1and2plot <- reactive({
 # Local images are generated using
 # python functions.
 output$gallery <- renderUI({
+    print('gallery')
 
     validate(need(hicv$y!="NULL", "Please upload a HiC file"))
 
     if(input$chip2){
         print(hicplot())
 
-        texts <- c("HiC", rname$n, bname$n, paste0(rname$n, bname$n))
-        hrefs <- c(hicplot(), p1plot(), p2plot(), p1and2plot())
+        texts <- c("HiC", rname$n, bname$n, paste0(rname$n,' + ', bname$n))
+        #hrefs <- c(hicplot(), p1plot(), p2plot(), p1and2plot())
+        hrefs <- c("","","","")
         images <- c(hicplot(), p1plot(), p2plot(), p1and2plot())
 
         gallery(
             texts = texts,
             hrefs = hrefs,
             images = images,
-            enlarge = TRUE,
+            #enlarge = TRUE,
             image_frame_size = 3,
             title = "",
-            enlarge_method = "modal",
+            #enlarge_method = "modal",
             style = "height: 100vh;"
             )
     }else if (input$chip1) {
        print(hicplot())
 
         texts <- c("HiC", rname$n)
-        hrefs <- c(hicplot(), p1plot())
+        #hrefs <- c(hicplot(), p1plot())
+        hrefs <- c("","")
         images <- c(hicplot(), p1plot())
 
         gallery(
             texts = texts,
             hrefs = hrefs,
             images = images,
-            enlarge = TRUE,
+            #enlarge = TRUE,
             image_frame_size = 6,
             title = "",
-            enlarge_method = "modal",
+            #enlarge_method = "modal",
             style = "height: 100vh;"
             )
     } else {
        print(hicplot())
 
         texts <- c("HiC")
-        hrefs <- c(hicplot())
+        hrefs <- c("")
         images <- c(hicplot())
 
         gallery(
             texts = texts,
-            hrefs = hrefs,
+            hrefs = hrefs,#hrefs,
             images = images,
-            enlarge = TRUE,
+            #enlarge = TRUE,
             image_frame_size = 6,
             title = "",
-            enlarge_method = "modal",
+            
+            #enlarge_method = "modal",
             style = "height: 100vh;"
             )
+
+        # list(src = paste('/Zulu/bnolan/HiC_Crayon/www/',hicplot(),sep=""),
+        #     contentType = 'image/svg+xml',
+        #     width = '100vh',
+        #     height = '100vh',
+        #     alt = "")
+
     }
     
 }) %>% shiny::bindEvent(input$generate_hic)

@@ -13,13 +13,12 @@ reticulate::source_python("python/functions.py")
 
 ui <- shinyUI({
   #source("ui/ui.R", local = TRUE)[1]
-  source("ui_shinydashboard.R", local = TRUE)[1]
+  source("ui/ui_shinydashboard.R", local = TRUE)[1]
 })
 
 server <- function(input, output, session) {
   source("server/fileChoose_server.R", local = TRUE)
   source("server/calcDistance_server.R", local = TRUE)
-  #source("server/minmax_server.R", local = TRUE)
   source("server/processBigwigs_server.R", local = TRUE)
   source("server/plotting_server.R", local = TRUE)
   source("server/readHiCmatrix_server.R", local = TRUE)

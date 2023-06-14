@@ -11,6 +11,11 @@ dashboardSidebar(
 ),
 dashboardBody(
     includeCSS("www/styles.css"),
+    # Zoomy zoom
+    tags$head(
+        tags$script(src = "https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js"),
+
+  ),
     tabItems(
     # First tab content
     tabItem(tabName = "Visualize",
@@ -49,7 +54,11 @@ dashboardBody(
                             ), #end row
                     ), # end column
                     column(width = 8,
-                           galleryUI)
+                           galleryUI,
+                           tags$script(
+                                HTML('panzoom($("#gallery")[0])')
+                            )
+                           )
             )
         )
     ), # /tabItems
