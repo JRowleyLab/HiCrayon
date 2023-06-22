@@ -47,8 +47,6 @@ def getHiCmetadata(hicfile):
 
 def readCoolHiC(mcool, chrom, start, stop, norm, binsize):
     print(f"{mcool} + {chrom} + {start}+ {stop}+ {binsize}")
-    h5 = h5py.File(mcool, 'r')
-    res = list(h5['resolutions'].keys())
     cool = f"{mcool}::/resolutions/{binsize}"
     print(cool)
     c = cooler.Cooler(cool)
