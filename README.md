@@ -1,4 +1,4 @@
-![](www/logo/HiCrayonlogo1.png)
+![](www/logo/HiCrayon_logo2.png)
 
 ## Co-visualisation of Hi-C and ChIP-seq data
 
