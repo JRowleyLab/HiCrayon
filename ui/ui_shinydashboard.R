@@ -1,7 +1,7 @@
 ## app.R ##
 
 dashboardPage(title = "HiCrayon",
-                    dashboardHeader(title = tags$a(span(img(src="logo/HiCrayon_logo2.png",height=60,align="left")),href="https://github.com/JRowleyLab/HiC_Crayon"),titleWidth = 600),
+                    dashboardHeader(title = tags$a(span(img(src="logo/HiCrayon_logo2.png",height=60,align="left")),href="https://github.com/JRowleyLab/HiCrayon"),titleWidth = 600),
 dashboardSidebar(
     sidebarMenu(id="sidebartabs",
                 menuItem("Visualize", tabName = "Visualize", icon = icon("eye"))
