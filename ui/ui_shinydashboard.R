@@ -49,6 +49,10 @@ dashboardBody(
                                     ),
                                     column(width = 12,
                                         actionButton("generate_hic", label="Generate")
+                                    ),
+                                    br(),
+                                    column(width = 12,
+                                        downloadButton(outputId = "downloadtree",label= "Download")
                                     )
                                     #generateHiCbuttonUI
                             ), #end row

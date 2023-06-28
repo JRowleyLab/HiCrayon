@@ -23,6 +23,7 @@ server <- function(input, output, session) {
   source("server/plotting_server.R", local = TRUE)
   source("server/readHiCmatrix_server.R", local = TRUE)
   source("server/updateOptions_server.R", local = TRUE)
+  source("server/downloadHandler_server.R", local = TRUE)
 }
 
 shinyApp(ui, server)

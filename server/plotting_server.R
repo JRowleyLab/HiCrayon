@@ -1,6 +1,11 @@
 hicplot <- reactive({
     hic_plot(cmap = input$map_colour,
-             distnormmat = hic_distance()
+             distnormmat = hic_distance(),
+             chrom = input$chr,
+             bin = input$bin, 
+             start = input$start,
+             stop = input$stop,
+             norm = input$norm
              )
 }) %>% shiny::bindEvent(input$generate_hic)
 
@@ -29,7 +34,13 @@ p1plot <- reactive({
         disthic_cmap = input$chip_cmap,
         hicalpha = input$hicalpha,
         bedalpha = input$bedalpha,
-        sample = "ChIP1"
+        sample = "ChIP1",
+        chrom = input$chr,
+        bin = input$bin, 
+        start = input$start,
+        stop = input$stop,
+        norm = input$norm,
+        name = input$n1
         )
 
 }) %>% shiny::bindEvent(input$generate_hic, input$chip1) 
@@ -59,7 +70,13 @@ p2plot <- reactive({
         disthic_cmap = input$chip_cmap,
         hicalpha = input$hicalpha2,
         bedalpha = input$bedalpha2,
-        sample = "ChIP2"
+        sample = "ChIP2",
+        chrom = input$chr,
+        bin = input$bin, 
+        start = input$start,
+        stop = input$stop,
+        norm = input$norm,
+        name = input$n2
         )
 
 }) %>% shiny::bindEvent(input$generate_hic, input$chip2)
@@ -91,7 +108,13 @@ p1and2plot <- reactive({
         disthic_cmap = input$chip_cmap,
         hicalpha = input$hicalpha2,
         bedalpha = input$bedalpha2,
-        sample = "ChIP_combined"
+        sample = "ChIP_combined",
+        chrom = input$chr,
+        bin = input$bin, 
+        start = input$start,
+        stop = input$stop,
+        norm = input$norm,
+        name = paste0(input$n1, "-", input$n2)
         )
 
 }) %>% shiny::bindEvent(input$generate_hic) 

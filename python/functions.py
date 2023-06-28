@@ -232,13 +232,12 @@ def matplot_colors():
 
 
 # Produce HiC map image saved to disk 
-def hic_plot(cmap, distnormmat):
+def hic_plot(cmap, distnormmat, chrom, bin, start, stop, norm):
 
 	if cmap in [i for i in coolboxcmaps.keys()]:
 		cmap = coolboxcmaps[cmap]
 	else:
 		cmap
-
 	
 	# Remove previous versions of svg images
 	# to prevent bloat in images directory.
@@ -263,8 +262,7 @@ def hic_plot(cmap, distnormmat):
 	# generating random strings
 	res = ''.join(random.choices(string.ascii_uppercase +
 								string.digits, k=8))
-	figname = "HiC_" + str(res) + ".svg"
-	#figname = "HiC.svg"
+	figname = f"HiC_locus-{chrom}-{start}-{stop}_{bin}bp_norm-{norm}_{str(res)}.svg"
 
 	directory = "images/"
 	wwwlocation = "www/" + directory + figname
@@ -274,7 +272,7 @@ def hic_plot(cmap, distnormmat):
 	return notwwwlocation
 	
 
-def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hicalpha, bedalpha):
+def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hicalpha, bedalpha, chrom, bin, start, stop, name, norm):
 	# NOTES: the issue here is that the matrix is generated inside the plotting function with calcAlphaMatrix.
 	# Before, i was passing the r,g,b matrices inside, which can be 1 chip or 2 chips depending. I need to do this again,
 	# but instead having alpha value as well.
@@ -285,7 +283,7 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hical
 	print(f"Plotting {sample}...")
 	#remove previously generated images
 
-	for f in glob.glob(f'./www/images/{sample}_*.svg'):
+	for f in glob.glob(f'./www/images/{sample}-*.svg'):
 		print(f'Removing image: {f}')
 		os.remove(f)
 
@@ -415,7 +413,7 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hical
 	#write image to file
 	res = ''.join(random.choices(string.ascii_uppercase +
 								string.digits, k=8))
-	figname = f"{sample}_" + str(res) + ".svg"
+	figname = f"{sample}-{name}-{chrom}-{start}-{stop}_{bin}bp_norm-{norm}_{str(res)}.svg"
 
 	directory = "images/"
 	wwwlocation = "www/" + directory + figname
