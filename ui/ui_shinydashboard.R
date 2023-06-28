@@ -47,6 +47,10 @@ dashboardBody(
                                         collapsible = TRUE,collapsed = TRUE, 
                                         chiptwoOptionsUI
                                     ),
+                                    box(width=12,title = "Colour Compartments",status = "warning", solidHeader = TRUE,
+                                        collapsible = TRUE,collapsed = TRUE,
+                                        comp_UI
+                                    ),
                                     column(width = 12,
                                         actionButton("generate_hic", label="Generate")
                                     )

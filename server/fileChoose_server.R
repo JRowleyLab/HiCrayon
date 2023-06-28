@@ -1,11 +1,13 @@
 # variable for starting root directory
 # When used by others: TODO: change to root
-workingdir = '/'
+workingdir = '/Zulu/bnolan/HiC_data/'
 
 ## Server side file-selection
 shinyFileChoose(input, 'hic', root = c(wd = workingdir), filetypes=c('hic', 'mcool'))
 shinyFileChoose(input, "bw1", root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
 shinyFileChoose(input, "bw2", root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
+shinyFileChoose(input, "bedg1", root = c(wd = workingdir), filetypes=c('bed', 'bedgraph'))
+
 
 ###############################
 ## display path for shinyFileChoose
@@ -45,9 +47,21 @@ if (is.integer(input$bw2[1])) {
 }
 })
 
+## print path to textbox with verbatimTextOutput
+output$f1_bedg1 <- renderPrint({
+if (is.integer(input$bedg1[1])) {
+    cat("No file has been selected")
+} else {
+    x <- parseFilePaths(roots = c(wd = workingdir), input$bedg1)
+    as.character(x$datapath[1])
+}
+})
+
+
 ##################################
 # Store file paths as reactiveValue
 ##################################
+
 # hic file handling
 hicv <- reactiveValues(y = "NULL")
 observeEvent(input$hic, {
@@ -72,6 +86,13 @@ observe(
         bw2v$y <- "NULL"
     }
 )
+
+# bedgraph file handling
+bedv <- reactiveValues(y = "NULL")
+observeEvent(input$bedg1, {
+    inFile <- parseFilePaths(roots = c(wd = workingdir), input$bedg1)
+    bedv$y <- inFile$datapath
+})
 
 # Store HiC file type as reactive value
 observe(

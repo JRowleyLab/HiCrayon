@@ -6,6 +6,7 @@ source("ui/gallery_ui.R", local = TRUE)
 source("ui/selectHiCoptions_ui.R", local = TRUE)
 source("ui/chiponeOptions_ui.R", local = TRUE)
 source("ui/chiptwoOptions_ui.R", local = TRUE)
+source("ui/compartment_ui.R", local = TRUE)
 source("radiobuttonswithimages.R", local = TRUE)
 
 
@@ -23,6 +24,8 @@ server <- function(input, output, session) {
   source("server/plotting_server.R", local = TRUE)
   source("server/readHiCmatrix_server.R", local = TRUE)
   source("server/updateOptions_server.R", local = TRUE)
+  source("server/gallery_server.R", local = TRUE)
+  source("server/plotCompartments_server.R", local = TRUE)
 }
 
 shinyApp(ui, server)

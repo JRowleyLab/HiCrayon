@@ -10,6 +10,7 @@ import glob
 from coolbox.core.track.hicmat.plot import cmaps as coolboxcmaps
 import h5py
 import cooler
+import pandas as pd
 
 
 #random string generation
@@ -272,7 +273,7 @@ def hic_plot(cmap, distnormmat):
 	plt.savefig(wwwlocation, bbox_inches='tight')
 	plt.close()
 	return notwwwlocation
-	
+
 
 def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hicalpha, bedalpha):
 	# NOTES: the issue here is that the matrix is generated inside the plotting function with calcAlphaMatrix.
@@ -424,3 +425,79 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hical
 	plt.close()
 
 	return notwwwlocation
+
+
+
+def filterCompartments(comp, chrom, start, stop):
+    print("filtering compartments")
+    # Filter compartments bedGraph by selected region
+    comp = pd.read_csv(comp, sep="\t", header=None, dtype={0: 'string'})
+    comp.columns = ['chrom', 'start', 'stop', 'value']
+    comp_filt = comp.loc[(comp['chrom'] == chrom) & (comp['start'] >= start) & (comp['stop'] <= stop)]
+    return comp_filt
+
+
+def plotCompartments(disthic, comp):
+    print("plotting compartments")
+    
+    # Remove previous images of compartments
+    for f in glob.glob('./www/images/Compartments_*.svg'):
+        print(f'Removing image: {f}')
+        os.remove(f)
+
+    # Plot HiC map and compartment tracks
+    mat = disthic.astype(np.uint8)
+
+    print(f"length matrix: {len(mat)}")
+
+    img = Image.fromarray(mat)
+                
+    fig, (ax2) = plt.subplots(ncols=1)
+
+    compartments = comp['value']
+
+    # Show distance normalized HiC
+    ax2.imshow(disthic, 'YlOrRd', interpolation='none', alpha = 1)
+
+    ax2.xaxis.set_visible(False)
+    ax2.yaxis.set_visible(False)
+
+    ax3 = fig.add_subplot()
+    ax3.plot(compartments, color='black', linewidth = 1)
+    #ax3.axis('off')
+    l1, b1, w1, h1 = ax2.get_position().bounds
+    #ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+    ax3.set_position((l1*(1),0.02, w1*1, .075))
+    ax3.margins(x=0)
+    ax3.axhline(y=0, color='black', linestyle='-')
+    ax3.fill_between(compartments.index, list(compartments), where=(compartments > 0), color='orange', alpha=.5)
+    ax3.fill_between(compartments.index, list(compartments), where=(compartments < 0), color='blue', alpha=.5)
+    ax3.xaxis.set_visible(False)
+    ax3.yaxis.set_visible(False)
+
+    ax4 = fig.add_subplot()
+    a = [x for x in range(len(compartments))]
+    ax4.plot(compartments[::-1], a, color='black', linewidth = 1)
+
+    l2, b2, w2, h2 = ax2.get_position().bounds
+    ax4.set_position((l2*(.7),b2, w2*.1, h2*(1)))
+    ax4.margins(y=0)
+    ax4.axvline(x=0, color='black', linestyle='-')
+    ax4.fill_betweenx(a, list(compartments[::-1]), where=(compartments[::-1] > 0), color='orange', alpha=.5)
+    ax4.fill_betweenx(a, list(compartments[::-1]), where=(compartments[::-1] < 0), color='blue', alpha=.5)
+    ax4.xaxis.set_visible(False)
+    ax4.yaxis.set_visible(False)
+    
+    # random string for name
+    # using random.choices()
+    # generating random strings
+    res = ''.join(random.choices(string.ascii_uppercase +
+                                string.digits, k=8))
+    figname = "Compartments_" + str(res) + ".svg"
+
+    directory = "images/"
+    wwwlocation = "www/" + directory + figname
+    notwwwlocation = directory + figname
+    plt.savefig(wwwlocation, bbox_inches='tight')
+    plt.close()
+    return notwwwlocation
