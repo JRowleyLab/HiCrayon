@@ -431,7 +431,7 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hical
 def filterCompartments(comp, chrom, start, stop):
     print("filtering compartments")
     # Filter compartments bedGraph by selected region
-    comp = pd.read_csv(comp, sep="\t", header=None, dtype={0: 'string'})
+    comp = pd.read_csv(comp, sep="\t", header=None, dtype={0: 'string'}, on_bad_lines='skip')
     comp.columns = ['chrom', 'start', 'stop', 'value']
     comp_filt = comp.loc[(comp['chrom'] == chrom) & (comp['start'] >= start) & (comp['stop'] <= stop)]
     return comp_filt

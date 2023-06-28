@@ -9,72 +9,110 @@ output$gallery <- renderUI({
 
     if(input$chip2){
 
-        print(hicplot())
+        if(input$bedgraph){
 
-        texts <- c("HiC", rname$n, bname$n, paste0(rname$n,' + ', bname$n))
-        hrefs <- c("","","","")
-        images <- c(hicplot(), p1plot(), p2plot(), p1and2plot())
+            texts <- c("HiC", rname$n, bname$n, paste0(rname$n,' + ', bname$n), "Compartments")
+            hrefs <- c("","","","","")
+            images <- c(hicplot(), p1plot(), p2plot(), p1and2plot(), comp_plot())
 
-        gallery(
-            texts = texts,
-            hrefs = hrefs,
-            images = images,
-            #enlarge = TRUE,
-            image_frame_size = 3,
-            title = "",
-            #enlarge_method = "modal",
-            style = "height: 100vh;"
-            )
+            gallery(
+                texts = texts,
+                hrefs = hrefs,
+                images = images,
+                #enlarge = TRUE,
+                image_frame_size = 3,
+                title = "",
+                #enlarge_method = "modal",
+                style = "height: 100vh;"
+                )
+
+        } else{
+            texts <- c("HiC", rname$n, bname$n, paste0(rname$n,' + ', bname$n))
+            hrefs <- c("","","","")
+            images <- c(hicplot(), p1plot(), p2plot(), p1and2plot())
+
+            gallery(
+                texts = texts,
+                hrefs = hrefs,
+                images = images,
+                #enlarge = TRUE,
+                image_frame_size = 3,
+                title = "",
+                #enlarge_method = "modal",
+                style = "height: 100vh;"
+                )
+        }
+
+        
     }else if (input$chip1) {
-       print(hicplot())
 
-        texts <- c("HiC", rname$n)
-        #hrefs <- c(hicplot(), p1plot())
-        hrefs <- c("","")
-        images <- c(hicplot(), p1plot())
+        if(input$bedgraph){
+            texts <- c("HiC", rname$n, "Compartments")
+            hrefs <- c("","","")
+            images <- c(hicplot(), p1plot(), comp_plot())
 
-        gallery(
-            texts = texts,
-            hrefs = hrefs,
-            images = images,
-            #enlarge = TRUE,
-            image_frame_size = 6,
-            title = "",
-            #enlarge_method = "modal",
-            style = "height: 100vh;"
-            )
-    } else if (input$bedgraph) {
-        print(hicplot())
+            gallery(
+                texts = texts,
+                hrefs = hrefs,
+                images = images,
+                #enlarge = TRUE,
+                image_frame_size = 4,
+                title = "",
+                #enlarge_method = "modal",
+                style = "height: 100vh;"
+                )
+        } else{
+            texts <- c("HiC", rname$n)
+            hrefs <- c("","")
+            images <- c(hicplot(), p1plot())
 
-        texts <- c("HiC", "Compartments")
-        hrefs <- c("", "")
-        images <- c(hicplot(), comp_plot())
+            gallery(
+                texts = texts,
+                hrefs = hrefs,
+                images = images,
+                #enlarge = TRUE,
+                image_frame_size = 6,
+                title = "",
+                #enlarge_method = "modal",
+                style = "height: 100vh;"
+                )
+        }
 
-        gallery(
-            texts = texts,
-            hrefs = hrefs,
-            images = images,
-            image_frame_size = 6,
-            title = "",
-            style = "height: 100vh;"
-            )
+        
     } else {
-       print(hicplot())
+        if(input$bedgraph){
+            texts <- c("HiC", "Compartments")
+            hrefs <- c("", "")
+            images <- c(hicplot(), comp_plot())
 
-        texts <- c("HiC")
-        hrefs <- c("")
-        images <- c(hicplot())
+            gallery(
+                texts = texts,
+                hrefs = hrefs,#hrefs,
+                images = images,
+                #enlarge = TRUE,
+                image_frame_size = 6,
+                title = "",
+                #enlarge_method = "modal",
+                style = "height: 100vh;"
+                )
+        } else {
+            texts <- c("HiC")
+            hrefs <- c("")
+            images <- c(hicplot())
 
-        gallery(
-            texts = texts,
-            hrefs = hrefs,#hrefs,
-            images = images,
-            #enlarge = TRUE,
-            image_frame_size = 6,
-            title = "",
-            #enlarge_method = "modal",
-            style = "height: 100vh;"
-            )
+            gallery(
+                texts = texts,
+                hrefs = hrefs,#hrefs,
+                images = images,
+                #enlarge = TRUE,
+                image_frame_size = 6,
+                title = "",
+                #enlarge_method = "modal",
+                style = "height: 100vh;"
+                )
+        }
+
+        
 
     }
     
