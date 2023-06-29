@@ -49,3 +49,9 @@ observe(
         choices = HiCmetadata()$res,
         selected = "10000")
 )
+
+# Reset plot view on click
+observeEvent(input$reset, {
+      shinyjs::show("#gallery")
+      reset("#gallery")
+    })

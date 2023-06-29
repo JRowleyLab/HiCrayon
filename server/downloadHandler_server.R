@@ -17,9 +17,11 @@ zipfolder <- reactive({
         files = append(files, paste("www/", p1plot(), sep = ""))
         }
     if(input$chip2){ 
-        files = append(files, paste("www/", p1plot(), sep = ""))
         files = append(files, paste("www/", p2plot(), sep = ""))
         }
+    if(input$bedgraph){
+      files = append(files, paste("www/", comp_plot(), sep = ""))
+    }
 
     print(files)
 

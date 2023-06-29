@@ -435,7 +435,66 @@ def filterCompartments(comp, chrom, start, stop):
     return comp_filt
 
 
-def plotCompartments(disthic, comp):
+def scaleCompartments(disthic, comp_df, Acol, Bcol):
+    #distance normalized hic matrix
+    distscaled = (disthic-np.min(disthic))/(np.max(disthic)-np.min(disthic))
+    print("c1")
+
+    comp_arr = comp_df['value']
+    # #Normalize on IQR
+    q3, q1 = np.percentile(comp_arr, [75,25])
+    print("a")
+    iqr = q3 - q1
+    print("b")
+    comp_arr_IQR_norm = comp_arr / iqr
+    print("c2")
+    # Normalize data to between -1 and 1
+    normd = (((comp_arr_IQR_norm-np.min(comp_arr_IQR_norm)) * ( (1) - (-1))) / (np.max(comp_arr_IQR_norm) - np.min(comp_arr_IQR_norm))) + -1
+    print("c3")
+    # 2.
+    Acomp = np.where(normd<0, 0, normd)
+    Bcomp = np.where(normd>0, 0, normd)
+    print("c4")
+
+    for i, comp in enumerate([Acomp, Bcomp]):
+
+        matsize = len(comp)
+        # RGBA
+        rmat = np.zeros((matsize,matsize))
+        gmat = np.zeros((matsize,matsize))
+        bmat = np.zeros((matsize,matsize))
+        amat = np.zeros((matsize,matsize))
+
+        if(i==0):
+            # Alter r,g,b for desired color
+            rmat.fill(Acol[0])
+            gmat.fill(Acol[1])
+            bmat.fill(Acol[2])
+        else:
+            rmat.fill(Bcol[0])
+            gmat.fill(Bcol[1])
+            bmat.fill(Bcol[2])
+
+        # Calculate the alpha value for each 
+        for x in range(0,matsize):
+            for y in range(x,matsize):
+
+                newscore = (comp[x] * comp[y])*255
+                # Multiply by HiC distance-normalized and 0-1 scaled
+                newscore = newscore * distscaled[x,y]
+                #alpha value
+                amat[x,y] = newscore
+                amat[y,x] = newscore
+
+        if(i==0):
+            Amatrix = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
+        else:
+            Bmatrix = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
+
+    return Amatrix, Bmatrix
+
+
+def plotCompartments(disthic, comp, ABmat):
     print("plotting compartments")
     
     # Remove previous images of compartments
@@ -455,7 +514,10 @@ def plotCompartments(disthic, comp):
     compartments = comp['value']
 
     # Show distance normalized HiC
-    ax2.imshow(disthic, 'YlOrRd', interpolation='none', alpha = 1)
+    ax2.imshow(disthic, 'gray', interpolation='none', alpha = .3)
+    
+	# Show compartments
+    ax2.imshow(ABmat, interpolation='none', alpha = 1)
 
     ax2.xaxis.set_visible(False)
     ax2.yaxis.set_visible(False)
