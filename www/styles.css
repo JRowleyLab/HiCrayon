@@ -395,7 +395,7 @@ button#generate_hic,
   width: 100%; 
   text-align: left; 
   color: #fff; 
-  background-color: #333; 
+  background-color: #51c703; 
   height:43px; 
   font-size: 120%; 
   line-height: 190%; 
@@ -403,6 +403,7 @@ button#generate_hic,
   border-radius: 0; 
   border-color: #eceff3;
   padding-top: 7px;
+  margin-top: 17px;
 }
 
 
