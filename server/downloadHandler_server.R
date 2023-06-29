@@ -4,27 +4,48 @@ zipfolder <- reactive({
 
     req(hicv$y)
 
-    files = c(hic_plot())
+    zipfile = "imagesZip.zip"
+
+    #remove existing images zip if exists
+    if(file.exists(zipfile)){
+        file.remove(zipfile)
+    }
+
+    files = c(paste("www/", hicplot(), sep = ""))
 
     if(input$chip1){ 
-        files = files.append(p1plot())
+        files = append(files, paste("www/", p1plot(), sep = ""))
         }
     if(input$chip2){ 
-        files = files.append(p2plot())
-        files = files.append(p2plot())
+        files = append(files, paste("www/", p1plot(), sep = ""))
+        files = append(files, paste("www/", p2plot(), sep = ""))
         }
 
-    zip(zipfile = 'www/images/imagesZip', files = files)
-    zipfile = 'www/images/imagesZip'
+    print(files)
 
-    return('www/images/imagesZip')
+    zip(zipfile = zipfile, files = files, mode = "cherry-pick")
+
+    return(zipfile)
 }) %>% shiny::bindEvent(input$generate_hic, input$downloadtree)
 
 
 
 output$downloadtree <- downloadHandler(
-            filename <- function(file) { zipfolder() },
-            content <- function(file) {
-            file.copy(zipfolder(), file)
-            }
-    )
+
+  filename = function() {
+    paste(zipfolder())
+  },
+
+  content = function(file) {
+    file.copy(zipfolder(), file)
+  },
+  contentType = "application/zip"
+) %>% shiny::bindEvent(input$generate_hic, input$downloadtree)
+
+
+observeEvent(input$generate_hic, {
+    if (input$generate_hic)
+      shinyjs::show("downloadtree")
+    else
+      shinyjs::hide("downloadtree")
+  })

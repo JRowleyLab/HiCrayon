@@ -10,6 +10,7 @@ dashboardSidebar(
     disable = TRUE
 ),
 dashboardBody(
+    shinyjs::useShinyjs(),
     includeCSS("www/styles.css"),
     # Zoomy zoom
     tags$head(
@@ -52,7 +53,7 @@ dashboardBody(
                                     ),
                                     br(),
                                     column(width = 12,
-                                        downloadButton(outputId = "downloadtree",label= "Download")
+                                        shinyjs::hidden(downloadButton(outputId = "downloadtree",label= "Download"))
                                     )
                                     #generateHiCbuttonUI
                             ), #end row

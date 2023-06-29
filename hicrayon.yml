@@ -19,6 +19,7 @@ dependencies:
   - r-dplyr=1.0.9
   - r-spsComps=0.3.2
   - r-colourpicker=1.2
+  - r-zip
 
   - pip:
       - coolbox==0.3.8

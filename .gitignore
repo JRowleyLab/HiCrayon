@@ -9,6 +9,7 @@ data/
 
 # any images
 www/images
+images*
 
 # workshop files
 workshop
