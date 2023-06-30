@@ -514,7 +514,7 @@ def plotCompartments(disthic, comp, ABmat):
     compartments = comp['value']
 
     # Show distance normalized HiC
-    ax2.imshow(disthic, 'gray', interpolation='none', alpha = .3)
+    #ax2.imshow(disthic, 'gray', interpolation='none', alpha = .3)
     
 	# Show compartments
     ax2.imshow(ABmat, interpolation='none', alpha = 1)
