@@ -25,32 +25,6 @@ chiponeOptionsUI <- div(
               checkboxInput("advancedparameters", "Advanced Parameters"),
           conditionalPanel(
                 condition = "input.advancedparameters == true",
-            #   fluidRow(
-            # column(
-            #   6,
-            #   sliderInput("strength",
-            #             label = "Bed Strength",
-            #             min = 0,
-            #             max = 2,
-            #             value = 1,
-            #             step = .05,
-            #             round = FALSE,
-            #             ticks = TRUE
-            #             )
-            #       ),
-            # column(
-            #   6,
-            #   sliderInput("opacity",
-            #             label = "Opacity",
-            #             min = 0,
-            #             max = 255,
-            #             value = 255,
-            #             step = 1,
-            #             round = FALSE,
-            #             ticks = TRUE
-            #             )
-            #       ),
-          #),
           fluidRow(
             column(
               6,
@@ -70,7 +44,7 @@ chiponeOptionsUI <- div(
                         label = "HiC Alpha",
                         min = 0,
                         max = 1,
-                        value = 1,
+                        value = .5,
                         step = .05,
                         round = FALSE,
                         ticks = TRUE

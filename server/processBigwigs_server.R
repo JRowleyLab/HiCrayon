@@ -17,7 +17,14 @@ bwlist_ChIP1 <- reactive({
         log = input$log
         )
 
-    return(bwlist)
+    bwlog <- tuple(bwlist, convert=T)[0]
+    bwraw <- tuple(bwlist, convert=T)[1]
+
+    return(list(
+        bwlog = bwlog,
+        bwraw = bwraw
+        )
+        )
 }) %>% shiny::bindEvent(input$generate_hic, input$chip1)
 
 
@@ -40,5 +47,12 @@ bwlist_ChIP2 <- reactive({
         log = input$log
         )
 
-    return(bwlist)
+    bwlog <- tuple(bwlist, convert=T)[0]
+    bwraw <- tuple(bwlist, convert=T)[1]
+
+    return(list(
+        bwlog = bwlog,
+        bwraw = bwraw
+        )
+        )
 }) %>% shiny::bindEvent(input$generate_hic, input$chip2)

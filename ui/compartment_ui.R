@@ -13,6 +13,14 @@ comp_UI <- div(
                 column(5,
                   verbatimTextOutput('f1_bedg1')
                 )
-              )
+              ),
+    fluidRow(
+          column(5,
+                  colourInput("colcompA", "Select colour: Pos", "red"),
+                ),
+          column(5,
+                  colourInput("colcompB", "Select colour: Neg", "blue"),
+                )
+    )
           )
 )

@@ -124,28 +124,25 @@ def processBigwigs(bigwig,binsize,chrom,start,stop, log):
 	wchr = "chr" + str(nochr)
 
 	bwopen = pyBigWig.open(bigwig)		
-	bwlist = []
+	bwraw = []
 
+	# Store raw bigwig values
+	for walker in range(start, stop+binsize, binsize):
+		try:
+			bwraw.append(bwopen.stats(nochr, walker, walker+binsize)[0])
+		except RuntimeError:
+			bwraw.append(bwopen.stats(wchr, walker, walker+binsize)[0])
+		except ValueError:
+			bwraw.append(0)
 
-	if(log==True):
-		for walker in range(start, stop+binsize, binsize):
-			try:
-				bwlist.append(math.log(bwopen.stats(nochr, walker, walker+binsize)[0]+0.01))
-			except RuntimeError:
-				bwlist.append(math.log(bwopen.stats(wchr, walker, walker+binsize)[0]+0.01))
-			except ValueError:
-				bwlist.append(0)
-	else:
-		for walker in range(start, stop+binsize, binsize):
-			try:
-				bwlist.append(bwopen.stats(nochr, walker, walker+binsize)[0])
-			except RuntimeError:
-				bwlist.append(bwopen.stats(wchr, walker, walker+binsize)[0])
-			except ValueError:
-				bwlist.append(0)
-			
+	# Perform log operation on all values
+	# 1e-5 added to avoid log(0)
+	bwlog = []
+	for i in bwraw:
+		bwlog.append(math.log(i)+1e-5)
+		
 	print("done bigwig")
-	return bwlist
+	return bwlog, bwraw
 
 # Convert bigwig values to an RGBA array
 # with the A value scaled by bigwig value
@@ -438,25 +435,27 @@ def filterCompartments(comp, chrom, start, stop):
 def scaleCompartments(disthic, comp_df, Acol, Bcol):
     #distance normalized hic matrix
     distscaled = (disthic-np.min(disthic))/(np.max(disthic)-np.min(disthic))
-    print("c1")
 
     comp_arr = comp_df['value']
+    
+    Acomp = np.where(comp_arr<0, 0, comp_arr)
+    Bcomp = np.where(comp_arr>0, 0, comp_arr)
     # #Normalize on IQR
-    q3, q1 = np.percentile(comp_arr, [75,25])
-    print("a")
-    iqr = q3 - q1
-    print("b")
-    comp_arr_IQR_norm = comp_arr / iqr
-    print("c2")
+    # q3, q1 = np.percentile(comp_arr, [75,25])
+    # iqr = q3 - q1
+    # comp_arr_IQR_norm = comp_arr / iqr
     # Normalize data to between -1 and 1
-    normd = (((comp_arr_IQR_norm-np.min(comp_arr_IQR_norm)) * ( (1) - (-1))) / (np.max(comp_arr_IQR_norm) - np.min(comp_arr_IQR_norm))) + -1
-    print("c3")
-    # 2.
-    Acomp = np.where(normd<0, 0, normd)
-    Bcomp = np.where(normd>0, 0, normd)
-    print("c4")
+    # Scale A compartment to 0 and 1
+    min = 0
+    max = 1
+    Anormd = (((Acomp-np.min(Acomp)) * ( (max) - (min))) / (np.max(Acomp) - np.min(Acomp))) + min
 
-    for i, comp in enumerate([Acomp, Bcomp]):
+    # SCale B compartment to 0 and -1
+    min = 0
+    max = -1
+    Bnormd = (((Bcomp-np.min(Bcomp)) * ( (min) - (max))) / (np.max(Bcomp) - np.min(Bcomp))) + max
+
+    for i, comp in enumerate([Anormd, Bnormd]):
 
         matsize = len(comp)
         # RGBA
@@ -494,8 +493,7 @@ def scaleCompartments(disthic, comp_df, Acol, Bcol):
     return Amatrix, Bmatrix
 
 
-def plotCompartments(disthic, comp, ABmat):
-    print("plotting compartments")
+def plotCompartments(disthic, comp, ABmat, colA, colB):
     
     # Remove previous images of compartments
     for f in glob.glob('./www/images/Compartments_*.svg'):
@@ -505,17 +503,12 @@ def plotCompartments(disthic, comp, ABmat):
     # Plot HiC map and compartment tracks
     mat = disthic.astype(np.uint8)
 
-    print(f"length matrix: {len(mat)}")
-
     img = Image.fromarray(mat)
                 
     fig, (ax2) = plt.subplots(ncols=1)
-
+    
     compartments = comp['value']
 
-    # Show distance normalized HiC
-    #ax2.imshow(disthic, 'gray', interpolation='none', alpha = .3)
-    
 	# Show compartments
     ax2.imshow(ABmat, interpolation='none', alpha = 1)
 
@@ -530,8 +523,8 @@ def plotCompartments(disthic, comp, ABmat):
     ax3.set_position((l1*(1),0.02, w1*1, .075))
     ax3.margins(x=0)
     ax3.axhline(y=0, color='black', linestyle='-')
-    ax3.fill_between(compartments.index, list(compartments), where=(compartments > 0), color='orange', alpha=.5)
-    ax3.fill_between(compartments.index, list(compartments), where=(compartments < 0), color='blue', alpha=.5)
+    ax3.fill_between(compartments.index, list(compartments), where=(compartments > 0), facecolor = colA, edgecolor='none', alpha=.5, interpolate=False, hatch = None)
+    ax3.fill_between(compartments.index, list(compartments), where=(compartments < 0), facecolor = colB, edgecolor='none', alpha=.5, interpolate=False, hatch = None)
     ax3.xaxis.set_visible(False)
     ax3.yaxis.set_visible(False)
 
@@ -543,8 +536,8 @@ def plotCompartments(disthic, comp, ABmat):
     ax4.set_position((l2*(.7),b2, w2*.1, h2*(1)))
     ax4.margins(y=0)
     ax4.axvline(x=0, color='black', linestyle='-')
-    ax4.fill_betweenx(a, list(compartments[::-1]), where=(compartments[::-1] > 0), color='orange', alpha=.5)
-    ax4.fill_betweenx(a, list(compartments[::-1]), where=(compartments[::-1] < 0), color='blue', alpha=.5)
+    ax4.fill_betweenx(a, list(compartments[::-1]), where=(compartments[::-1] > 0), facecolor = colA, edgecolor='none', alpha=.5, interpolate=False, hatch = None)
+    ax4.fill_betweenx(a, list(compartments[::-1]), where=(compartments[::-1] < 0), facecolor = colB, edgecolor='none', alpha=.5, interpolate=False, hatch = None)
     ax4.xaxis.set_visible(False)
     ax4.yaxis.set_visible(False)
     

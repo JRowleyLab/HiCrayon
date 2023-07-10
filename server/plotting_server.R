@@ -17,19 +17,25 @@ p1plot <- reactive({
     rgb <- col2rgb(input$colchip1)
 
     m1 <- calcAlphaMatrix(
-        bwlist_ChIP1(),
+        bwlist_ChIP1()$bwlog,
         hic_distance(),
         input$chipscale,
         rgb[1], 
         rgb[2], 
         rgb[3])
 
+      if(input$log==TRUE){
+        bwtrack1 = bwlist_ChIP1()$bwlog
+    }else {
+        bwtrack1 = bwlist_ChIP1()$bwraw
+    }
+
     p1_plot <- ChIP_plot(
         disthic = hic_distance(),
         col1 = input$colchip1,
         col2 = "NULL",
         mat = m1,
-        chip = bwlist_ChIP1(),
+        chip = bwtrack1,
         chip2 = "NULL",
         disthic_cmap = input$chip_cmap,
         hicalpha = input$hicalpha,
@@ -53,12 +59,18 @@ p2plot <- reactive({
     rgb <- col2rgb(input$colchip2)
 
     m2 <- calcAlphaMatrix(
-        bwlist_ChIP2(),
+        bwlist_ChIP2()$bwlog,
         hic_distance(),
         input$chipscale,
         rgb[1],
         rgb[2], 
         rgb[3])
+
+      if(input$log==TRUE){
+        bwtrack2 = bwlist_ChIP2()$bwlog
+    }else {
+        bwtrack2 = bwlist_ChIP2()$bwraw
+    }
 
     p2_plot <- ChIP_plot(
         disthic = hic_distance(),
@@ -66,7 +78,7 @@ p2plot <- reactive({
         col2 = input$colchip2,
         mat = m2,
         chip = "NULL",
-        chip2 = bwlist_ChIP2(),
+        chip2 = bwtrack2,
         disthic_cmap = input$chip_cmap,
         hicalpha = input$hicalpha2,
         bedalpha = input$bedalpha2,
@@ -94,17 +106,25 @@ p1and2plot <- reactive({
     rgb <- col2rgb(input$colchip1)
     rgb2 <- col2rgb(input$colchip2)
 
-    m1 <- calcAlphaMatrix(bwlist_ChIP1(), hic_distance(), input$chipscale, rgb[1], rgb[2],rgb[3])
-    m2 <- calcAlphaMatrix(bwlist_ChIP2(), hic_distance(), input$chipscale, rgb2[1], rgb2[2],rgb2[3])
+    m1 <- calcAlphaMatrix(bwlist_ChIP1()$bwlog, hic_distance(), input$chipscale, rgb[1], rgb[2],rgb[3])
+    m2 <- calcAlphaMatrix(bwlist_ChIP2()$bwlog, hic_distance(), input$chipscale, rgb2[1], rgb2[2],rgb2[3])
     m3 <- lnerp_matrices(m1, m2)
+
+    if(input$log==TRUE){
+        bwtrack1 = bwlist_ChIP1()$bwlog
+        bwtrack2 = bwlist_ChIP2()$bwlog
+    }else {
+        bwtrack1 = bwlist_ChIP1()$bwraw
+        bwtrack2 = bwlist_ChIP2()$bwraw
+    }
 
     p2_plot <- ChIP_plot(
         disthic = hic_distance(),
         col1 = input$colchip1,
         col2 = input$colchip2,
         mat = m3,
-        chip = bwlist_ChIP1(),
-        chip2 = bwlist_ChIP2(),
+        chip = bwtrack1,
+        chip2 = bwtrack2,
         disthic_cmap = input$chip_cmap,
         hicalpha = input$hicalpha2,
         bedalpha = input$bedalpha2,
