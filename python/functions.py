@@ -139,7 +139,7 @@ def processBigwigs(bigwig,binsize,chrom,start,stop, log):
 	# 1e-5 added to avoid log(0)
 	bwlog = []
 	for i in bwraw:
-		bwlog.append(math.log(i)+0.01)
+		bwlog.append(math.log(i+0.01))
 		
 	print("done bigwig")
 	return bwlog, bwraw
