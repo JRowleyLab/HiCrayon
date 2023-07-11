@@ -211,17 +211,15 @@ def lnerp_matrices(m1, m2):
     r = (m1[:,:,:1] * br) + (m2[:,:,:1] * (1 - br))
     g = (m1[:,:,1:2] * br) + (m2[:,:,1:2] * (1 - br))
     b = (m1[:,:,2:3] * br) + (m2[:,:,2:3] * (1 - br))
-    # Calculate average alpha value
-    fa = (m1[:,:,3:4] + m2[:,:,3:4])
+    # Sum alpha values. Data type is changed to 16 bit for addition to
+    # prevent data overflow, then clipped to 255
+    fa = np.array(m1[:,:,3:4].astype('int16') + m2[:,:,3:4].astype('int16'))
+    print(np.max(fa))
+    fa = np.clip(fa, 0, 255)
+    print(np.max(fa))
     
-	# Take max alpha from each pair
-    #fa = np.maximum(m1[:,:,3:4], m2[:,:,3:4])
-
-    # If alpha in combined is less than b, take 255 as
-    # an overflow has happened due ot uint8 datatype
-    fa[fa<m2[:,:,3:4]] = 255
-
     # Stack R,G,B,A channels
+    # Data type now back to 8 bit
     mat = (np.dstack((r,g,b,fa))).astype(np.uint8)
 
     return mat
