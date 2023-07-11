@@ -139,7 +139,7 @@ def processBigwigs(bigwig,binsize,chrom,start,stop, log):
 	# 1e-5 added to avoid log(0)
 	bwlog = []
 	for i in bwraw:
-		bwlog.append(math.log(i)+1e-5)
+		bwlog.append(math.log(i)+0.01)
 		
 	print("done bigwig")
 	return bwlog, bwraw
@@ -213,6 +213,13 @@ def lnerp_matrices(m1, m2):
     b = (m1[:,:,2:3] * br) + (m2[:,:,2:3] * (1 - br))
     # Calculate average alpha value
     fa = (m1[:,:,3:4] + m2[:,:,3:4])
+    
+	# Take max alpha from each pair
+    #fa = np.maximum(m1[:,:,3:4], m2[:,:,3:4])
+
+    # If alpha in combined is less than b, take 255 as
+    # an overflow has happened due ot uint8 datatype
+    fa[fa<m2[:,:,3:4]] = 255
 
     # Stack R,G,B,A channels
     mat = (np.dstack((r,g,b,fa))).astype(np.uint8)
