@@ -214,9 +214,7 @@ def lnerp_matrices(m1, m2):
     # Sum alpha values. Data type is changed to 16 bit for addition to
     # prevent data overflow, then clipped to 255
     fa = np.array(m1[:,:,3:4].astype('int16') + m2[:,:,3:4].astype('int16'))
-    print(np.max(fa))
     fa = np.clip(fa, 0, 255)
-    print(np.max(fa))
     
     # Stack R,G,B,A channels
     # Data type now back to 8 bit
@@ -247,7 +245,7 @@ def hic_plot(cmap, distnormmat, chrom, bin, start, stop, norm):
 	# NOTE: the file cannot be overwritten
 	# as webpage doesn't recognise it has
 	# changed if the filename hasn't changed.
-	for f in glob.glob('./www/images/HiC_*.svg'):
+	for f in glob.glob('./www/images/HiC_*.*'):
 		print(f'Removing image: {f}')
 		os.remove(f)
 
@@ -265,12 +263,14 @@ def hic_plot(cmap, distnormmat, chrom, bin, start, stop, norm):
 	# generating random strings
 	res = ''.join(random.choices(string.ascii_uppercase +
 								string.digits, k=8))
-	figname = f"HiC_locus-{chrom}-{start}-{stop}_{bin}bp_norm-{norm}_{str(res)}.svg"
+	figname = f"HiC_locus-{chrom}-{start}-{stop}_{bin}bp_norm-{norm}_{str(res)}"
 
 	directory = "images/"
 	wwwlocation = "www/" + directory + figname
 	notwwwlocation = directory + figname
-	plt.savefig(wwwlocation, bbox_inches='tight')
+	plt.savefig(wwwlocation + '.svg', bbox_inches='tight')
+	plt.savefig(wwwlocation + '.png', bbox_inches='tight', dpi=300)
+
 	plt.close()
 	return notwwwlocation
 
@@ -286,10 +286,9 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hical
 	print(f"Plotting {sample}...")
 	#remove previously generated images
 
-	for f in glob.glob(f'./www/images/{sample}-*.svg'):
+	for f in glob.glob(f'./www/images/{sample}-*.*'):
 		print(f'Removing image: {f}')
 		os.remove(f)
-
 
 	# Set up CMAP for HiC background
 	if disthic_cmap in [i for i in coolboxcmaps.keys()]:
@@ -297,15 +296,10 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hical
 	else:
 		disthic_cmap
 
-
-	print(f"length matrix: {len(mat)}")
-
 	img = Image.fromarray(mat)
 				
 	fig, (ax2) = plt.subplots(ncols=1)
-	
-	print(f"check_maybe {sample}")
-	
+		
 	# #########################
 	# background = Image.new('RGBA', (len(disthic),len(disthic)), (0,0,0,opacity) )
 	# # Show black background
@@ -370,58 +364,60 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hical
 	#ChIP1 and ChIP2 red and blue tracks together
 	elif(sample=="ChIP_combined"):
 
+		# Plot the first ChIP track
+		# Removing all ticks, margins and labels
 		ax3 = fig.add_subplot()
 		ax3.plot(chip, color=col1, linewidth = 1)
-		ax3.plot(chip2, color=col2, linewidth = 1)
-		#ax3.axis('off')
-		l1, b1, w1, h1 = ax2.get_position().bounds
-		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
-		ax3.set_position((l1*(1),0.02, w1*1, .075))
 		ax3.margins(x=0)
 		ax3.xaxis.set_visible(False)
 		ax3.yaxis.set_visible(False)
 
-		print("checkpoint")
-		ax4 = fig.add_subplot()
-		a = [x for x in range(len(chip2))]
-		ax4.plot(chip[::-1], a, color=col1)
-		
+		# Set new plot on same x, this plots
+		# both overlaying on different scales
+		ax4 = ax3.twinx()
+		ax4.plot(chip2, color=col2, linewidth = 1)
 		#ax3.axis('off')
-		l2, b2, w2, h2 = ax2.get_position().bounds
-		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
-		ax4.set_position((l2*(.7),b2, w2*.1, h2*(1)))
-		ax4.margins(y=0)
+		l1, b1, w1, h1 = ax2.get_position().bounds
+		# Hacky code to move track underneath Hi-C plot
+		ax4.set_position((l1*(1),0.02, w1*1, .075))
+		ax4.margins(x=0)
 		ax4.xaxis.set_visible(False)
 		ax4.yaxis.set_visible(False)
 
+		# ---------------------------------
+		# # Plot vertical ChIP-seq track
 		ax5 = fig.add_subplot()
-
+		# # Reverse and flip data to orientate in a 90 degree rotation
 		b = [x for x in range(len(chip))]
 		ax5.plot(chip[::-1], b, color=col1, linewidth = 1)
-		
-		a = [x for x in range(len(chip2))]
-		ax5.plot(chip2[::-1], a, color=col2, linewidth = 1)
-
-		#ax3.axis('off')
-		l2, b2, w2, h2 = ax2.get_position().bounds
-		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
-		ax5.set_position((l2*(.7),b2, w2*.1, h2*(1)))
+		# Remove all ticks and labels
 		ax5.margins(y=0)
 		ax5.xaxis.set_visible(False)
 		ax5.yaxis.set_visible(False)
+		# Plot both tracks on same track but with 
+		# different scales
+		a = [x for x in range(len(chip2))]
+		ax6 = ax5.twiny()
+		ax6.plot(chip2[::-1], a, color=col2, linewidth = 1)
 
-
-
+		# # Position to the left of Hi-C plot	
+		l2, b2, w2, h2 = ax2.get_position().bounds
+		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+		ax6.set_position((l2*(.7),b2, w2*.1, h2*(1)))
+		ax6.margins(y=0)
+		ax6.xaxis.set_visible(False)
+		ax6.yaxis.set_visible(False)
 
 	#write image to file
 	res = ''.join(random.choices(string.ascii_uppercase +
 								string.digits, k=8))
-	figname = f"{sample}-{name}-{chrom}-{start}-{stop}_{bin}bp_norm-{norm}_{str(res)}.svg"
+	figname = f"{sample}-{name}-{chrom}-{start}-{stop}_{bin}bp_norm-{norm}_{str(res)}"
 
 	directory = "images/"
 	wwwlocation = "www/" + directory + figname
 	notwwwlocation = directory + figname #this path is for 'shiny'
-	plt.savefig(wwwlocation, bbox_inches='tight')
+	plt.savefig(wwwlocation + '.svg', bbox_inches='tight')
+	plt.savefig(wwwlocation + '.png', bbox_inches='tight', dpi=300)
 	plt.close()
 
 	return notwwwlocation
@@ -498,10 +494,10 @@ def scaleCompartments(disthic, comp_df, Acol, Bcol):
     return Amatrix, Bmatrix
 
 
-def plotCompartments(disthic, comp, ABmat, colA, colB):
+def plotCompartments(disthic, comp, ABmat, colA, colB, chrom, start, stop):
     
     # Remove previous images of compartments
-    for f in glob.glob('./www/images/Compartments_*.svg'):
+    for f in glob.glob('./www/images/compartments-*.*'):
         print(f'Removing image: {f}')
         os.remove(f)
 
@@ -551,11 +547,13 @@ def plotCompartments(disthic, comp, ABmat, colA, colB):
     # generating random strings
     res = ''.join(random.choices(string.ascii_uppercase +
                                 string.digits, k=8))
-    figname = "Compartments_" + str(res) + ".svg"
+    figname = f"compartments-{chrom}-{start}-{stop}_{str(res)}"
 
     directory = "images/"
     wwwlocation = "www/" + directory + figname
     notwwwlocation = directory + figname
-    plt.savefig(wwwlocation, bbox_inches='tight')
+    plt.savefig(wwwlocation + '.svg', bbox_inches='tight')
+    plt.savefig(wwwlocation + '.png', bbox_inches='tight', dpi=300)
+    
     plt.close()
     return notwwwlocation

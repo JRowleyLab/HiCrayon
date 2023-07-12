@@ -56,6 +56,9 @@ comp_plot <- reactive({
         comp = filter_compartments(), 
         ABmat = comp_LNERP(),
         colA = input$colcompA,
-        colB = input$colcompB
+        colB = input$colcompB,
+        chrom = input$chr,
+        start = input$start,
+        stop = input$stop
         )
 }) %>% shiny::bindEvent(input$generate_hic)

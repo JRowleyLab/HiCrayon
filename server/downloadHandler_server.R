@@ -11,17 +11,23 @@ zipfolder <- reactive({
         file.remove(zipfile)
     }
 
-    files = c(paste("www/", hicplot(), sep = ""))
+    files = c()
+    files = append(files, paste("www/", hicplot(), ".svg", sep = ""))
+    files = append(files, paste("www/", hicplot(), ".png", sep = ""))
 
     if(input$chip1){ 
-        files = append(files, paste("www/", p1plot(), sep = ""))
+        files = append(files, paste("www/", p1plot(), ".svg", sep = ""))
+        files = append(files, paste("www/", p1plot(), ".png", sep = ""))
         }
     if(input$chip2){ 
-        files = append(files, paste("www/", p2plot(), sep = ""))
-        files = append(files, paste("www/", p1and2plot(), sep = ""))
+        files = append(files, paste("www/", p2plot(), ".svg", sep = ""))
+        files = append(files, paste("www/", p2plot(), ".png", sep = ""))
+        files = append(files, paste("www/", p1and2plot(), ".svg", sep = ""))
+        files = append(files, paste("www/", p1and2plot(), ".png", sep = ""))
         }
     if(input$bedgraph){
-      files = append(files, paste("www/", comp_plot(), sep = ""))
+      files = append(files, paste("www/", comp_plot(), ".svg", sep = ""))
+      files = append(files, paste("www/", comp_plot(), ".png", sep = ""))
     }
 
     print(files)

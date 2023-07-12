@@ -13,7 +13,13 @@ output$gallery <- renderUI({
 
             texts <- c("HiC", rname$n, bname$n, paste0(rname$n,' + ', bname$n), "Compartments")
             hrefs <- c("","","","","")
-            images <- c(hicplot(), p1plot(), p2plot(), p1and2plot(), comp_plot())
+            images <- c(
+                paste(hicplot(), ".svg", sep=""),
+                paste(p1plot(), ".svg", sep=""),
+                paste(p2plot(),  ".svg", sep=""),
+                paste(p1and2plot(), ".svg", sep=""),
+                paste(comp_plot(), ".svg", sep="")
+                )
 
             gallery(
                 texts = texts,
@@ -29,7 +35,12 @@ output$gallery <- renderUI({
         } else{
             texts <- c("HiC", rname$n, bname$n, paste0(rname$n,' + ', bname$n))
             hrefs <- c("","","","")
-            images <- c(hicplot(), p1plot(), p2plot(), p1and2plot())
+            images <- c(
+                paste(hicplot(), ".svg", sep=""),
+                paste(p1plot(), ".svg", sep=""),
+                paste(p2plot(),  ".svg", sep=""),
+                paste(p1and2plot(), ".svg", sep="")
+                )
 
             gallery(
                 texts = texts,
@@ -49,7 +60,11 @@ output$gallery <- renderUI({
         if(input$bedgraph){
             texts <- c("HiC", rname$n, "Compartments")
             hrefs <- c("","","")
-            images <- c(hicplot(), p1plot(), comp_plot())
+            images <- c(
+                paste(hicplot(), ".svg", sep=""),
+                paste(p1plot(), ".svg", sep=""),
+                paste(compplot(), ".svg", sep="")
+            )
 
             gallery(
                 texts = texts,
@@ -64,7 +79,10 @@ output$gallery <- renderUI({
         } else{
             texts <- c("HiC", rname$n)
             hrefs <- c("","")
-            images <- c(hicplot(), p1plot())
+            images <- c(
+                paste(hicplot(), ".svg", sep=""),
+                paste(p1plot(), ".svg", sep="") 
+                )
 
             gallery(
                 texts = texts,
@@ -83,7 +101,10 @@ output$gallery <- renderUI({
         if(input$bedgraph){
             texts <- c("HiC", "Compartments")
             hrefs <- c("", "")
-            images <- c(hicplot(), comp_plot())
+            images <- c(
+                paste(hicplot(), ".svg", sep=""),
+                paste(compplot(), ".svg", sep="")
+            )
 
             gallery(
                 texts = texts,
@@ -98,7 +119,9 @@ output$gallery <- renderUI({
         } else {
             texts <- c("HiC")
             hrefs <- c("")
-            images <- c(hicplot())
+            images <- c(
+                paste(hicplot(), ".svg", sep="")
+            )
 
             gallery(
                 texts = texts,
@@ -111,9 +134,6 @@ output$gallery <- renderUI({
                 style = "height: 100vh;"
                 )
         }
-
-        
-
     }
     
 }) %>% shiny::bindEvent(input$generate_hic)
