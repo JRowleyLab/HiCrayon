@@ -63,7 +63,7 @@ output$gallery <- renderUI({
             images <- c(
                 paste(hicplot(), ".svg", sep=""),
                 paste(p1plot(), ".svg", sep=""),
-                paste(compplot(), ".svg", sep="")
+                paste(comp_plot(), ".svg", sep="")
             )
 
             gallery(
@@ -103,7 +103,7 @@ output$gallery <- renderUI({
             hrefs <- c("", "")
             images <- c(
                 paste(hicplot(), ".svg", sep=""),
-                paste(compplot(), ".svg", sep="")
+                paste(comp_plot(), ".svg", sep="")
             )
 
             gallery(

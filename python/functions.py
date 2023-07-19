@@ -429,7 +429,15 @@ def filterCompartments(comp, chrom, start, stop):
     # Filter compartments bedGraph by selected region
     comp = pd.read_csv(comp, sep="\t", header=None, dtype={0: 'string'}, on_bad_lines='skip')
     comp.columns = ['chrom', 'start', 'stop', 'value']
-    comp_filt = comp.loc[(comp['chrom'] == chrom) & (comp['start'] >= start) & (comp['stop'] <= stop)]
+
+    nochr = chrom.strip('chr')
+    wchr = "chr" + str(nochr)
+
+    comp_filt = comp.loc[(comp['chrom'] == nochr) & (comp['start'] >= start) & (comp['stop'] <= stop)]
+    
+    if(len(comp_filt)==0):
+        comp_filt = comp.loc[(comp['chrom'] == wchr) & (comp['start'] >= start) & (comp['stop'] <= stop)]
+
     return comp_filt
 
 
@@ -438,7 +446,7 @@ def scaleCompartments(disthic, comp_df, Acol, Bcol):
     distscaled = (disthic-np.min(disthic))/(np.max(disthic)-np.min(disthic))
 
     comp_arr = comp_df['value']
-    
+    print("1")
     Acomp = np.where(comp_arr<0, 0, comp_arr)
     Bcomp = np.where(comp_arr>0, 0, comp_arr)
     # #Normalize on IQR
@@ -447,10 +455,11 @@ def scaleCompartments(disthic, comp_df, Acol, Bcol):
     # comp_arr_IQR_norm = comp_arr / iqr
     # Normalize data to between -1 and 1
     # Scale A compartment to 0 and 1
+    print("2")
     min = 0
     max = 1
     Anormd = (((Acomp-np.min(Acomp)) * ( (max) - (min))) / (np.max(Acomp) - np.min(Acomp))) + min
-
+    print("2")
     # SCale B compartment to 0 and -1
     min = 0
     max = -1
