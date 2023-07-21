@@ -16,26 +16,22 @@ observe({
         )
 })
 
-# redname reactivevalue
-rname <- reactiveValues(n = "Chip 1")
-observe(
-    if (!input$chip1) {
-        rname$n <- "ChIP 1"
-    } else {
-        rname$n <- input$n1
+# ChIP names reactivevalue
+chipnames <- reactiveValues()
+observe({
+    lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
+        if(!is.null(bw1v[[LETTERS[x]]])){
+        updateTextInput(
+            session,
+            inputId = paste("n", LETTERS[x], sep = "_"),
+            value = tools::file_path_sans_ext(basename(bw1v[[LETTERS[x]]])
+        )
+    )
     }
-)
 
-
-# bluename reactivevalue
-bname <- reactiveValues(n = "ChIP 2")
-observe(
-    if (!input$chip2) {
-        bname$n <- "ChIP 2"
-    } else {
-        bname$n <- input$n2
-    }
-)
+    })
+    
+})
 
 # Update chromsome list
 observe(
@@ -49,9 +45,3 @@ observe(
         choices = HiCmetadata()$res,
         selected = "10000")
 )
-
-# Reset plot view on click
-observeEvent(input$reset, {
-      shinyjs::show("#gallery")
-      reset("#gallery")
-    })

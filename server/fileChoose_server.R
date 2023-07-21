@@ -1,12 +1,13 @@
 # variable for starting root directory
 # When used by others: TODO: change to root
-workingdir = '/'
+workingdir = '/Zulu/bnolan/HiC_data/GM12878/ultrares/'
 
 ## Server side file-selection
 shinyFileChoose(input, 'hic', root = c(wd = workingdir), filetypes=c('hic', 'mcool'))
-shinyFileChoose(input, "bw1", root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
-shinyFileChoose(input, "bw2", root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
 shinyFileChoose(input, "bedg1", root = c(wd = workingdir), filetypes=c('bed', 'bedgraph'))
+
+# ChIP inputs
+shinyFileChoose(input, "bw1", root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
 
 
 ###############################
@@ -25,27 +26,6 @@ if (is.integer(input$hic[1])) {
 }
 })
 
-output$f1_bw1 <- renderPrint({
-    #cat("text")
-    #print(input$hic)
-if (is.integer(input$bw1[1])) {
-    cat("No file has been selected")
-} else {
-    x <- parseFilePaths(roots = c(wd = workingdir), input$bw1)
-    as.character(x$datapath[1])
-}
-})
-
-output$f1_bw2 <- renderPrint({
-    #cat("text")
-    #print(input$hic)
-if (is.integer(input$bw2[1])) {
-    cat("No file has been selected")
-} else {
-    x <- parseFilePaths(roots = c(wd = workingdir), input$bw2)
-    as.character(x$datapath[1])
-}
-})
 
 ## print path to textbox with verbatimTextOutput
 output$f1_bedg1 <- renderPrint({
@@ -70,22 +50,17 @@ observeEvent(input$hic, {
 })
 
 # bw1 file handling
-bw1v <- reactiveValues(y = "NULL")
+bw1v <- reactiveValues()
 observeEvent(input$bw1, {
     inFile <- parseFilePaths(roots = c(wd = workingdir), input$bw1)
-    bw1v$y <- inFile$datapath
-})
+    paths <- inFile$datapath
+    x <- as.list(paths)
 
-# bw2 file handling
-bw2v <- reactiveValues(y = "NULL")
-observe(
-    if (input$chip2) {
-        inFile <- parseFilePaths(roots = c(wd = workingdir), input$bw2)
-        bw2v$y <- inFile$datapath
-    }else {
-        bw2v$y <- "NULL"
+    # Store bigwigs as a letter in reactiveValues()
+    for(i in seq_along(x)){
+        bw1v[[LETTERS[i]]] <- as.character(x[i])
     }
-)
+})
 
 # bedgraph file handling
 bedv <- reactiveValues(y = "NULL")

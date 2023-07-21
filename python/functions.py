@@ -275,7 +275,7 @@ def hic_plot(cmap, distnormmat, chrom, bin, start, stop, norm):
 	return notwwwlocation
 
 
-def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hicalpha, bedalpha, chrom, bin, start, stop, name, norm):
+def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, sample, hicalpha, bedalpha, chrom, bin, start, stop, name, norm):
 	# NOTES: the issue here is that the matrix is generated inside the plotting function with calcAlphaMatrix.
 	# Before, i was passing the r,g,b matrices inside, which can be 1 chip or 2 chips depending. I need to do this again,
 	# but instead having alpha value as well.
@@ -298,7 +298,8 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hical
 
 	img = Image.fromarray(mat)
 				
-	fig, (ax2) = plt.subplots(ncols=1)
+	fig = plt.figure()
+	ax = fig.add_subplot()
 		
 	# #########################
 	# background = Image.new('RGBA', (len(disthic),len(disthic)), (0,0,0,opacity) )
@@ -307,110 +308,112 @@ def ChIP_plot(chip, chip2, mat, col1, col2, disthic, disthic_cmap, sample, hical
 	# # Colour map for HiC underlay
 
 	# Show distance normalized HiC
-	ax2.imshow(disthic, disthic_cmap, interpolation='none', alpha = hicalpha)
+	ax.imshow(disthic, disthic_cmap, interpolation='none', alpha = hicalpha)
 	# Show ChIP-seq matrix
-	ax2.imshow(img, interpolation='none', alpha = bedalpha)
+	ax.imshow(img, interpolation='none', alpha = bedalpha)
 
+	ax.xaxis.set_visible(False)
+	ax.yaxis.set_visible(False)
+
+	#############################
+	# Create bigwigs dynamically, 
+	# given a vector of names, 
+	# bigwigs and colors, do whatever
+	# length, so works with 1 or 10.
+	#############################
+	# x-axis plot setup
+	ax2 = fig.add_subplot()
+	l1, b1, w1, h1 = ax.get_position().bounds
+	#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+	ax2.set_position((l1*(1),0.02, w1*1, .075))
+	ax2.margins(x=0)
 	ax2.xaxis.set_visible(False)
 	ax2.yaxis.set_visible(False)
 
-	# Adding ChIP track underneath matrix
-	# ChIP1 includes red track
-	if(sample=="ChIP1"):
-		ax3 = fig.add_subplot()
-		ax3.plot(chip, color=col1, linewidth = 1)
-		#ax3.axis('off')
-		l1, b1, w1, h1 = ax2.get_position().bounds
-		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
-		ax3.set_position((l1*(1),0.02, w1*1, .075))
-		ax3.margins(x=0)
-		ax3.xaxis.set_visible(False)
-		ax3.yaxis.set_visible(False)
+	# y-axis plot setup
+	ax3 = fig.add_subplot()
+	l2, b2, w2, h2 = ax.get_position().bounds
+	ax3.set_position((l2*(.7),b2, w2*.1, h2*(1)))
+	ax3.margins(y=0)
+	ax3.xaxis.set_visible(False)
+	ax3.yaxis.set_visible(False)
+	print(len(chip))
 
-		ax4 = fig.add_subplot()
-		a = [x for x in range(len(chip))]
-		ax4.plot(chip[::-1], a, color=col1, linewidth = 1)
+	# Dynamically add subplots
+	for i in range(len(chip)):
+		# x-axis track
+		ax2 = ax2.twinx()
+		ax2.plot(chip[i], color=col1[i], linewidth = 1)
+		# y-axis track
+		ax3 = ax3.twiny()
+		a = [x for x in range(len(chip[i]))]
+		ax3.plot(chip[i][::-1], a, color=col1[[i]], linewidth = 1)
+
 		
-		l2, b2, w2, h2 = ax2.get_position().bounds
-		ax4.set_position((l2*(.7),b2, w2*.1, h2*(1)))
-		ax4.margins(y=0)
-		ax4.xaxis.set_visible(False)
-		ax4.yaxis.set_visible(False)
 
-	#ChIP2 includes blue track
-	elif(sample=="ChIP2"):
-		ax3 = fig.add_subplot()
-		ax3.plot(chip2, color=col2, linewidth = 1)
-		#ax3.axis('off')
-		l1, b1, w1, h1 = ax2.get_position().bounds
-		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
-		ax3.set_position((l1*(1),0.02, w1*1, .075))
-		ax3.margins(x=0)
-		ax3.xaxis.set_visible(False)
-		ax3.yaxis.set_visible(False)
+	# Add bigwig tracks to plot
+	#ax3 = fig.add_subplot()
+	
+	#ax3.axis('off')
 
-		ax4 = fig.add_subplot()
-		a = [x for x in range(len(chip2))]
-		ax4.plot(chip2[::-1], a, color=col2, linewidth = 1)
-		
-		#ax3.axis('off')
-		l2, b2, w2, h2 = ax2.get_position().bounds
-		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
-		ax4.set_position((l2*(.7),b2, w2*.1, h2*(1)))
-		ax4.margins(y=0)
-		ax4.xaxis.set_visible(False)
-		ax4.yaxis.set_visible(False)
+
+	#ax4 = fig.add_subplot()
+	
+
+	
 
 	#ChIP1 and ChIP2 red and blue tracks together
-	elif(sample=="ChIP_combined"):
 
-		# Plot the first ChIP track
-		# Removing all ticks, margins and labels
-		ax3 = fig.add_subplot()
-		ax3.plot(chip, color=col1, linewidth = 1)
-		ax3.margins(x=0)
-		ax3.xaxis.set_visible(False)
-		ax3.yaxis.set_visible(False)
+	# # Plot the first ChIP track
+	# # Removing all ticks, margins and labels
+	# ax3 = fig.add_subplot()
+	# ax3.plot(chip, color=col1, linewidth = 1)
+	# ax3.margins(x=0)
+	# ax3.xaxis.set_visible(False)
+	# ax3.yaxis.set_visible(False)
 
-		# Set new plot on same x, this plots
-		# both overlaying on different scales
-		ax4 = ax3.twinx()
-		ax4.plot(chip2, color=col2, linewidth = 1)
-		#ax3.axis('off')
-		l1, b1, w1, h1 = ax2.get_position().bounds
-		# Hacky code to move track underneath Hi-C plot
-		ax4.set_position((l1*(1),0.02, w1*1, .075))
-		ax4.margins(x=0)
-		ax4.xaxis.set_visible(False)
-		ax4.yaxis.set_visible(False)
+	# # Set new plot on same x, this plots
+	# # both overlaying on different scales
+	# ax4 = ax3.twinx()
+	# ax4.plot(chip2, color=col2, linewidth = 1)
+	# #ax3.axis('off')
+	# l1, b1, w1, h1 = ax2.get_position().bounds
+	# # Hacky code to move track underneath Hi-C plot
+	# ax4.set_position((l1*(1),0.02, w1*1, .075))
+	# ax4.margins(x=0)
+	# ax4.xaxis.set_visible(False)
+	# ax4.yaxis.set_visible(False)
 
-		# ---------------------------------
-		# # Plot vertical ChIP-seq track
-		ax5 = fig.add_subplot()
-		# # Reverse and flip data to orientate in a 90 degree rotation
-		b = [x for x in range(len(chip))]
-		ax5.plot(chip[::-1], b, color=col1, linewidth = 1)
-		# Remove all ticks and labels
-		ax5.margins(y=0)
-		ax5.xaxis.set_visible(False)
-		ax5.yaxis.set_visible(False)
-		# Plot both tracks on same track but with 
-		# different scales
-		a = [x for x in range(len(chip2))]
-		ax6 = ax5.twiny()
-		ax6.plot(chip2[::-1], a, color=col2, linewidth = 1)
+	# ---------------------------------
+	# # Plot vertical ChIP-seq track
+	ax5 = fig.add_subplot()
+	# # Reverse and flip data to orientate in a 90 degree rotation
+	b = [x for x in range(len(chip))]
+	ax5.plot(chip[::-1], b, color=col1, linewidth = 1)
+	# Remove all ticks and labels
+	ax5.margins(y=0)
+	ax5.xaxis.set_visible(False)
+	ax5.yaxis.set_visible(False)
+	# Plot both tracks on same track but with 
+	# different scales
+	a = [x for x in range(len(chip2))]
+	ax6 = ax5.twiny()
+	ax6.plot(chip2[::-1], a, color=col2, linewidth = 1)
 
-		# # Position to the left of Hi-C plot	
-		l2, b2, w2, h2 = ax2.get_position().bounds
-		#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
-		ax6.set_position((l2*(.7),b2, w2*.1, h2*(1)))
-		ax6.margins(y=0)
-		ax6.xaxis.set_visible(False)
-		ax6.yaxis.set_visible(False)
+	# # # Position to the left of Hi-C plot	
+	# l2, b2, w2, h2 = ax2.get_position().bounds
+	# #ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+	# ax6.set_position((l2*(.7),b2, w2*.1, h2*(1)))
+	# ax6.margins(y=0)
+	# ax6.xaxis.set_visible(False)
+	# ax6.yaxis.set_visible(False)
 
 	#write image to file
 	res = ''.join(random.choices(string.ascii_uppercase +
 								string.digits, k=8))
+	if(isinstance(name, list)):
+		name = '_'.join(name)
+
 	figname = f"{sample}-{name}-{chrom}-{start}-{stop}_{bin}bp_norm-{norm}_{str(res)}"
 
 	directory = "images/"

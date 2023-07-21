@@ -10,131 +10,145 @@ hicplot <- reactive({
 }) %>% shiny::bindEvent(input$generate_hic)
 
 
-p1plot <- reactive({
+chipalpha <- reactive({
 
     req(input$chip1)
 
-    rgb <- col2rgb(input$colchip1)
+    chipalphas <- list()
 
-    m1 <- calcAlphaMatrix(
-        bwlist_ChIP1()$bwlog,
-        hic_distance(),
-        input$chipscale,
-        rgb[1], 
-        rgb[2], 
-        rgb[3])
+    lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
+        col <- input[[paste("col", LETTERS[[x]], sep="_")]]
+        rgb <- col2rgb(col)
 
-      if(input$log==TRUE){
-        bwtrack1 = bwlist_ChIP1()$bwlog
-    }else {
-        bwtrack1 = bwlist_ChIP1()$bwraw
-    }
+        m1 <- calcAlphaMatrix(
+            bwlist_ChIP1()$logs[[x]],
+            hic_distance(),
+            input$chipscale,
+            rgb[1], 
+            rgb[2], 
+            rgb[3])
 
-    p1_plot <- ChIP_plot(
-        disthic = hic_distance(),
-        col1 = input$colchip1,
-        col2 = "NULL",
-        mat = m1,
-        chip = bwtrack1,
-        chip2 = "NULL",
-        disthic_cmap = input$chip_cmap,
-        hicalpha = input$hicalpha,
-        bedalpha = input$bedalpha,
-        sample = "ChIP1",
-        chrom = input$chr,
-        bin = input$bin, 
-        start = input$start,
-        stop = input$stop,
-        norm = input$norm,
-        name = input$n1
-        )
+        chipalphas[[x]] <<- m1
+    })
+
+    return(chipalphas)
+}) %>% shiny::bindEvent(input$generate_hic, input$chip1) 
+
+chipplot <- reactive({
+
+    req(input$chip1)
+
+    images <- c()
+    track <- list()
+    col <- list()
+
+    lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
+        
+        # Overwrite the colour and track for single chips
+        col[1] <- input[[paste("col", LETTERS[[x]], sep="_")]]
+        print(col)
+
+        if(input$log==TRUE){
+            track[[1]] <- bwlist_ChIP1()$logs[[x]]
+        }else {
+            track[[1]] <- bwlist_ChIP1()$raws[[x]]
+        }
+
+        p1_plot <- ChIP_plot(
+            disthic = hic_distance(),
+            col1 = col,
+            mat = chipalpha()[[x]],
+            chip = track,
+            disthic_cmap = input$chip_cmap,
+            hicalpha = input$hicalpha,
+            bedalpha = input$bedalpha,
+            sample = paste("ChIP", x, sep=""),
+            chrom = input$chr,
+            bin = input$bin, 
+            start = input$start,
+            stop = input$stop,
+            norm = input$norm,
+            name = input[[paste("n", LETTERS[x], sep="_")]]
+            )
+
+        images[x] <<- p1_plot
+    })
+
+    return(images)
 
 }) %>% shiny::bindEvent(input$generate_hic, input$chip1) 
 
 
-p2plot <- reactive({
 
-    req(input$chip2)
-
-    rgb <- col2rgb(input$colchip2)
-
-    m2 <- calcAlphaMatrix(
-        bwlist_ChIP2()$bwlog,
-        hic_distance(),
-        input$chipscale,
-        rgb[1],
-        rgb[2], 
-        rgb[3])
-
-      if(input$log==TRUE){
-        bwtrack2 = bwlist_ChIP2()$bwlog
-    }else {
-        bwtrack2 = bwlist_ChIP2()$bwraw
+combinedchips <- reactiveValues()
+observeEvent(input$generate_hic, {
+    chipstocombine <- c()
+    print('observing chips')
+    # Combine ChIPs that are selected for
+    # combination from checkbox
+    for(i in seq_along(reactiveValuesToList(bw1v))){
+        if(input[[paste("comb", LETTERS[i], sep = "_")]] == TRUE){
+            chipstocombine = append(chipstocombine, i)
+        }
     }
-
-    p2_plot <- ChIP_plot(
-        disthic = hic_distance(),
-        col1 = "NULL",
-        col2 = input$colchip2,
-        mat = m2,
-        chip = "NULL",
-        chip2 = bwtrack2,
-        disthic_cmap = input$chip_cmap,
-        hicalpha = input$hicalpha2,
-        bedalpha = input$bedalpha2,
-        sample = "ChIP2",
-        chrom = input$chr,
-        bin = input$bin, 
-        start = input$start,
-        stop = input$stop,
-        norm = input$norm,
-        name = input$n2
-        )
-
-}) %>% shiny::bindEvent(input$generate_hic, input$chip2)
+    combinedchips$chips <- chipstocombine
+})
 
 
-p1and2plot <- reactive({
+chipcombinedplot <- reactive({
 
     req(input$chip1)
-    req(input$chip2)
+
+    chipstocombine <- combinedchips$chips
+
+    req(length(chipstocombine)>1)
+
     # Combine ChIP data from protein 1
     # and protein 2
     #chip, r, g, b, disthic, sample, chip2, hicalpha, opacity
-    print('plotting combined')
+    print(paste('plotting combined:', chipstocombine))
 
-    rgb <- col2rgb(input$colchip1)
-    rgb2 <- col2rgb(input$colchip2)
+    # first two chips
+    m1 <- chipalpha()[[chipstocombine[1]]]
+    m2 <- chipalpha()[[chipstocombine[2]]]
 
-    m1 <- calcAlphaMatrix(bwlist_ChIP1()$bwlog, hic_distance(), input$chipscale, rgb[1], rgb[2],rgb[3])
-    m2 <- calcAlphaMatrix(bwlist_ChIP2()$bwlog, hic_distance(), input$chipscale, rgb2[1], rgb2[2],rgb2[3])
-    m3 <- lnerp_matrices(m1, m2)
-
-    if(input$log==TRUE){
-        bwtrack1 = bwlist_ChIP1()$bwlog
-        bwtrack2 = bwlist_ChIP2()$bwlog
-    }else {
-        bwtrack1 = bwlist_ChIP1()$bwraw
-        bwtrack2 = bwlist_ChIP2()$bwraw
+    i <- 2
+    while(i <= length(chipstocombine)){
+        m3 <- lnerp_matrices(m1, m2)
+        i <- i + 1
     }
 
-    p2_plot <- ChIP_plot(
+    # bigwig tracks
+    tracks <- list()
+    cols <- c()
+    names <- list()
+
+    # Create lists of info for combination plot
+    for(x in seq_along(chipstocombine)){
+        if(input$log==TRUE){
+            tracks[[x]] <- bwlist_ChIP1()$logs[[chipstocombine[x]]]
+        }else{
+            tracks[[x]] <- bwlist_ChIP1()$raws[[chipstocombine[x]]]
+        }
+        cols <- append(cols, input[[paste("col", LETTERS[[chipstocombine[x]]], sep="_")]])
+        names <- append(names, input[[paste("n", LETTERS[[chipstocombine[x]]], sep="_")]])
+    }
+
+    ChIP_plot(
         disthic = hic_distance(),
-        col1 = input$colchip1,
-        col2 = input$colchip2,
+        col1 = cols,
         mat = m3,
-        chip = bwtrack1,
-        chip2 = bwtrack2,
+        chip = tracks,
         disthic_cmap = input$chip_cmap,
-        hicalpha = input$hicalpha2,
-        bedalpha = input$bedalpha2,
+        hicalpha = input$hicalpha,
+        bedalpha = input$bedalpha,
         sample = "ChIP_combined",
         chrom = input$chr,
         bin = input$bin, 
         start = input$start,
         stop = input$stop,
         norm = input$norm,
-        name = paste0(input$n1, "-", input$n2)
+        name = names
         )
 
 }) %>% shiny::bindEvent(input$generate_hic) 

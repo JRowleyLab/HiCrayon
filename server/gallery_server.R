@@ -3,137 +3,45 @@
 # Local images are generated using
 # python functions.
 output$gallery <- renderUI({
-    print('gallery')
 
     validate(need(hicv$y!="NULL", "Please upload a HiC file"))
 
-    if(input$chip2){
+    print('gallery')
 
-        if(input$bedgraph){
+    # Initialise with HiC data
+    texts <- c("HiC")
+    images <- c(paste(hicplot(), ".svg", sep=""))
+    hrefs <- c("")
 
-            texts <- c("HiC", rname$n, bname$n, paste0(rname$n,' + ', bname$n), "Compartments")
-            hrefs <- c("","","","","")
-            images <- c(
-                paste(hicplot(), ".svg", sep=""),
-                paste(p1plot(), ".svg", sep=""),
-                paste(p2plot(),  ".svg", sep=""),
-                paste(p1and2plot(), ".svg", sep=""),
-                paste(comp_plot(), ".svg", sep="")
-                )
-
-            gallery(
-                texts = texts,
-                hrefs = hrefs,
-                images = images,
-                #enlarge = TRUE,
-                image_frame_size = 3,
-                title = "",
-                #enlarge_method = "modal",
-                style = "height: 100vh;"
-                )
-
-        } else{
-            texts <- c("HiC", rname$n, bname$n, paste0(rname$n,' + ', bname$n))
-            hrefs <- c("","","","")
-            images <- c(
-                paste(hicplot(), ".svg", sep=""),
-                paste(p1plot(), ".svg", sep=""),
-                paste(p2plot(),  ".svg", sep=""),
-                paste(p1and2plot(), ".svg", sep="")
-                )
-
-            gallery(
-                texts = texts,
-                hrefs = hrefs,
-                images = images,
-                #enlarge = TRUE,
-                image_frame_size = 3,
-                title = "",
-                #enlarge_method = "modal",
-                style = "height: 100vh;"
-                )
+    # Control inclusion through checkbox
+    if(input$chip1){
+        # Dynamically add chip data
+        for(i in seq_along(reactiveValuesToList(bw1v))){
+            texts[i+1] <- input[[paste("n", LETTERS[i], sep = "_")]]
+            hrefs = append(hrefs, "")
+            images[i+1] <- paste(chipplot()[i], ".svg", sep="")
         }
+        if(length(combinedchips$chips) > 1){
+            combname <- "" 
+            for(i in combinedchips$chips){
+                combname = paste(combname, input[[paste("n", LETTERS[i], sep = "_")]], sep = " ") 
+                combhref = ""
+                combimage = paste(chipcombinedplot(), ".svg", sep="")
+            }
 
-        
-    }else if (input$chip1) {
-
-        if(input$bedgraph){
-            texts <- c("HiC", rname$n, "Compartments")
-            hrefs <- c("","","")
-            images <- c(
-                paste(hicplot(), ".svg", sep=""),
-                paste(p1plot(), ".svg", sep=""),
-                paste(comp_plot(), ".svg", sep="")
-            )
-
-            gallery(
-                texts = texts,
-                hrefs = hrefs,
-                images = images,
-                #enlarge = TRUE,
-                image_frame_size = 4,
-                title = "",
-                #enlarge_method = "modal",
-                style = "height: 100vh;"
-                )
-        } else{
-            texts <- c("HiC", rname$n)
-            hrefs <- c("","")
-            images <- c(
-                paste(hicplot(), ".svg", sep=""),
-                paste(p1plot(), ".svg", sep="") 
-                )
-
-            gallery(
-                texts = texts,
-                hrefs = hrefs,
-                images = images,
-                #enlarge = TRUE,
-                image_frame_size = 6,
-                title = "",
-                #enlarge_method = "modal",
-                style = "height: 100vh;"
-                )
-        }
-
-        
-    } else {
-        if(input$bedgraph){
-            texts <- c("HiC", "Compartments")
-            hrefs <- c("", "")
-            images <- c(
-                paste(hicplot(), ".svg", sep=""),
-                paste(comp_plot(), ".svg", sep="")
-            )
-
-            gallery(
-                texts = texts,
-                hrefs = hrefs,#hrefs,
-                images = images,
-                #enlarge = TRUE,
-                image_frame_size = 6,
-                title = "",
-                #enlarge_method = "modal",
-                style = "height: 100vh;"
-                )
-        } else {
-            texts <- c("HiC")
-            hrefs <- c("")
-            images <- c(
-                paste(hicplot(), ".svg", sep="")
-            )
-
-            gallery(
-                texts = texts,
-                hrefs = hrefs,#hrefs,
-                images = images,
-                #enlarge = TRUE,
-                image_frame_size = 6,
-                title = "",
-                #enlarge_method = "modal",
-                style = "height: 100vh;"
-                )
+            texts = append(texts, combname)
+            hrefs = append(hrefs, combhref)
+            images = append(images, combimage)
         }
     }
+
+    gallery(
+        texts = texts,
+        hrefs = hrefs,
+        images = images,
+        image_frame_size = 4,
+        title = "",
+        style = "height: 100vh;"
+        )
     
 }) %>% shiny::bindEvent(input$generate_hic)

@@ -36,18 +36,10 @@ dashboardBody(
                                         collapsible = TRUE,collapsed = TRUE,
                                         selectHiCoptionsUI
                                     ), # end box
-                                    
-                                    
-                                    box(width=12,title = "ChIP-seq 1",status = "success", solidHeader = TRUE,
+                                    box(width=12,title = "ChIP-seq",status = "success", solidHeader = TRUE,
                                         collapsible = TRUE,collapsed = TRUE,
                                         chiponeOptionsUI
-                                    ), # end box   
-                                    
-                                    
-                                    box(width=12,title = "ChIP-seq 2",status = "info", solidHeader = TRUE,
-                                        collapsible = TRUE,collapsed = TRUE, 
-                                        chiptwoOptionsUI
-                                    ),
+                                    ), # end box
                                     box(width=12,title = "Colour Compartments",status = "warning", solidHeader = TRUE,
                                         collapsible = TRUE,collapsed = TRUE,
                                         comp_UI

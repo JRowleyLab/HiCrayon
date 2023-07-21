@@ -4,24 +4,15 @@ chiponeOptionsUI <- div(
                 condition = "input.chip1 == true",
               fluidRow(
                 column(5,
-                  textInput("n1", label = "Name"),
-                ),
-                column(5,
-                  colourInput("colchip1", "Select colour", "blue"),
-                )
-              ),
-              fluidRow(
-                column(5,
                   shinyFilesButton(
                     'bw1', 
                     label = 'Select bigwig', 
                     title = 'Please select a .bigwig/.bw file', 
-                    multiple=FALSE),
-                ),
-                column(5,
-                  verbatimTextOutput('f1_bw1')
+                    multiple=TRUE),
                 )
-              ),
+                ),
+                # Dynamic ChIP UI
+                uiOutput("chipUI"),
               checkboxInput("advancedparameters", "Advanced Parameters"),
           conditionalPanel(
                 condition = "input.advancedparameters == true",
