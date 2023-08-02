@@ -375,7 +375,35 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, sample, hicalpha, bedalpha
 
 	return notwwwlocation
 
+# check that the bedgraph binsize matches that
+# of the chosen binsize of Hi-C
+def checkBedBinsize(df, binsize):
+    print('checking bedsize')
+    bedbinsize = df['stop'].iloc[10] - df['start'].iloc[10]
+    return bedbinsize == binsize
 
+# Add missing bins and store as 0
+def addEmptyBins(df, chrom, start, stop, binsize):
+	# Setup model dataframe
+    print(1)
+    starts = [x for x in range(start, stop, binsize)]
+    stops = [x for x in range(start+binsize, stop+binsize, binsize)]
+    print(2)
+    chr = [chrom] * len(starts)
+    value = [0] * len(starts)
+    print(3)
+    emptyval = list(zip(chr,starts,stops,value))
+    dfnew = pd.DataFrame(emptyval, columns=['chrom','start', 'stop', 'value'])
+
+    # Merge on old dataframe and take new rows as 0
+    df['chrom'] = chrom
+    dfmerged = df.merge(dfnew, how='right', on=['chrom', 'start', 'stop'], )
+    dfmerged['value_x'][dfmerged['value_x'].apply(math.isnan)] = 0
+    dfmerged.drop(['value_y'], axis=1, inplace=True)
+    dfmerged.sort_values(['chrom', 'start'], inplace=True)
+    dfmerged.rename({'value_x': 'value'}, axis=1, inplace=True)
+
+    return dfmerged
 
 def filterCompartments(comp, chrom, start, stop):
     print("filtering compartments")

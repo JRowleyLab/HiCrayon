@@ -25,14 +25,21 @@ output$gallery <- renderUI({
             combname <- "" 
             for(i in combinedchips$chips){
                 combname = paste(combname, input[[paste("n", LETTERS[i], sep = "_")]], sep = " ") 
-                combhref = ""
-                combimage = paste(chipcombinedplot(), ".svg", sep="")
             }
+            combhref = ""
+            combimage = paste(chipcombinedplot(), ".svg", sep="")
 
             texts = append(texts, combname)
             hrefs = append(hrefs, combhref)
             images = append(images, combimage)
         }
+    }
+
+    if(input$bedgraph){
+        #add begraph to texts, hrefs, images
+        texts = append(texts, "Combination")
+        hrefs = append(hrefs, "")
+        images = append(images, paste(comp_plot(), ".svg", sep=""))
     }
 
     gallery(

@@ -1,12 +1,32 @@
 filter_compartments <- reactive({
     validate(need(bedv$y, "Please upload compartments bed file"))
 
-    filterCompartments(
+    compsdf <- filterCompartments(
         bedv$y, 
         input$chr, 
         input$start, 
         input$stop)
+
+    # Check binsize of bedgraph
+    boolean <- checkBedBinsize(compsdf, as.integer(input$bin))
+    validate(need(
+        boolean==TRUE, 
+        "Bedgraph binsize does not match selected binsize"))
+
+    return(compsdf)
+
 })  %>% shiny::bindEvent(input$generate_hic)
+
+
+addbins_compartments <- reactive({
+    print("adding empty bins")
+    #add in addemptybins section
+    addEmptyBins(df = filter_compartments(),
+                 chrom = input$chr,
+                 start = input$start,
+                 stop = input$stop,
+                 binsize = as.integer(input$bin))
+}) %>% shiny::bindEvent(input$generate_hic)
 
 scale_compartments <- reactive({
     req(hicv$y)
@@ -18,7 +38,8 @@ scale_compartments <- reactive({
     
     comps <- scaleCompartments(
         disthic = hic_distance(),
-        comp_df = filter_compartments(),
+        #comp_df = filter_compartments(),
+        comp_df = addbins_compartments(),
         Acol = rgbA,
         Bcol = rgbB
         )
@@ -53,7 +74,8 @@ comp_plot <- reactive({
 
     plotCompartments(
         disthic = hic_distance(), 
-        comp = filter_compartments(), 
+        #comp = filter_compartments(),
+        comp = addbins_compartments(),
         ABmat = comp_LNERP(),
         colA = input$colcompA,
         colB = input$colcompB,

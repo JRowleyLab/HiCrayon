@@ -43,7 +43,7 @@ if (is.integer(input$bedg1[1])) {
 ##################################
 
 # hic file handling
-hicv <- reactiveValues(y = "NULL")
+hicv <- reactiveValues()
 observeEvent(input$hic, {
     inFile <- parseFilePaths(roots = c(wd = workingdir), input$hic)
     hicv$y <- inFile$datapath
@@ -63,7 +63,7 @@ observeEvent(input$bw1, {
 })
 
 # bedgraph file handling
-bedv <- reactiveValues(y = "NULL")
+bedv <- reactiveValues()
 observeEvent(input$bedg1, {
     inFile <- parseFilePaths(roots = c(wd = workingdir), input$bedg1)
     bedv$y <- inFile$datapath

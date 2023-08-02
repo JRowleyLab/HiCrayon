@@ -113,9 +113,24 @@ chipcombinedplot <- reactive({
     m2 <- chipalpha()[[chipstocombine[2]]]
 
     i <- 2
+
+    #combine m1 + m2 lnerp.
+    # then iterate through rest of m's
+    # and lnerp with result from previous
+
     while(i <= length(chipstocombine)){
+
         m3 <- lnerp_matrices(m1, m2)
+
+        if(i < length(chipstocombine)){
+            # update matrices
+            m1 <- m3
+            m2 <- chipalpha()[[chipstocombine[i+1]]]
+        }
+
+        # update counter
         i <- i + 1
+
     }
 
     # bigwig tracks

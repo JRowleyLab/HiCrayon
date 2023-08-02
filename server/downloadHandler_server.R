@@ -12,25 +12,42 @@ zipfolder <- reactive({
     }
 
     files = c()
-    files = append(files, paste("www/", hicplot(), ".svg", sep = ""))
-    files = append(files, paste("www/", hicplot(), ".png", sep = ""))
 
-    if(input$chip1){ 
-        files = append(files, paste("www/", p1plot(), ".svg", sep = ""))
-        files = append(files, paste("www/", p1plot(), ".png", sep = ""))
+    files = append(files, paste("www/", hicplot(), ".svg", sep = "") )
+    files = append(files, paste("www/", hicplot(), ".png", sep = "") )
+
+    # Control inclusion through checkbox
+    if(input$chip1){
+        # Dynamically add chip data
+        for(i in seq_along(reactiveValuesToList(bw1v))){
+            files = append(
+              files, paste("www/", chipplot()[i], ".svg", sep = "")
+              )
+            files = append(
+              files, paste("www/", chipplot()[i], ".png", sep = "")
+              )
         }
-    if(input$chip2){ 
-        files = append(files, paste("www/", p2plot(), ".svg", sep = ""))
-        files = append(files, paste("www/", p2plot(), ".png", sep = ""))
-        files = append(files, paste("www/", p1and2plot(), ".svg", sep = ""))
-        files = append(files, paste("www/", p1and2plot(), ".png", sep = ""))
+        if(length(combinedchips$chips) > 1){
+            combname <- "" 
+              files = append(
+                files, paste("www/",chipcombinedplot(), ".svg", sep = "")
+              )
+              files = append(
+                files, paste("www/",chipcombinedplot(), ".png", sep = "")
+              )
         }
-    if(input$bedgraph){
-      files = append(files, paste("www/", comp_plot(), ".svg", sep = ""))
-      files = append(files, paste("www/", comp_plot(), ".png", sep = ""))
     }
 
-    print(files)
+    if(input$bedgraph){
+      files = append(
+                files, paste("www/",comp_plot(), ".svg", sep="")
+              )
+      files = append(
+                files, paste("www/",comp_plot(), ".png", sep="")
+              )
+    }
+
+    print(paste0("FILES: ",files))
 
     zip(zipfile = zipfile, files = files, mode = "cherry-pick")
 
