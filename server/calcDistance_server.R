@@ -1,13 +1,11 @@
 hic_distance <- reactive({
 
-    if(input$disthic){
-        matrix <- distanceMatHiC(
-                    hicnumpy = HiCmatrix()
-                )
-    }else {
-       matrix <- HiCmatrix()
-    }
-    
+    matrix <- distanceMatHiC(
+                hicnumpy = HiCmatrix(),
+                thresh = input$thresh,
+                distnorm = input$disthic
+            )
+
     return(matrix)
 
 }) %>% shiny::bindEvent(input$generate_hic)

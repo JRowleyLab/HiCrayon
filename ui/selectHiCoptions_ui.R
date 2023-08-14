@@ -50,14 +50,17 @@ selectHiCoptionsUI <- div(fluidRow(
                             )
                         ),
                         fluidRow(
-                            column(3,
-                                checkboxInput("log", "Log Scale", value=TRUE)
+                            column(4,
+                                checkboxInput("log", "Log Scale", value=FALSE)
                             ),
-                            column(3,
+                            column(4,
                                 checkboxInput("chipscale", "Scale ChIP w/ HiC", value=TRUE)
                             ),
-                            column(3,
+                            column(4,
                                 checkboxInput("disthic", "Distance normalize HiC", value=TRUE)
+                            ),
+                            column(12,
+                                numericInput("thresh", "HiC Threshold", min=0, max=30, value=2)
                             )
                         )
 )

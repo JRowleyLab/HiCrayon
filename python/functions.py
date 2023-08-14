@@ -85,28 +85,36 @@ def readHiCasNumpy(hicfile, chrom, start, stop, norm, binsize):
 # Cut down version of distanceMat() to work for just HiC Map
 # Obtain distance matrix of HiC map,
 # Normalized using threshold value
-def distanceMatHiC(hicnumpy):
-	thresh = 2
-	print("Beginning distance matrix HiC")
+def distanceMatHiC(hicnumpy, thresh, distnorm):
+	
 	matsize = len(hicnumpy)
-	print(matsize)
-	mydiags=[]
-	for i in range(0,len(hicnumpy)):
-		mydiags.append(np.nanmean(np.diag(hicnumpy, k=i)))
 
+    # Distance normalize
+	if distnorm == True:
+		mydiags=[]
+		for i in range(0,len(hicnumpy)):
+			mydiags.append(np.nanmean(np.diag(hicnumpy, k=i)))
+		
 	distnormmat = np.zeros((matsize,matsize))
+	
+
 	for x in range(0,matsize):
 		for y in range(x,matsize):
-			distance=y-x
-			hicscore = (hicnumpy[x,y] + 1)/(mydiags[distance]+1)
+			# set hicscore as distance normalized
+			if distnorm == True:
+				distance=y-x
+				hicscore = (hicnumpy[x,y] + 1)/(mydiags[distance]+1)
+			# or don't
+			else:
+				hicscore = hicnumpy[x,y]
 			if hicscore > thresh:
 				distnormmat[x,y] = thresh
 				distnormmat[y,x] = thresh
-				satscore = 1
+				#satscore = 1
 			else:
 				distnormmat[x,y] = hicscore
 				distnormmat[y,x] = hicscore
-				satscore = hicscore/thresh
+				#satscore = hicscore/thresh
 	print("done")
 	return(distnormmat)
 
@@ -154,7 +162,8 @@ def calcAlphaMatrix(chip,disthic,showhic,r,g,b):
     chip_arr = np.array(chip)
     chip_norm = (chip_arr-np.min(chip_arr))/(np.max(chip_arr)-np.min(chip_arr))
 
-
+    # True: scale ChIP by Hi-C
+    # false: raw ChIP not weighted by Hi-C
     if(showhic==True):
         # Normalize hic matrix to between 0 and 1
         distscaled = (disthic-np.min(disthic))/(np.max(disthic)-np.min(disthic))
