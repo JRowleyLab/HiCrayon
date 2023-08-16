@@ -207,29 +207,31 @@ def calcAlphaMatrix(chip,disthic,showhic,r,g,b):
 
 # Use Linear interpolation to calculate
 # the alpha weighted color mixing ratio
-def lnerp_matrices(m1, m2):
+def lnerp_matrices(matrices):
     print("LNERP...")
-    # Alpha values normalized to 1
-    a1 = m1[:,:,3:4]/255
-    a2 = m2[:,:,3:4]/255
-
-    # Blend ratio
-    br = a1 / (a1 + a2)
-
-    # Linear interpolation for color mixing
-    r = (m1[:,:,:1] * br) + (m2[:,:,:1] * (1 - br))
-    g = (m1[:,:,1:2] * br) + (m2[:,:,1:2] * (1 - br))
-    b = (m1[:,:,2:3] * br) + (m2[:,:,2:3] * (1 - br))
-    # Sum alpha values. Data type is changed to 16 bit for addition to
-    # prevent data overflow, then clipped to 255
-    fa = np.array(m1[:,:,3:4].astype('int16') + m2[:,:,3:4].astype('int16'))
-    fa = np.clip(fa, 0, 255)
+        
+    # Extract alpha values scaled to 0-255 for each matrix
+    alpha_values = [matrix[:, :, 3:4] for matrix in matrices]
     
-    # Stack R,G,B,A channels
-    # Data type now back to 8 bit
-    mat = (np.dstack((r,g,b,fa))).astype(np.uint8)
-
-    return mat
+    # Calculate the total sum of alpha values for weighting
+    total_alpha = np.sum(alpha_values, axis=0)
+    
+    # Calculate blend ratios for each matrix
+    blend_ratios = [alpha / total_alpha for alpha in alpha_values]
+    
+    # Initialize color channels
+    color_channels = [matrix[:, :, :3] for matrix in matrices]
+    
+    # Perform linear interpolation for color mixing
+    mixed_color_channels = np.sum([color * blend_ratio for color, blend_ratio in zip(color_channels, blend_ratios)], axis=0)
+    
+    # Ensure that the final alpha value is 255
+    mixed_alpha = np.clip(total_alpha, 0, 255)
+    
+    # Combine color channels and summed alpha values
+    mixed_matrix = np.dstack((mixed_color_channels, mixed_alpha)).astype(np.uint8)
+    
+    return mixed_matrix
 
 # Return a list of all possible sequential
 # matplotlib colormaps

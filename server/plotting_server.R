@@ -108,30 +108,12 @@ chipcombinedplot <- reactive({
     #chip, r, g, b, disthic, sample, chip2, hicalpha, opacity
     print(paste('plotting combined:', chipstocombine))
 
-    # first two chips
-    m1 <- chipalpha()[[chipstocombine[1]]]
-    m2 <- chipalpha()[[chipstocombine[2]]]
 
-    i <- 2
+    allchips <- lapply(chipstocombine, function(x){
+        chipalpha()[[chipstocombine[x]]]
+    })
 
-    #combine m1 + m2 lnerp.
-    # then iterate through rest of m's
-    # and lnerp with result from previous
-
-    while(i <= length(chipstocombine)){
-
-        m3 <- lnerp_matrices(m1, m2)
-
-        if(i < length(chipstocombine)){
-            # update matrices
-            m1 <- m3
-            m2 <- chipalpha()[[chipstocombine[i+1]]]
-        }
-
-        # update counter
-        i <- i + 1
-
-    }
+    m3 <- lnerp_matrices(allchips)
 
     # bigwig tracks
     tracks <- list()
