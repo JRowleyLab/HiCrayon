@@ -43,5 +43,36 @@ observe(
 observe(
     updateSelectizeInput(session, "bin",
         choices = HiCmetadata()$res,
-        selected = "10000")
+        selected = HiCmetadata()$res[1])
 )
+
+# Set maximum value for coordinates based on chromosome
+idx <- reactive({
+    which(input$chr==HiCmetadata()$chrs)
+})
+
+observe(
+    updateAutonumericInput(
+            session = session, 
+            inputId = "start",
+            options = list(maximumValue = HiCmetadata()$lengths[idx()] )
+        )
+)
+
+
+observe(
+    updateAutonumericInput(
+            session = session, 
+            inputId = "stop",
+            options = list(maximumValue = HiCmetadata()$lengths[idx()] )
+        )
+)
+
+
+observeEvent(input$endofchrom, {
+    updateAutonumericInput(
+            session = session, 
+            inputId = "stop",
+            value = HiCmetadata()$lengths[idx()]
+        )
+})

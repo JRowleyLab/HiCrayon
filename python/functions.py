@@ -37,13 +37,15 @@ def getHiCmetadata(hicfile):
 	# Chromosome list
 	chroms = hicdump.getChromosomes()[1:]
 	chrlist = []
+	lengths = []
 	for x in chroms:
 		chrlist.append(x.name)
+		lengths.append(x.length)
 	
 	# Resolution list
 	res = hicdump.getResolutions()
 
-	return chrlist, res
+	return chrlist, res, lengths
 
 
 def readCoolHiC(mcool, chrom, start, stop, norm, binsize):

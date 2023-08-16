@@ -46,7 +46,8 @@ selectHiCoptionsUI <- div(fluidRow(
                                     value = 69000000, 
                                     minimumValue = 0, 
                                     maximumValue = 1000000000,
-                                    allowDecimalPadding = FALSE)
+                                    allowDecimalPadding = FALSE),
+                                actionButton("endofchrom", "Chr end")
                             )
                         ),
                         fluidRow(

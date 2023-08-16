@@ -9,6 +9,7 @@ HiCmetadata <- reactive({
 
         chrs = tuple(metadata, convert = T)[0]
         res = tuple(metadata, convert = T)[1]
+        lengths = tuple(metadata, convert = T)[2]
     }else if (hicv$type=='mcool') {
        mcoolfile = hicv$y
        metadata = coolerMetadata(mcoolfile)
@@ -20,7 +21,8 @@ HiCmetadata <- reactive({
 
     return(list(
         chrs = chrs,
-        res = res
+        res = res,
+        lengths = lengths
         ))
 })
 
