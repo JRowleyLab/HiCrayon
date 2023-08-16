@@ -61,7 +61,7 @@ comp_LNERP <- reactive({
     m1 <- scale_compartments()$Amatrix
     m2 <- scale_compartments()$Bmatrix
 
-    m3 = lnerp_matrices(m1, m2)
+    m3 = lnerp_matrices(list(m1, m2))
 
     return(m3)
 }) %>% shiny::bindEvent(input$generate_hic)
