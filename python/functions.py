@@ -49,12 +49,9 @@ def getHiCmetadata(hicfile):
 
 
 def readCoolHiC(mcool, chrom, start, stop, norm, binsize):
-    print(f"{mcool} + {chrom} + {start}+ {stop}+ {binsize}")
     cool = f"{mcool}::/resolutions/{binsize}"
-    print(cool)
     c = cooler.Cooler(cool)
     string = f"{chrom}:{str(start)}-{str(stop+1)}"
-    print(string)
     mat = c.matrix().fetch(string)
     return mat
 
@@ -117,7 +114,6 @@ def distanceMatHiC(hicnumpy, thresh, distnorm):
 				distnormmat[x,y] = hicscore
 				distnormmat[y,x] = hicscore
 				#satscore = hicscore/thresh
-	print("done")
 	return(distnormmat)
 
 
@@ -125,7 +121,6 @@ def distanceMatHiC(hicnumpy, thresh, distnorm):
 # bigwig peak values
 def processBigwigs(bigwig,binsize,chrom,start,stop, log):
 
-	print("processing bigwigs...")
 	start=int(start)
 	binsize=int(binsize)
 	stop=int(stop)
@@ -151,7 +146,6 @@ def processBigwigs(bigwig,binsize,chrom,start,stop, log):
 	for i in bwraw:
 		bwlog.append(math.log(i+0.01))
 		
-	print("done bigwig")
 	return bwlog, bwraw
 
 # Convert bigwig values to an RGBA array
@@ -159,6 +153,7 @@ def processBigwigs(bigwig,binsize,chrom,start,stop, log):
 # TODO: have an option to also use HiC value
 # scale the alpha.
 def calcAlphaMatrix(chip,disthic,showhic,r,g,b):
+    print('calculating alpha...')
     matsize = len(chip)
     # Normalize chip list to between 0 and 1
     chip_arr = np.array(chip)
@@ -210,7 +205,6 @@ def calcAlphaMatrix(chip,disthic,showhic,r,g,b):
 # Use Linear interpolation to calculate
 # the alpha weighted color mixing ratio
 def lnerp_matrices(matrices):
-    print("LNERP...")
         
     # Extract alpha values scaled to 0-255 for each matrix
     alpha_values = [matrix[:, :, 3:4] for matrix in matrices]
@@ -259,7 +253,6 @@ def hic_plot(cmap, distnormmat, chrom, bin, start, stop, norm):
 	# as webpage doesn't recognise it has
 	# changed if the filename hasn't changed.
 	for f in glob.glob('./www/images/HiC_*.*'):
-		print(f'Removing image: {f}')
 		os.remove(f)
 
 	# Save distance normalized HiC plot and display. This is base functionality of the app and 
@@ -296,11 +289,9 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, sample, hicalpha, bedalpha
 	#color can be hexidecimal
 	mat = mat.astype(np.uint8)
 
-	print(f"Plotting {sample}...")
 	#remove previously generated images
 
 	for f in glob.glob(f'./www/images/{sample}-*.*'):
-		print(f'Removing image: {f}')
 		os.remove(f)
 
 	# Set up CMAP for HiC background
@@ -391,20 +382,16 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, sample, hicalpha, bedalpha
 # check that the bedgraph binsize matches that
 # of the chosen binsize of Hi-C
 def checkBedBinsize(df, binsize):
-    print('checking bedsize')
     bedbinsize = df['stop'].iloc[10] - df['start'].iloc[10]
     return bedbinsize == binsize
 
 # Add missing bins and store as 0
 def addEmptyBins(df, chrom, start, stop, binsize):
 	# Setup model dataframe
-    print(1)
     starts = [x for x in range(start, stop, binsize)]
     stops = [x for x in range(start+binsize, stop+binsize, binsize)]
-    print(2)
     chr = [chrom] * len(starts)
     value = [0] * len(starts)
-    print(3)
     emptyval = list(zip(chr,starts,stops,value))
     dfnew = pd.DataFrame(emptyval, columns=['chrom','start', 'stop', 'value'])
 
@@ -419,7 +406,6 @@ def addEmptyBins(df, chrom, start, stop, binsize):
     return dfmerged
 
 def filterCompartments(comp, chrom, start, stop):
-    print("filtering compartments")
     # Filter compartments bedGraph by selected region
     comp = pd.read_csv(comp, sep="\t", header=None, dtype={0: 'string'}, on_bad_lines='skip')
     comp.columns = ['chrom', 'start', 'stop', 'value']
@@ -440,7 +426,6 @@ def scaleCompartments(disthic, comp_df, Acol, Bcol):
     distscaled = (disthic-np.min(disthic))/(np.max(disthic)-np.min(disthic))
 
     comp_arr = comp_df['value']
-    print("1")
     Acomp = np.where(comp_arr<0, 0, comp_arr)
     Bcomp = np.where(comp_arr>0, 0, comp_arr)
     # #Normalize on IQR
@@ -449,11 +434,9 @@ def scaleCompartments(disthic, comp_df, Acol, Bcol):
     # comp_arr_IQR_norm = comp_arr / iqr
     # Normalize data to between -1 and 1
     # Scale A compartment to 0 and 1
-    print("2")
     min = 0
     max = 1
     Anormd = (((Acomp-np.min(Acomp)) * ( (max) - (min))) / (np.max(Acomp) - np.min(Acomp))) + min
-    print("2")
     # SCale B compartment to 0 and -1
     min = 0
     max = -1
@@ -501,7 +484,6 @@ def plotCompartments(disthic, comp, ABmat, colA, colB, chrom, start, stop):
     
     # Remove previous images of compartments
     for f in glob.glob('./www/images/compartments-*.*'):
-        print(f'Removing image: {f}')
         os.remove(f)
 
     # Plot HiC map and compartment tracks

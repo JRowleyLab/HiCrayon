@@ -47,12 +47,10 @@ zipfolder <- reactive({
               )
     }
 
-    print(paste0("FILES: ",files))
-
     zip(zipfile = zipfile, files = files, mode = "cherry-pick")
 
     return(zipfile)
-}) %>% shiny::bindEvent(input$generate_hic, input$downloadtree)
+}) 
 
 
 
@@ -66,7 +64,7 @@ output$downloadtree <- downloadHandler(
     file.copy(zipfolder(), file)
   },
   contentType = "application/zip"
-) %>% shiny::bindEvent(input$generate_hic, input$downloadtree)
+) 
 
 
 observeEvent(input$generate_hic, {

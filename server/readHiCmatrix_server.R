@@ -1,7 +1,6 @@
 HiCmetadata <- reactive({
 
     validate(need(hicv$y!="NULL", "Please upload a HiC file"))
-    print(hicv$type)
 
     if(hicv$type=='hic'){
         hicfile = hicv$y
@@ -16,8 +15,6 @@ HiCmetadata <- reactive({
        chrs = tuple(metadata, convert = T)[0]
        res = tuple(metadata, convert = T)[1]
     }
-
-    print("metadata done")
 
     return(list(
         chrs = chrs,
@@ -55,4 +52,4 @@ HiCmatrix <- reactive({
     }
 
     return(matrix)
-}) %>% shiny::bindEvent(input$generate_hic)
+}) 

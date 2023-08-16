@@ -15,18 +15,16 @@ filter_compartments <- reactive({
 
     return(compsdf)
 
-})  %>% shiny::bindEvent(input$generate_hic)
-
+})  
 
 addbins_compartments <- reactive({
-    print("adding empty bins")
     #add in addemptybins section
     addEmptyBins(df = filter_compartments(),
                  chrom = input$chr,
                  start = input$start,
                  stop = input$stop,
                  binsize = as.integer(input$bin))
-}) %>% shiny::bindEvent(input$generate_hic)
+}) 
 
 scale_compartments <- reactive({
     req(hicv$y)
@@ -52,7 +50,7 @@ scale_compartments <- reactive({
         Bmatrix = Bmatrix
      ))
 
-}) %>% shiny::bindEvent(input$generate_hic)
+}) 
 
 
 comp_LNERP <- reactive({
@@ -64,7 +62,7 @@ comp_LNERP <- reactive({
     m3 = lnerp_matrices(list(m1, m2))
 
     return(m3)
-}) %>% shiny::bindEvent(input$generate_hic)
+}) 
 
 
 
@@ -83,4 +81,4 @@ comp_plot <- reactive({
         start = input$start,
         stop = input$stop
         )
-}) %>% shiny::bindEvent(input$generate_hic)
+}) 

@@ -8,7 +8,6 @@ bwlist_ChIP1 <- reactive({
     raws = list()
 
     lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
-        print(paste("Bigwig path: ", bw1v[[LETTERS[x]]]))
 
         bwlist <- processBigwigs(
             bigwig = bw1v[[LETTERS[x]]],
@@ -28,4 +27,4 @@ bwlist_ChIP1 <- reactive({
         logs = logs,
         raws = raws
         ))
-}) %>% shiny::bindEvent(input$generate_hic, input$chip1)
+}) 

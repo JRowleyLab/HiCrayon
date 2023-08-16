@@ -7,7 +7,7 @@ hicplot <- reactive({
              stop = input$stop,
              norm = input$norm
              )
-}) %>% shiny::bindEvent(input$generate_hic)
+}) 
 
 
 chipalpha <- reactive({
@@ -32,7 +32,7 @@ chipalpha <- reactive({
     })
 
     return(chipalphas)
-}) %>% shiny::bindEvent(input$generate_hic, input$chip1) 
+}) 
 
 chipplot <- reactive({
 
@@ -46,7 +46,6 @@ chipplot <- reactive({
         
         # Overwrite the colour and track for single chips
         col[1] <- input[[paste("col", LETTERS[[x]], sep="_")]]
-        print(col)
 
         if(input$log==TRUE){
             track[[1]] <- bwlist_ChIP1()$logs[[x]]
@@ -76,14 +75,13 @@ chipplot <- reactive({
 
     return(images)
 
-}) %>% shiny::bindEvent(input$generate_hic, input$chip1) 
+}) 
 
 
 
 combinedchips <- reactiveValues()
 observeEvent(input$generate_hic, {
     chipstocombine <- c()
-    print('observing chips')
     # Combine ChIPs that are selected for
     # combination from checkbox
     for(i in seq_along(reactiveValuesToList(bw1v))){
@@ -106,9 +104,9 @@ chipcombinedplot <- reactive({
     # Combine ChIP data from protein 1
     # and protein 2
     #chip, r, g, b, disthic, sample, chip2, hicalpha, opacity
-    print(paste('plotting combined:', chipstocombine))
 
-
+    #this doesn't seem to work when you skip a chip for
+    # combination
     allchips <- lapply(chipstocombine, function(x){
         chipalpha()[[chipstocombine[x]]]
     })
@@ -148,4 +146,4 @@ chipcombinedplot <- reactive({
         name = names
         )
 
-}) %>% shiny::bindEvent(input$generate_hic) 
+}) 

@@ -6,8 +6,6 @@ output$gallery <- renderUI({
 
     validate(need(hicv$y!="NULL", "Please upload a HiC file"))
 
-    print('gallery')
-
     # Initialise with HiC data
     texts <- c("HiC")
     images <- c(paste(hicplot(), ".svg", sep=""))

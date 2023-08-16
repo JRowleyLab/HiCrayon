@@ -8,4 +8,4 @@ hic_distance <- reactive({
 
     return(matrix)
 
-}) %>% shiny::bindEvent(input$generate_hic)
+}) 
