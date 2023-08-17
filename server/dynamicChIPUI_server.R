@@ -46,12 +46,14 @@ observeEvent(input$addBtn, {
                 title = 'Please select a .bigwig/.bw file', 
                 multiple=FALSE),
             ),
-            column(8,
+            column(6,
                 textInput(
                     paste0('urlchip',nr),
                     label="",
                     placeholder = "https://<file.bigwig>")
-            )
+            ),
+            column(2,
+                actionButton(paste0('loadurlchip',nr), label = "Add URL"))
         ),
         fluidRow(
             # Update in server to the basename minus the suffix
@@ -81,6 +83,7 @@ observeEvent(input$addBtn, {
       )
       # NULL the filepath
       bw1v[[paste0("bw",nr)]] <- NULL
+      #print(str(reactiveValuesToList(bw1v)))
     })
     # Set up file handling for local files
     shinyFileChoose(input, paste0("bw",nr), root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
@@ -88,6 +91,7 @@ observeEvent(input$addBtn, {
     observeEvent(input[[paste0("bw",nr)]], {
         inFile <- parseFilePaths(roots = c(wd = workingdir), input[[paste0("bw",nr)]])
          bw1v[[paste0("bw",nr)]] <- inFile$datapath
+         #print(str(reactiveValuesToList(bw1v)))
         # Update text with file name
          updateTextInput(
             session,
@@ -95,4 +99,12 @@ observeEvent(input$addBtn, {
             value = tools::file_path_sans_ext(basename(bw1v[[paste0("bw",nr)]]))
             )
     }) 
+    observeEvent(input[[paste0('loadurlchip',nr)]], {
+        bw1v[[paste0("bw",nr)]] <- input[[paste0('urlchip',nr)]]
+        updateTextInput(
+            session,
+            inputId = paste0("n", nr),
+            value = tools::file_path_sans_ext(basename(bw1v[[paste0("bw",nr)]]))
+            )
+    })
   })

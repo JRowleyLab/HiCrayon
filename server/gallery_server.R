@@ -15,9 +15,12 @@ output$gallery <- renderUI({
     if(input$chip1){
         # Dynamically add chip data
         for(i in seq_along(reactiveValuesToList(bw1v))){
-            texts[i+1] <- input[[paste0("n", i)]]
-            hrefs = append(hrefs, "")
-            images[i+1] <- paste0(chipplot()[i], ".svg")
+
+            if(!is.null(bw1v[[paste0("bw",i)]])){
+                texts[i+1] <- input[[paste0("n", i)]]
+                hrefs = append(hrefs, "")
+                images[i+1] <- paste0(chipplot()[i], ".svg")
+        }
         }
         if(length(combinedchips$chips) > 1){
             combname <- "" 

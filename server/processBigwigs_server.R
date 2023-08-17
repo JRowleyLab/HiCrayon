@@ -9,8 +9,8 @@ bwlist_ChIP1 <- reactive({
 
     lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
 
-
-        bwlist <- processBigwigs(
+        if(!is.null(bw1v[[paste0("bw",x)]])){
+            bwlist <- processBigwigs(
             bigwig = bw1v[[paste0("bw",x)]],
             binsize = as.integer(input$bin),
             chrom = input$chr,
@@ -18,10 +18,9 @@ bwlist_ChIP1 <- reactive({
             stop = input$stop,
             log = input$log
             )
-
         logs[[x]] <<- tuple(bwlist, convert=T)[0]
         raws[[x]] <<- tuple(bwlist, convert=T)[1]
-
+        }
     })
 
     return(list(

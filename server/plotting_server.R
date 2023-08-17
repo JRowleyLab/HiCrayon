@@ -17,18 +17,22 @@ chipalpha <- reactive({
     chipalphas <- list()
 
     lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
-        col <- input[[paste0("col", x)]]
-        rgb <- col2rgb(col)
 
-        m1 <- calcAlphaMatrix(
-            bwlist_ChIP1()$logs[[x]],
-            hic_distance(),
-            input$chipscale,
-            rgb[1], 
-            rgb[2], 
-            rgb[3])
+        if(!is.null(bw1v[[paste0("bw",x)]])){
 
-        chipalphas[[x]] <<- m1
+            col <- input[[paste0("col", x)]]
+            rgb <- col2rgb(col)
+
+            m1 <- calcAlphaMatrix(
+                bwlist_ChIP1()$logs[[x]],
+                hic_distance(),
+                input$chipscale,
+                rgb[1], 
+                rgb[2], 
+                rgb[3])
+
+            chipalphas[[x]] <<- m1
+        }
     })
 
     return(chipalphas)
@@ -43,34 +47,37 @@ chipplot <- reactive({
     col <- list()
 
     lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
+
+        if(!is.null(bw1v[[paste0("bw",x)]])){
         
-        # Overwrite the colour and track for single chips
-        col[1] <- input[[paste0("col", x)]]
+            # Overwrite the colour and track for single chips
+            col[1] <- input[[paste0("col", x)]]
 
-        if(input$log==TRUE){
-            track[[1]] <- bwlist_ChIP1()$logs[[x]]
-        }else {
-            track[[1]] <- bwlist_ChIP1()$raws[[x]]
+            if(input$log==TRUE){
+                track[[1]] <- bwlist_ChIP1()$logs[[x]]
+            }else {
+                track[[1]] <- bwlist_ChIP1()$raws[[x]]
+            }
+
+            p1_plot <- ChIP_plot(
+                disthic = hic_distance(),
+                col1 = col,
+                mat = chipalpha()[[x]],
+                chip = track,
+                disthic_cmap = input$chip_cmap,
+                hicalpha = input$hicalpha,
+                bedalpha = input$bedalpha,
+                sample = paste0("ChIP", x, sep=""),
+                chrom = input$chr,
+                bin = input$bin, 
+                start = input$start,
+                stop = input$stop,
+                norm = input$norm,
+                name = input[[paste0("n", x)]]
+                )
+
+            images[x] <<- p1_plot
         }
-
-        p1_plot <- ChIP_plot(
-            disthic = hic_distance(),
-            col1 = col,
-            mat = chipalpha()[[x]],
-            chip = track,
-            disthic_cmap = input$chip_cmap,
-            hicalpha = input$hicalpha,
-            bedalpha = input$bedalpha,
-            sample = paste0("ChIP", x, sep=""),
-            chrom = input$chr,
-            bin = input$bin, 
-            start = input$start,
-            stop = input$stop,
-            norm = input$norm,
-            name = input[[paste0("n", x)]]
-            )
-
-        images[x] <<- p1_plot
     })
 
     return(images)
@@ -85,11 +92,15 @@ observeEvent(input$generate_hic, {
     # Combine ChIPs that are selected for
     # combination from checkbox
     for(i in seq_along(reactiveValuesToList(bw1v))){
-        if(input[[paste0("comb", i)]] == TRUE){
-            chipstocombine = append(chipstocombine, i)
+
+        if(!is.null(bw1v[[paste0("bw",i)]])){
+
+            if(input[[paste0("comb", i)]] == TRUE){
+                chipstocombine = append(chipstocombine, i)
+            }
+            combinedchips$chips <- chipstocombine
         }
     }
-    combinedchips$chips <- chipstocombine
 })
 
 

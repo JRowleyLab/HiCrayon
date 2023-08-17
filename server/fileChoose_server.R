@@ -56,6 +56,9 @@ observeEvent(input$loadurlhic, {
 
 # bw1 file handling
 bw1v <- reactiveValues()
+
+
+
 # observeEvent(input$bw1, {
 #     inFile <- parseFilePaths(roots = c(wd = workingdir), input$bw1)
 #     paths <- inFile$datapath

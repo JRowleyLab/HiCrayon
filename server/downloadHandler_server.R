@@ -20,12 +20,15 @@ zipfolder <- reactive({
     if(input$chip1){
         # Dynamically add chip data
         for(i in seq_along(reactiveValuesToList(bw1v))){
+
+          if(!is.null(bw1v[[paste0("bw",i)]])){
             files = append(
               files, paste("www/", chipplot()[i], ".svg", sep = "")
               )
             files = append(
               files, paste("www/", chipplot()[i], ".png", sep = "")
               )
+          }
         }
         if(length(combinedchips$chips) > 1){
             combname <- "" 
