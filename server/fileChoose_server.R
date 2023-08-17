@@ -49,6 +49,11 @@ observeEvent(input$hic, {
     hicv$y <- inFile$datapath
 })
 
+# hic url handling
+observeEvent(input$loadurlhic, {
+    hicv$y <- input$urlhic
+})
+
 # bw1 file handling
 bw1v <- reactiveValues()
 observeEvent(input$bw1, {

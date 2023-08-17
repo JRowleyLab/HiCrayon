@@ -9,6 +9,7 @@ HiCmetadata <- reactive({
         chrs = tuple(metadata, convert = T)[0]
         res = tuple(metadata, convert = T)[1]
         lengths = tuple(metadata, convert = T)[2]
+        hicdump = tuple(metadata, convert = T)[3]
     }else if (hicv$type=='mcool') {
        mcoolfile = hicv$y
        metadata = coolerMetadata(mcoolfile)
@@ -19,9 +20,25 @@ HiCmetadata <- reactive({
     return(list(
         chrs = chrs,
         res = res,
-        lengths = lengths
+        lengths = lengths,
+        hicdump = hicdump
         ))
 })
+
+HiCMatrixZoom <- reactive({
+    validate(need(hicv$y!="NULL", "Please upload a HiC file"))
+
+    hicobject <- hicMatrixZoom(
+        hicdump = HiCmetadata()$hicdump, 
+        chrom = input$chr,
+        norm = input$norm,
+        binsize = as.integer(input$bin))
+
+     message("Loading Hi-C from URL")
+
+    return(hicobject)
+})
+
 
 ##################
 # Based on the conditional button input$yes,
@@ -33,7 +50,7 @@ HiCmatrix <- reactive({
 
     if(hicv$type=='hic'){
         matrix <- readHiCasNumpy(
-        hicfile = hicv$y,
+        hicobject = HiCMatrixZoom(),
         chrom = input$chr,
         start = input$start,
         stop = input$stop,

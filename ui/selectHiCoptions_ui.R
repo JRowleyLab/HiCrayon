@@ -4,7 +4,18 @@ selectHiCoptionsUI <- div(fluidRow(
                             ),
                             column(8,
                             verbatimTextOutput('f1_hic')
-                            ) ),
+                            ) 
+                            ),
+                            fluidRow(
+                                column(8,
+                                    textInput('urlhic',
+                                    label="",
+                                    placeholder = "https://www.encodeproject.org/files/ENCFF750AOC/@@download/ENCFF750AOC.hic")
+                                ),
+                                column(4,
+                                    actionButton('loadurlhic', label = "Load URL")
+                                )
+                            ),
                             fluidRow(
                                 column(4,
                                 selectizeInput("norm", label="Normalization", choices=c("VC", "VC_SQRT", "KR", "NONE"), selected="NONE")
@@ -50,18 +61,22 @@ selectHiCoptionsUI <- div(fluidRow(
                                 actionButton("endofchrom", "Chr end")
                             )
                         ),
-                        fluidRow(
-                            column(4,
-                                checkboxInput("log", "Log Scale", value=FALSE)
-                            ),
-                            column(4,
-                                checkboxInput("chipscale", "Scale ChIP w/ HiC", value=TRUE)
-                            ),
-                            column(4,
-                                checkboxInput("disthic", "Distance normalize HiC", value=TRUE)
-                            ),
-                            column(12,
-                                numericInput("thresh", "HiC Threshold", min=0, max=30, value=2)
-                            )
+                        checkboxInput("hicoptions", "Options"),
+                        conditionalPanel(
+                            condition = "input.hicoptions == true",
+                                fluidRow(
+                                    column(4,
+                                        checkboxInput("log", "Log Scale", value=FALSE)
+                                    ),
+                                    column(4,
+                                        checkboxInput("chipscale", "Scale ChIP w/ HiC", value=TRUE)
+                                    ),
+                                    column(4,
+                                        checkboxInput("disthic", "Distance normalize HiC", value=TRUE)
+                                    ),
+                                    column(12,
+                                        numericInput("thresh", "HiC Threshold", min=0, max=30, value=2)
+                                    )
+                                )
                         )
 )

@@ -45,7 +45,7 @@ def getHiCmetadata(hicfile):
 	# Resolution list
 	res = hicdump.getResolutions()
 
-	return chrlist, res, lengths
+	return chrlist, res, lengths, hicdump
 
 
 def readCoolHiC(mcool, chrom, start, stop, norm, binsize):
@@ -56,13 +56,17 @@ def readCoolHiC(mcool, chrom, start, stop, norm, binsize):
     return mat
 
 
+def hicMatrixZoom(hicdump, chrom, norm, binsize):
+	hicobject = hicdump.getMatrixZoomData(chrom, chrom, "observed", norm, "BP", binsize)
+	return hicobject
+
 # Read in HiC file and output selected coordinates + binsize
 # as matrix. 
-def readHiCasNumpy(hicfile, chrom, start, stop, norm, binsize):
+def readHiCasNumpy(hicobject, chrom, start, stop, norm, binsize):
 
-	hicdump = hicstraw.HiCFile(hicfile)
+	#hicdump = hicstraw.HiCFile(hicfile)
 	
-	hicobject = hicdump.getMatrixZoomData(chrom, chrom, "observed", norm, "BP", binsize)
+	#hicobject = hicdump.getMatrixZoomData(chrom, chrom, "observed", norm, "BP", binsize)
 
 	# .getRecordsAsMatrix results in a segmentation fault when a matrix of
 	# too great a size is provided. ie. hicnumpy = hicobject.getRecordsAsMatrix(x1,y1,x2,y2)
