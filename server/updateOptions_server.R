@@ -16,22 +16,22 @@ observe({
         )
 })
 
-# ChIP names reactivevalue
-chipnames <- reactiveValues()
-observe({
-    lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
-        if(!is.null(bw1v[[LETTERS[x]]])){
-        updateTextInput(
-            session,
-            inputId = paste("n", LETTERS[x], sep = "_"),
-            value = tools::file_path_sans_ext(basename(bw1v[[LETTERS[x]]])
-        )
-    )
-    }
+# # ChIP names reactivevalue
+# chipnames <- reactiveValues()
+# observe({
+#     lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
+#         if(!is.null(bw1v[[paste0("bw",nr)]])){
+#         updateTextInput(
+#             session,
+#             inputId = paste0("n", x),
+#             value = tools::file_path_sans_ext(basename(bw1v[[paste0("bw",nr)]])
+#         )
+#     )
+#     }
 
-    })
+#     })
     
-})
+# })
 
 # Update chromsome list
 observe(

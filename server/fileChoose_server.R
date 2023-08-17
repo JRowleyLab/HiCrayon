@@ -7,7 +7,7 @@ shinyFileChoose(input, 'hic', root = c(wd = workingdir), filetypes=c('hic', 'mco
 shinyFileChoose(input, "bedg1", root = c(wd = workingdir), filetypes=c('bed', 'bedgraph'))
 
 # ChIP inputs
-shinyFileChoose(input, "bw1", root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
+#shinyFileChoose(input, "bw1", root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
 
 
 ###############################
@@ -56,16 +56,27 @@ observeEvent(input$loadurlhic, {
 
 # bw1 file handling
 bw1v <- reactiveValues()
-observeEvent(input$bw1, {
-    inFile <- parseFilePaths(roots = c(wd = workingdir), input$bw1)
-    paths <- inFile$datapath
-    x <- as.list(paths)
+# observeEvent(input$bw1, {
+#     inFile <- parseFilePaths(roots = c(wd = workingdir), input$bw1)
+#     paths <- inFile$datapath
+#     x <- as.list(paths)
 
-    # Store bigwigs as a letter in reactiveValues()
-    for(i in seq_along(x)){
-        bw1v[[LETTERS[i]]] <- as.character(x[i])
-    }
-})
+#     # Store bigwigs as a letter in reactiveValues()
+#     for(i in seq_along(x)){
+#         bw1v[[LETTERS[i]]] <- as.character(x[i])
+#     }
+# })
+
+# observeEvent(input$bw1, {
+#     inFile <- parseFilePaths(roots = c(wd = workingdir), input$bw1)
+#     paths <- inFile$datapath
+#     x <- as.list(paths)
+
+#     # Store bigwigs as a letter in reactiveValues()
+#     for(i in seq_along(x)){
+#         bw1v[[LETTERS[i]]] <- as.character(x[i])
+#     }
+# })
 
 # bedgraph file handling
 bedv <- reactiveValues()

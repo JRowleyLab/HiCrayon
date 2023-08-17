@@ -17,7 +17,7 @@ chipalpha <- reactive({
     chipalphas <- list()
 
     lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
-        col <- input[[paste("col", LETTERS[[x]], sep="_")]]
+        col <- input[[paste0("col", x)]]
         rgb <- col2rgb(col)
 
         m1 <- calcAlphaMatrix(
@@ -45,7 +45,7 @@ chipplot <- reactive({
     lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
         
         # Overwrite the colour and track for single chips
-        col[1] <- input[[paste("col", LETTERS[[x]], sep="_")]]
+        col[1] <- input[[paste0("col", x)]]
 
         if(input$log==TRUE){
             track[[1]] <- bwlist_ChIP1()$logs[[x]]
@@ -61,13 +61,13 @@ chipplot <- reactive({
             disthic_cmap = input$chip_cmap,
             hicalpha = input$hicalpha,
             bedalpha = input$bedalpha,
-            sample = paste("ChIP", x, sep=""),
+            sample = paste0("ChIP", x, sep=""),
             chrom = input$chr,
             bin = input$bin, 
             start = input$start,
             stop = input$stop,
             norm = input$norm,
-            name = input[[paste("n", LETTERS[x], sep="_")]]
+            name = input[[paste0("n", x)]]
             )
 
         images[x] <<- p1_plot
@@ -85,7 +85,7 @@ observeEvent(input$generate_hic, {
     # Combine ChIPs that are selected for
     # combination from checkbox
     for(i in seq_along(reactiveValuesToList(bw1v))){
-        if(input[[paste("comb", LETTERS[i], sep = "_")]] == TRUE){
+        if(input[[paste0("comb", i)]] == TRUE){
             chipstocombine = append(chipstocombine, i)
         }
     }
@@ -125,8 +125,8 @@ chipcombinedplot <- reactive({
         }else{
             tracks[[x]] <- bwlist_ChIP1()$raws[[chipstocombine[x]]]
         }
-        cols <- append(cols, input[[paste("col", LETTERS[[chipstocombine[x]]], sep="_")]])
-        names <- append(names, input[[paste("n", LETTERS[[chipstocombine[x]]], sep="_")]])
+        cols <- append(cols, input[[paste0("col", chipstocombine[x])]])
+        names <- append(names, input[[paste0("n", chipstocombine[x])]])
     }
 
     ChIP_plot(
