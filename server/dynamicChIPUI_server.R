@@ -91,15 +91,4 @@ observeEvent(input$addBtn, {
           print("URL not valid: ERROR MESSAGE")
       }
     }) %>% bindEvent(input[[paste0('loadurlchip',nr)]])
-
-
-
-    # observeEvent(input[[paste0('loadurlchip',nr)]], {
-    #     bw1v[[paste0("bw",nr)]] <- input[[paste0('urlchip',nr)]]
-    #     updateTextInput(
-    #         session,
-    #         inputId = paste0("n", nr),
-    #         value = tools::file_path_sans_ext(basename(bw1v[[paste0("bw",nr)]]))
-    #         )
-    # })
   })

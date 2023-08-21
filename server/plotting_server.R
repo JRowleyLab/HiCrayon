@@ -119,14 +119,13 @@ chipcombinedplot <- reactive({
     #this doesn't seem to work when you skip a chip for
     # combination
     allchips <- list()
-    # allchips <- lapply(chipstocombine, function(x){
-    #     chipalpha()[[chipstocombine[x]]]
-    # })
+    counter = 1
     for(x in seq_along(chipstocombine)){
-        counter = 1
         allchips[[counter]] <- chipalpha()[[chipstocombine[x]]]
         counter = counter + 1
     }
+
+    print(allchips)
 
     print(chipstocombine)
     print(length(allchips))
@@ -139,9 +138,9 @@ chipcombinedplot <- reactive({
     cols <- c()
     names <- list()
 
+    counter = 1
     # Create lists of info for combination plot
     for(x in seq_along(chipstocombine)){
-        counter = 1
         if(input$log==TRUE){
             tracks[[counter]] <- bwlist_ChIP1()$logs[[chipstocombine[x]]]
         }else{
