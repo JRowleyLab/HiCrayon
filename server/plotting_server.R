@@ -118,12 +118,21 @@ chipcombinedplot <- reactive({
 
     #this doesn't seem to work when you skip a chip for
     # combination
-    allchips <- lapply(chipstocombine, function(x){
-        chipalpha()[[chipstocombine[x]]]
-    })
+    allchips <- list()
+    # allchips <- lapply(chipstocombine, function(x){
+    #     chipalpha()[[chipstocombine[x]]]
+    # })
+    for(x in seq_along(chipstocombine)){
+        counter = 1
+        allchips[[counter]] <- chipalpha()[[chipstocombine[x]]]
+        counter = counter + 1
+    }
 
     print(chipstocombine)
+    print(length(allchips))
     m3 <- lnerp_matrices(allchips)
+
+    print("hmm")
 
     # bigwig tracks
     tracks <- list()
@@ -132,14 +141,22 @@ chipcombinedplot <- reactive({
 
     # Create lists of info for combination plot
     for(x in seq_along(chipstocombine)){
+        counter = 1
         if(input$log==TRUE){
-            tracks <- append(tracks, bwlist_ChIP1()$logs[[chipstocombine[x]]])
+            tracks[[counter]] <- bwlist_ChIP1()$logs[[chipstocombine[x]]]
         }else{
-            tracks <- append(tracks, bwlist_ChIP1()$raws[[chipstocombine[x]]])
+            tracks[[counter]] <- bwlist_ChIP1()$raws[[chipstocombine[x]]]
         }
         cols <- append(cols, input[[paste0("col", chipstocombine[x])]])
         names <- append(names, input[[paste0("n", chipstocombine[x])]])
+
+        counter = counter + 1
     }
+
+    print("checkpoint")
+    print(tracks)
+    print(cols)
+    print(names)
 
     ChIP_plot(
         disthic = hic_distance(),
