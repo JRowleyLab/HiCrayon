@@ -1,9 +1,9 @@
 # variable for starting root directory
 # When used by others: TODO: change to root
-workingdir = '/'
+#workingdir = '/'
 
 ## Server side file-selection
-shinyFileChoose(input, 'hic', root = c(wd = workingdir), filetypes=c('hic'))
+#shinyFileChoose(input, 'hic', root = c(wd = workingdir), filetypes=c('hic'))
 shinyFileChoose(input, "bedg1", root = c(wd = workingdir), filetypes=c('bed', 'bedgraph'))
 
 # ChIP inputs
@@ -21,8 +21,9 @@ output$f1_hic <- renderPrint({
 if (is.integer(input$hic[1])) {
     cat("No file has been selected")
 } else {
-    x <- parseFilePaths(roots = c(wd = workingdir), input$hic)
-    as.character(x$datapath[1])
+    cat("Hi-C uploaded")
+    # file <- input$hic
+    # file$datapath
 }
 })
 

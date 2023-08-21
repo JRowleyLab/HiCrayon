@@ -370,11 +370,18 @@ button#generate_hic,
  border-top-color:#;
 } */
 
-/* plot button 5 */
+/* Generate Button */
 .box.box-solid.box-danger>.box-header,
 #generate_hic.btn.btn-default.action-button.shiny-bound-input{
   color:#fff;
   background:#333;
+}
+
+/* ChIP Add button */
+button#addBtn{
+  color: black;
+  margin-left: 10px;
+
 }
 
 .box.box-solid.box-danger{
