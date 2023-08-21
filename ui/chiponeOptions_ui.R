@@ -3,7 +3,10 @@ chiponeOptionsUI <- div(
           conditionalPanel(
                 condition = "input.chip1 == true",
               fluidRow(
-                actionButton("addBtn", "Add"),
+                actionBttn("addBtn", "Add", 
+                  style = "minimal", 
+                  color = "default", 
+                  size = "sm"),
                 ),
                 tags$div(id='inputList'),
                 # Dynamic ChIP UI

@@ -13,7 +13,6 @@ observeEvent(input$hic, {
 
 observe({
     isvalid = checkURL(input$urlhic, list('hic'))
-    print(isvalid)
 
     if(isvalid=="Valid"){
         hicv$y <- input$urlhic

@@ -43,10 +43,6 @@ output$gallery <- renderUI({
         images = append(images, paste0(comp_plot(), ".svg"))
     }
 
-    print(texts)
-    print(hrefs)
-    print(images)
-
     gallery(
         texts = texts,
         hrefs = hrefs,

@@ -9,8 +9,10 @@ observeEvent(input$addBtn, {
     id <- paste0("input",input$addBtn)
     insertUI(
       selector = '#inputList',
-      ui=div(
+      ui=#box(
+      div(
         style = "border:1px solid black; margin:10px;",
+        #width=12,
         id = paste0("newInput",nr),
         fluidRow(
             column(3,
@@ -76,7 +78,6 @@ observeEvent(input$addBtn, {
 
     observe({
       isvalid = checkURL(input[[paste0('urlchip',nr)]], list('bigWig', 'bigwig', 'bw'))
-      print(isvalid)
 
       if(isvalid=="Valid"){
           bw1v[[paste0("bw",nr)]] <- input[[paste0('urlchip',nr)]]

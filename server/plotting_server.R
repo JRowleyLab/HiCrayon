@@ -125,13 +125,7 @@ chipcombinedplot <- reactive({
         counter = counter + 1
     }
 
-    print(allchips)
-
-    print(chipstocombine)
-    print(length(allchips))
     m3 <- lnerp_matrices(allchips)
-
-    print("hmm")
 
     # bigwig tracks
     tracks <- list()
@@ -151,11 +145,6 @@ chipcombinedplot <- reactive({
 
         counter = counter + 1
     }
-
-    print("checkpoint")
-    print(tracks)
-    print(cols)
-    print(names)
 
     ChIP_plot(
         disthic = hic_distance(),

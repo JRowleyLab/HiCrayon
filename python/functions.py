@@ -180,7 +180,6 @@ def processBigwigs(bigwig,binsize,chrom,start,stop, log):
 # TODO: have an option to also use HiC value
 # scale the alpha.
 def calcAlphaMatrix(chip,disthic,showhic,r,g,b):
-    print('calculating alpha...')
     matsize = len(chip)
     # Normalize chip list to between 0 and 1
     chip_arr = np.array(chip)
