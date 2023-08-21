@@ -1,35 +1,8 @@
-
-# cols <- reactive({
-#     lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
-#         div(
-#         fluidRow(
-#             # Update in server to the basename minus the suffix
-#             column(4,
-#                 textInput(paste("n", LETTERS[x], sep="_"), 
-#                           label = "Name", 
-#                           value = paste('ChIP', x))
-#             ),
-#             column(4,
-#                 colourInput(paste("col", LETTERS[x], sep="_"), 
-#                             "Select colour", 
-#                             "blue")
-#             ),
-#             column(4,
-#                 checkboxInput(paste("comb", LETTERS[x], sep="_"),
-#                               "Combination")
-#                 )
-#     )
-#     )
-#     })
-
-# })
-
-
-# output$chipUI <- renderUI({cols()})
-
-
 # Dynamic UI add/ remove Bigwig upload
 # elements
+
+# bw1 file handling
+bw1v <- reactiveValues()
 
 observeEvent(input$addBtn, {
     nr <- input$addBtn
@@ -37,6 +10,7 @@ observeEvent(input$addBtn, {
     insertUI(
       selector = '#inputList',
       ui=div(
+        style = "border:1px solid black; margin:10px;",
         id = paste0("newInput",nr),
         fluidRow(
             column(3,
@@ -99,12 +73,33 @@ observeEvent(input$addBtn, {
             value = tools::file_path_sans_ext(basename(bw1v[[paste0("bw",nr)]]))
             )
     }) 
-    observeEvent(input[[paste0('loadurlchip',nr)]], {
-        bw1v[[paste0("bw",nr)]] <- input[[paste0('urlchip',nr)]]
-        updateTextInput(
+
+    observe({
+      isvalid = checkURL(input[[paste0('urlchip',nr)]], list('bigWig', 'bigwig', 'bw'))
+      print(isvalid)
+
+      if(isvalid=="Valid"){
+          bw1v[[paste0("bw",nr)]] <- input[[paste0('urlchip',nr)]]
+
+          updateTextInput(
             session,
             inputId = paste0("n", nr),
             value = tools::file_path_sans_ext(basename(bw1v[[paste0("bw",nr)]]))
             )
-    })
+      }else{
+          #make this an actual error message
+          print("URL not valid: ERROR MESSAGE")
+      }
+    }) %>% bindEvent(input[[paste0('loadurlchip',nr)]])
+
+
+
+    # observeEvent(input[[paste0('loadurlchip',nr)]], {
+    #     bw1v[[paste0("bw",nr)]] <- input[[paste0('urlchip',nr)]]
+    #     updateTextInput(
+    #         session,
+    #         inputId = paste0("n", nr),
+    #         value = tools::file_path_sans_ext(basename(bw1v[[paste0("bw",nr)]]))
+    #         )
+    # })
   })

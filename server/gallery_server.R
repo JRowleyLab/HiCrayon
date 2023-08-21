@@ -17,9 +17,9 @@ output$gallery <- renderUI({
         for(i in seq_along(reactiveValuesToList(bw1v))){
 
             if(!is.null(bw1v[[paste0("bw",i)]])){
-                texts[i+1] <- input[[paste0("n", i)]]
+                texts = append(texts, input[[paste0("n", i)]])
                 hrefs = append(hrefs, "")
-                images[i+1] <- paste0(chipplot()[i], ".svg")
+                images = append(images, paste0(chipplot()[i], ".svg"))
         }
         }
         if(length(combinedchips$chips) > 1){
@@ -42,6 +42,10 @@ output$gallery <- renderUI({
         hrefs = append(hrefs, "")
         images = append(images, paste0(comp_plot(), ".svg"))
     }
+
+    print(texts)
+    print(hrefs)
+    print(images)
 
     gallery(
         texts = texts,

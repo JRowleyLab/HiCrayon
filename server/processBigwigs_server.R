@@ -10,6 +10,8 @@ bwlist_ChIP1 <- reactive({
     lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
 
         if(!is.null(bw1v[[paste0("bw",x)]])){
+            print(x)
+            print(bw1v[[paste0("bw",x)]])
             bwlist <- processBigwigs(
             bigwig = bw1v[[paste0("bw",x)]],
             binsize = as.integer(input$bin),

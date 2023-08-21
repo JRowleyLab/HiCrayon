@@ -1,21 +1,42 @@
+# hic file handling
+hicv <- reactiveValues()
+observeEvent(input$hic, {
+    inFile <- parseFilePaths(roots = c(wd = workingdir), input$hic)
+    hicv$y <- inFile$datapath
+})
+
+# # hic url handling
+# observeEvent(input$loadurlhic, {
+#     hicv$y <- input$urlhic
+# })
+
+
+observe({
+    isvalid = checkURL(input$urlhic, list('hic'))
+    print(isvalid)
+
+    if(isvalid=="Valid"){
+        hicv$y <- input$urlhic
+    }else{
+        #make this an actual error message
+        print("URL not valid: ERROR MESSAGE")
+    }
+    
+}) %>% bindEvent(input$loadurlhic)
+
+
 HiCmetadata <- reactive({
 
     validate(need(hicv$y!="NULL", "Please upload a HiC file"))
 
-    if(hicv$type=='hic'){
-        hicfile = hicv$y
-        metadata = getHiCmetadata(hicfile)
+    hicfile = hicv$y
+    metadata = getHiCmetadata(hicfile)
 
-        chrs = tuple(metadata, convert = T)[0]
-        res = tuple(metadata, convert = T)[1]
-        lengths = tuple(metadata, convert = T)[2]
-        hicdump = tuple(metadata, convert = T)[3]
-    }else if (hicv$type=='mcool') {
-       mcoolfile = hicv$y
-       metadata = coolerMetadata(mcoolfile)
-       chrs = tuple(metadata, convert = T)[0]
-       res = tuple(metadata, convert = T)[1]
-    }
+    chrs = tuple(metadata, convert = T)[0]
+    res = tuple(metadata, convert = T)[1]
+    lengths = tuple(metadata, convert = T)[2]
+    hicdump = tuple(metadata, convert = T)[3]
+
 
     return(list(
         chrs = chrs,

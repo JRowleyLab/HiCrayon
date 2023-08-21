@@ -11,6 +11,8 @@ from coolbox.core.track.hicmat.plot import cmaps as coolboxcmaps
 import h5py
 import cooler
 import pandas as pd
+import requests
+import re
 
 
 #random string generation
@@ -32,7 +34,11 @@ def getHiCmetadata(hicfile):
 	# Given a hic-pro file upload, return
 	# multiple lists of metadata
 	# Chr name, resolutions, normalizations
-	hicdump = hicstraw.HiCFile(hicfile)
+	try:
+		hicdump = hicstraw.HiCFile(hicfile)
+	except:
+		return("NA")
+
 
 	# Chromosome list
 	chroms = hicdump.getChromosomes()[1:]
@@ -47,6 +53,23 @@ def getHiCmetadata(hicfile):
 
 	return chrlist, res, lengths, hicdump
 
+
+def checkURL(url, filetype):
+    #check string is valid url
+    url_pattern = re.compile(r"^(https?|ftp)://[^\s/$.?#].[^\s]*$")
+    if(bool(url_pattern.match(url))):
+		#check url is downloadable content
+        r = requests.get(url, stream=True)
+        isattachment = 'attachment' in r.headers.get('Content-Disposition', '')
+        if(isattachment):
+			#check downloadable content is correct filetype
+            file = r.headers.get('Content-Disposition', '')
+            string = 'attachment; filename='
+            filename = re.sub(string, "", file)
+            suffix = filename.split('.')[1]
+            if(suffix in filetype):
+                return("Valid")
+    return("Not valid")
 
 def readCoolHiC(mcool, chrom, start, stop, norm, binsize):
     cool = f"{mcool}::/resolutions/{binsize}"

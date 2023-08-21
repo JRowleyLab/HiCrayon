@@ -98,8 +98,8 @@ observeEvent(input$generate_hic, {
             if(input[[paste0("comb", i)]] == TRUE){
                 chipstocombine = append(chipstocombine, i)
             }
-            combinedchips$chips <- chipstocombine
         }
+        combinedchips$chips <- chipstocombine
     }
 })
 
@@ -122,6 +122,7 @@ chipcombinedplot <- reactive({
         chipalpha()[[chipstocombine[x]]]
     })
 
+    print(chipstocombine)
     m3 <- lnerp_matrices(allchips)
 
     # bigwig tracks
@@ -132,9 +133,9 @@ chipcombinedplot <- reactive({
     # Create lists of info for combination plot
     for(x in seq_along(chipstocombine)){
         if(input$log==TRUE){
-            tracks[[x]] <- bwlist_ChIP1()$logs[[chipstocombine[x]]]
+            tracks <- append(tracks, bwlist_ChIP1()$logs[[chipstocombine[x]]])
         }else{
-            tracks[[x]] <- bwlist_ChIP1()$raws[[chipstocombine[x]]]
+            tracks <- append(tracks, bwlist_ChIP1()$raws[[chipstocombine[x]]])
         }
         cols <- append(cols, input[[paste0("col", chipstocombine[x])]])
         names <- append(names, input[[paste0("n", chipstocombine[x])]])
