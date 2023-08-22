@@ -1,5 +1,4 @@
 ## app.R ##
-
 dashboardPage(title = "HiCrayon",
                     dashboardHeader(title = tags$a(span(img(src="logo/HiCrayon_logo2.png",height=60,align="left")),href="https://github.com/JRowleyLab/HiCrayon"),titleWidth = 600),
 dashboardSidebar(
@@ -15,22 +14,12 @@ dashboardBody(
     # Zoomy zoom
     tags$head(
         tags$script(src = "https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js"),
-
   ),
     tabItems(
     # First tab content
     tabItem(tabName = "Visualize",
             fluidRow(width=12,
-                    column(width=3,
-                            # choose between tabs
-                            radioGroupButtons(
-                            inputId = "dashboardchooser", label = NULL, 
-                            choices = c("Info", "Plot"), 
-                            selected = "Plot",
-                            justified = TRUE, status = "primary",
-                            checkIcon = list(yes = "", no = "")
-                            ),
-                            
+                    column(width=3,                            
                             fluidRow(width=12,
                                     box(width=12,title = "HiC",status = "primary", solidHeader = TRUE,
                                         collapsible = TRUE,collapsed = TRUE,
