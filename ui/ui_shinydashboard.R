@@ -22,15 +22,6 @@ dashboardBody(
     tabItem(tabName = "Visualize",
             fluidRow(width=12,
                     column(width=3,
-                            # choose between tabs
-                            radioGroupButtons(
-                            inputId = "dashboardchooser", label = NULL, 
-                            choices = c("Info", "Plot"), 
-                            selected = "Plot",
-                            justified = TRUE, status = "primary",
-                            checkIcon = list(yes = "", no = "")
-                            ),
-                            
                             fluidRow(width=12,
                                     box(width=12,title = "HiC",status = "primary", solidHeader = TRUE,
                                         collapsible = TRUE,collapsed = TRUE,
