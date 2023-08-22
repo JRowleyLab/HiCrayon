@@ -16,11 +16,6 @@ observeEvent(input$addBtn, {
         id = paste0("newInput",nr),
         fluidRow(
             column(3,
-                # shinyFilesButton(
-                # paste0('bw', nr), 
-                # label = 'Select bigwig', 
-                # title = 'Please select a .bigwig/.bw file', 
-                # multiple=FALSE),
                 fileInput(paste0('bw', nr), 
                 "Select Bigwig", accept = c(".bw", ".bigwig"),
                  multiple = FALSE)

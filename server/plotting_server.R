@@ -1,12 +1,33 @@
 hicplot <- reactive({
-    hic_plot(cmap = input$map_colour,
-             distnormmat = hic_distance(),
-             chrom = input$chr,
-             bin = input$bin, 
-             start = input$start,
-             stop = input$stop,
-             norm = input$norm
+
+    patt <- str_glue(
+            "HiC_{input$chr}_{input$start}_{input$stop}_{input$bin}_norm-{input$norm}_"
+            )
+
+    pngpath <- tempfile(
+        pattern = patt,
+        fileext = ".png",
+        tmpdir = userinfo)
+
+    svgpath <- tempfile(
+        pattern = patt,
+        fileext = ".svg",
+        tmpdir = userinfo)
+
+    path <- hic_plot(
+        cmap = input$map_colour,
+        distnormmat = hic_distance(),
+        filepathpng = pngpath,
+        filepathsvg = svgpath
              )
+
+    pngout <- tuple(path, convert = T)[0]
+    svgout <- tuple(path, convert = T)[1]
+
+    return(list(
+        png = pngout,
+        svg = svgout
+    ))
 }) 
 
 
@@ -59,6 +80,20 @@ chipplot <- reactive({
                 track[[1]] <- bwlist_ChIP1()$raws[[x]]
             }
 
+            patt <- str_glue(
+            "ChIP_{input[[paste0('n',x)]]}_{input$chr}_{input$start}_{input$stop}_{input$bin}_norm-{input$norm}_"
+            )
+
+            pngpath <- tempfile(
+                pattern = patt,
+                fileext = ".png",
+                tmpdir = userinfo)
+
+            svgpath <- tempfile(
+                pattern = patt,
+                fileext = ".svg",
+                tmpdir = userinfo)
+
             p1_plot <- ChIP_plot(
                 disthic = hic_distance(),
                 col1 = col,
@@ -67,21 +102,18 @@ chipplot <- reactive({
                 disthic_cmap = input$chip_cmap,
                 hicalpha = input$hicalpha,
                 bedalpha = input$bedalpha,
-                sample = paste0("ChIP", x, sep=""),
-                chrom = input$chr,
-                bin = input$bin, 
-                start = input$start,
-                stop = input$stop,
-                norm = input$norm,
-                name = input[[paste0("n", x)]]
+                filepathpng = pngpath,
+                filepathsvg = svgpath
                 )
 
-            images[x] <<- p1_plot
+            pngimage <- tuple(p1_plot, convert = T)[0]
+            svgimage <- tuple(p1_plot, convert = T)[1]
+
+            images[[x]] <<- list(png = pngimage, svg = svgimage)
         }
     })
 
     return(images)
-
 }) 
 
 
@@ -146,21 +178,37 @@ chipcombinedplot <- reactive({
         counter = counter + 1
     }
 
-    ChIP_plot(
-        disthic = hic_distance(),
-        col1 = cols,
-        mat = m3,
-        chip = tracks,
-        disthic_cmap = input$chip_cmap,
-        hicalpha = input$hicalpha,
-        bedalpha = input$bedalpha,
-        sample = "ChIP_combined",
-        chrom = input$chr,
-        bin = input$bin, 
-        start = input$start,
-        stop = input$stop,
-        norm = input$norm,
-        name = names
-        )
+    patt <- str_glue(
+    "ChIP_{paste0(names, collapse = '_')}_{input$chr}_{input$start}_{input$stop}_{input$bin}_norm-{input$norm}_"
+    )
 
+    pngpath <- tempfile(
+        pattern = patt,
+        fileext = ".png",
+        tmpdir = userinfo)
+
+    svgpath <- tempfile(
+        pattern = patt,
+        fileext = ".svg",
+        tmpdir = userinfo)
+
+    chipcomb <- ChIP_plot(
+            disthic = hic_distance(),
+            col1 = cols,
+            mat = m3,
+            chip = tracks,
+            disthic_cmap = input$chip_cmap,
+            hicalpha = input$hicalpha,
+            bedalpha = input$bedalpha,
+            filepathpng = pngpath,
+            filepathsvg = svgpath
+            )
+
+    chippng <- tuple(chipcomb, convert = T)[0]
+    chipsvg <- tuple(chipcomb, convert = T)[1]
+
+    return(list(
+        png = chippng,
+        svg = chipsvg
+    ))
 }) 

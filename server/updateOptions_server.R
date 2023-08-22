@@ -16,22 +16,6 @@ observe({
         )
 })
 
-# # ChIP names reactivevalue
-# chipnames <- reactiveValues()
-# observe({
-#     lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
-#         if(!is.null(bw1v[[paste0("bw",nr)]])){
-#         updateTextInput(
-#             session,
-#             inputId = paste0("n", x),
-#             value = tools::file_path_sans_ext(basename(bw1v[[paste0("bw",nr)]])
-#         )
-#     )
-#     }
-
-#     })
-    
-# })
 
 # Update chromsome list
 observe(
@@ -68,11 +52,37 @@ observe(
         )
 )
 
-
 observeEvent(input$endofchrom, {
     updateAutonumericInput(
             session = session, 
             inputId = "stop",
             value = HiCmetadata()$lengths[idx()]
         )
+})
+
+# bedgraph file handling
+bedv <- reactiveValues()
+observeEvent(input$bedg1, {
+    inFile <- input$bedg1 
+    bedv$y <- inFile$datapath
+})
+
+# Store HiC file type as reactive value
+observe(
+    hicv$type <- file_ext(hicv$y)
+)
+
+# User session number as temporary directory
+userinfo = paste0("www/user", session$token)
+
+# Create temporary directory for each user
+if(!dir.exists(userinfo)){
+    dir.create(userinfo)
+}
+
+# Delete user temporary directory when session ends
+session$onSessionEnded(function() {
+    if(dir.exists(userinfo)){
+        unlink(userinfo, recursive = TRUE)
+    }
 })

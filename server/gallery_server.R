@@ -8,7 +8,7 @@ output$gallery <- renderUI({
 
     # Initialise with HiC data
     texts <- c("HiC")
-    images <- c(paste0(hicplot(), ".svg"))
+    images <- c(gsub("www/", "", hicplot()$svg))
     hrefs <- c("")
 
     # Control inclusion through checkbox
@@ -19,16 +19,16 @@ output$gallery <- renderUI({
             if(!is.null(bw1v[[paste0("bw",i)]])){
                 texts = append(texts, input[[paste0("n", i)]])
                 hrefs = append(hrefs, "")
-                images = append(images, paste0(chipplot()[i], ".svg"))
+                images = append(images, gsub("www/", "", chipplot()[[i]]$svg))
         }
         }
         if(length(combinedchips$chips) > 1){
             combname <- "" 
             for(i in combinedchips$chips){
-                combname = paste0(combname, input[[paste0("n", i)]]) 
+                combname = paste0(combname, input[[paste0("n", i)]], sep = " ") 
             }
             combhref = ""
-            combimage = paste0(chipcombinedplot(), ".svg")
+            combimage = gsub("www/", "", chipcombinedplot()$svg)
 
             texts = append(texts, combname)
             hrefs = append(hrefs, combhref)
@@ -40,7 +40,7 @@ output$gallery <- renderUI({
         #add begraph to texts, hrefs, images
         texts = append(texts, "Combination")
         hrefs = append(hrefs, "")
-        images = append(images, paste0(comp_plot(), ".svg"))
+        images = append(images, gsub("www/", "", comp_plot()$svg))
     }
 
     gallery(

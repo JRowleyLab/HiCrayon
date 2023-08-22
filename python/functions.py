@@ -266,21 +266,13 @@ def matplot_colors():
 
 
 # Produce HiC map image saved to disk 
-def hic_plot(cmap, distnormmat, chrom, bin, start, stop, norm):
+def hic_plot(cmap, distnormmat, filepathpng, filepathsvg):
 
 	if cmap in [i for i in coolboxcmaps.keys()]:
 		cmap = coolboxcmaps[cmap]
 	else:
 		cmap
 	
-	# Remove previous versions of svg images
-	# to prevent bloat in images directory.
-	# NOTE: the file cannot be overwritten
-	# as webpage doesn't recognise it has
-	# changed if the filename hasn't changed.
-	for f in glob.glob('./www/images/HiC_*.*'):
-		os.remove(f)
-
 	# Save distance normalized HiC plot and display. This is base functionality of the app and 
 	# only requires a HiC file.
 	fig, (ax1) = plt.subplots(ncols=1)
@@ -290,35 +282,21 @@ def hic_plot(cmap, distnormmat, chrom, bin, start, stop, norm):
 	ax1.xaxis.set_visible(False)
 	ax1.yaxis.set_visible(False)
 
-	# random string for name
-	# using random.choices()
-	# generating random strings
-	res = ''.join(random.choices(string.ascii_uppercase +
-								string.digits, k=8))
-	figname = f"HiC_locus-{chrom}-{start}-{stop}_{bin}bp_norm-{norm}_{str(res)}"
-
-	directory = "images/"
-	wwwlocation = "www/" + directory + figname
-	notwwwlocation = directory + figname
-	plt.savefig(wwwlocation + '.svg', bbox_inches='tight')
-	plt.savefig(wwwlocation + '.png', bbox_inches='tight', dpi=300)
+    # Save figure to temp path
+	plt.savefig(filepathpng, bbox_inches='tight')
+	plt.savefig(filepathsvg, bbox_inches='tight', dpi=300)
 
 	plt.close()
-	return notwwwlocation
+	return filepathpng, filepathsvg
 
 
-def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, sample, hicalpha, bedalpha, chrom, bin, start, stop, name, norm):
+def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepathpng, filepathsvg):
 	# NOTES: the issue here is that the matrix is generated inside the plotting function with calcAlphaMatrix.
 	# Before, i was passing the r,g,b matrices inside, which can be 1 chip or 2 chips depending. I need to do this again,
 	# but instead having alpha value as well.
 	# The chosen colour needs to be passed to calcAlphaMatrix and then I can pass the rmat ,gmat ,bmat  to this function again
 	#color can be hexidecimal
 	mat = mat.astype(np.uint8)
-
-	#remove previously generated images
-
-	for f in glob.glob(f'./www/images/{sample}-*.*'):
-		os.remove(f)
 
 	# Set up CMAP for HiC background
 	if disthic_cmap in [i for i in coolboxcmaps.keys()]:
@@ -387,23 +365,11 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, sample, hicalpha, bedalpha
 	ax3.set_position((l2*(.7),b2, w2*.1, h2*(1)))
 	ax3.margins(y=0)
 
-
-	#write image to file
-	res = ''.join(random.choices(string.ascii_uppercase +
-								string.digits, k=8))
-	if(isinstance(name, list)):
-		name = '_'.join(name)
-
-	figname = f"{sample}-{name}-{chrom}-{start}-{stop}_{bin}bp_norm-{norm}_{str(res)}"
-
-	directory = "images/"
-	wwwlocation = "www/" + directory + figname
-	notwwwlocation = directory + figname #this path is for 'shiny'
-	plt.savefig(wwwlocation + '.svg', bbox_inches='tight')
-	plt.savefig(wwwlocation + '.png', bbox_inches='tight', dpi=300)
+	plt.savefig(filepathsvg, bbox_inches='tight')
+	plt.savefig(filepathpng, bbox_inches='tight', dpi=300)
 	plt.close()
 
-	return notwwwlocation
+	return filepathpng, filepathsvg
 
 # check that the bedgraph binsize matches that
 # of the chosen binsize of Hi-C
@@ -506,12 +472,8 @@ def scaleCompartments(disthic, comp_df, Acol, Bcol):
     return Amatrix, Bmatrix
 
 
-def plotCompartments(disthic, comp, ABmat, colA, colB, chrom, start, stop):
+def plotCompartments(disthic, comp, ABmat, colA, colB, filepathpng, filepathsvg):
     
-    # Remove previous images of compartments
-    for f in glob.glob('./www/images/compartments-*.*'):
-        os.remove(f)
-
     # Plot HiC map and compartment tracks
     mat = disthic.astype(np.uint8)
 
@@ -553,18 +515,8 @@ def plotCompartments(disthic, comp, ABmat, colA, colB, chrom, start, stop):
     ax4.xaxis.set_visible(False)
     ax4.yaxis.set_visible(False)
     
-    # random string for name
-    # using random.choices()
-    # generating random strings
-    res = ''.join(random.choices(string.ascii_uppercase +
-                                string.digits, k=8))
-    figname = f"compartments-{chrom}-{start}-{stop}_{str(res)}"
-
-    directory = "images/"
-    wwwlocation = "www/" + directory + figname
-    notwwwlocation = directory + figname
-    plt.savefig(wwwlocation + '.svg', bbox_inches='tight')
-    plt.savefig(wwwlocation + '.png', bbox_inches='tight', dpi=300)
+    plt.savefig(filepathsvg, bbox_inches='tight')
+    plt.savefig(filepathpng, bbox_inches='tight', dpi=300)
     
     plt.close()
-    return notwwwlocation
+    return filepathpng, filepathsvg
