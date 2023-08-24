@@ -2,6 +2,7 @@ import numpy as np
 import hicstraw
 from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt 
+import matplotlib.gridspec as gridspec
 import pyBigWig
 import math
 from PIL import Image
@@ -242,6 +243,40 @@ def matplot_colors():
 	cmaps = cmaps + [i for i in coolboxcmaps.keys()]
 	return cmaps
 
+def calculate_indices(start, stop, bin):
+	# Adjust the start and stop to be divisible by bin
+    adjusted_start = start - (start % bin)
+    adjusted_stop = stop + (bin - (stop % bin) if stop % bin != 0 else 0)
+    
+    # Calculate the total range
+    total_range = adjusted_stop - adjusted_start
+
+    # Calculate how many bins exist in the example:
+    num_bins = total_range // bin
+    
+    tick_labels = []
+
+    # Single bin scenario
+    if num_bins == 1:
+        return [adjusted_start]
+    
+    # Two bins scenario
+    if num_bins == 2:
+        return [adjusted_start, adjusted_stop]
+
+    # Check the even distribution for 4, 3, 2, or 1 tick mark
+    for divisor in [5, 4, 3, 2]:  
+        tick_interval = total_range / divisor
+        if tick_interval % bin == 0:
+            tick_labels = [adjusted_start + i * tick_interval for i in range(divisor)]
+            tick_labels.append(adjusted_stop)
+            break
+    else:  # For cases like 11 bins
+        half_point = adjusted_start + total_range // 2
+        adjusted_half = half_point - (half_point % bin)
+        tick_labels = [adjusted_start, adjusted_half, adjusted_stop]
+
+    return tick_labels
 
 # Produce HiC map image saved to disk 
 def hic_plot(cmap, distnormmat, chrom, bin, start, stop, norm):
@@ -250,7 +285,7 @@ def hic_plot(cmap, distnormmat, chrom, bin, start, stop, norm):
 		cmap = coolboxcmaps[cmap]
 	else:
 		cmap
-	
+
 	# Remove previous versions of svg images
 	# to prevent bloat in images directory.
 	# NOTE: the file cannot be overwritten
@@ -261,12 +296,62 @@ def hic_plot(cmap, distnormmat, chrom, bin, start, stop, norm):
 
 	# Save distance normalized HiC plot and display. This is base functionality of the app and 
 	# only requires a HiC file.
-	fig, (ax1) = plt.subplots(ncols=1)
+	# BEN'S WAY:
+	# fig, (ax1) = plt.subplots()
 
-	#ax1.set_title('Hi-C')
-	ax1.matshow(distnormmat, cmap=cmap, interpolation='none')
-	ax1.xaxis.set_visible(False)
-	ax1.yaxis.set_visible(False)
+	# #ax1.set_title('Hi-C')
+	# ax1.matshow(distnormmat, cmap=cmap, interpolation='none')
+	# ax1.xaxis.set_visible(False)
+	# ax1.yaxis.set_visible(False)
+
+	# Calculate the interval (or genomic "resolution") based on the matrix size
+	tick_labels = calculate_indices(int(start), int(stop), int(bin))
+	tick_positions = np.linspace(0, distnormmat.shape[0]-1, len(tick_labels))
+
+	# Old way
+	# interval = (stop - start) / distnormmat.shape[0]
+	# genomic_positions = [start + i * interval for i in range(distnormmat.shape[0])]
+
+	# # Choose only six tick positions and labels
+	# tick_indices = np.linspace(0, len(genomic_positions)-1, 6).astype(int)
+	# tick_positions = np.linspace(0, distnormmat.shape[0]-1, 6)
+	# tick_labels = [genomic_positions[i] for i in tick_indices]
+
+	# Create a GridSpec layout
+	gs = gridspec.GridSpec(2, 2,
+						width_ratios=[30, 1],
+						height_ratios=[1, 30],
+						wspace=0.05, hspace=0.05)
+
+	fig = plt.figure(figsize=(8, 8))
+
+	# Main data plot
+	ax = plt.subplot(gs[1, 0])
+	ax.matshow(distnormmat, cmap=cmap, interpolation='none')
+	ax.xaxis.set_visible(False)
+	ax.yaxis.set_visible(False)
+
+	# Top genomic track
+	ax2 = plt.subplot(gs[0, 0], sharex=ax)
+	ax2.xaxis.tick_top()
+	ax2.yaxis.set_visible(False)
+	ax2.set_xticks(tick_positions)
+	ax2.set_xticklabels([int(label) for label in tick_labels])
+	ax2.spines['right'].set_visible(False)
+	ax2.spines['bottom'].set_visible(False)
+	ax2.spines['left'].set_visible(False)
+
+	# # Right genomic track
+	# ax4 = plt.subplot(gs[1, 1], sharey=ax)
+	# ax4.xaxis.set_visible(False)
+	# ax4.yaxis.tick_right()
+	# ax4.set_yticks(tick_positions)
+	# ax4.set_yticklabels([int(label) for label in tick_labels])
+	# ax4.spines['top'].set_visible(False)
+	# ax4.spines['left'].set_visible(False)
+	# ax4.spines['bottom'].set_visible(False)
+
+	plt.tight_layout()
 
 	# random string for name
 	# using random.choices()
