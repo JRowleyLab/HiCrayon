@@ -4,7 +4,11 @@ comp_UI <- div(
                 condition = "input.bedgraph == true",
       fluidRow(
               column(12,
-                fileInput("bedg1", "Select Bedgraph", accept = c(".bed", ".bedgraph"), multiple = FALSE)
+                shinyFilesButton(
+                    'bedg1',
+                    label = 'Select bedGraph',
+                    title = 'Please select a .bedgraph/.bed file',
+                    multiple=FALSE),
               ),
             ),
       fluidRow(

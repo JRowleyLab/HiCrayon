@@ -3,16 +3,10 @@ options(shiny.maxRequestSize=10000*1024^2)
 # hic file handling
 hicv <- reactiveValues()
 observeEvent(input$hic, {
-    #inFile <- parseFilePaths(roots = c(wd = workingdir), input$hic)
-    file <- input$hic
-    hicv$y <- file$datapath
+    inFile <- parseFilePaths(roots = c(wd = workingdir), input$hic)
+    #file <- input$hic
+    hicv$y <- inFile$datapath
 })
-
-# # hic url handling
-# observeEvent(input$loadurlhic, {
-#     hicv$y <- input$urlhic
-# })
-
 
 observe({
     isvalid = checkURL(input$urlhic, list('hic'))

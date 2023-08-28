@@ -1,7 +1,7 @@
 selectHiCoptionsUI <- div(fluidRow(
                             column(12,
                             #shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
-                            fileInput("hic", "Select HiC", accept = ".hic", multiple = FALSE)
+                            shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE)
                             ),
                             ),
                             fluidRow(

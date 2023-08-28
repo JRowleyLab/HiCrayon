@@ -16,9 +16,11 @@ observeEvent(input$addBtn, {
         id = paste0("newInput",nr),
         fluidRow(
             column(3,
-                fileInput(paste0('bw', nr), 
-                "Select Bigwig", accept = c(".bw", ".bigwig"),
-                 multiple = FALSE)
+                shinyFilesButton(
+                paste0('bw', nr),
+                label = 'Select bigwig',
+                title = 'Please select a .bigwig/.bw file',
+                multiple=FALSE),
             ),
             column(6,
                 textInput(
@@ -63,10 +65,8 @@ observeEvent(input$addBtn, {
     #shinyFileChoose(input, paste0("bw",nr), root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
     # Add file path to reactive variable
     observeEvent(input[[paste0("bw",nr)]], {
-        #inFile <- parseFilePaths(roots = c(wd = workingdir), input[[paste0("bw",nr)]])
-        file <- input[[paste0('bw', nr)]]
-        bw1v[[paste0("bw",nr)]] <- file$datapath
-         #print(str(reactiveValuesToList(bw1v)))
+        inFile <- parseFilePaths(roots = c(wd = workingdir), input[[paste0("bw",nr)]])
+        bw1v[[paste0("bw",nr)]] <- inFile$datapath
         # Update text with file name
          updateTextInput(
             session,
