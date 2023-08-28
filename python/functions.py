@@ -4,31 +4,10 @@ from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt 
 import pyBigWig
 import math
-from PIL import Image
-import os
-import glob
-from coolbox.core.track.hicmat.plot import cmaps as coolboxcmaps
-import h5py
-import cooler
 import pandas as pd
 import requests
 import re
 
-
-#random string generation
-import string
-import random
-
-
-def coolerMetadata(mcool):
-    h5 = h5py.File(mcool, 'r')
-    res = list(h5['resolutions'].keys())
-    res = sorted([int(x) for x in res], reverse=True)
-    cool = f"{mcool}::/resolutions/{res[0]}"
-    c = cooler.Cooler(cool)
-    chrlist = c.chromnames
-    
-    return chrlist, res
 
 def getHiCmetadata(hicfile):
 	# Given a hic-pro file upload, return
@@ -70,14 +49,6 @@ def checkURL(url, filetype):
             if(suffix in filetype):
                 return("Valid")
     return("Not valid")
-
-def readCoolHiC(mcool, chrom, start, stop, norm, binsize):
-    cool = f"{mcool}::/resolutions/{binsize}"
-    c = cooler.Cooler(cool)
-    string = f"{chrom}:{str(start)}-{str(stop+1)}"
-    mat = c.matrix().fetch(string)
-    return mat
-
 
 def hicMatrixZoom(hicdump, chrom, norm, binsize):
 	hicobject = hicdump.getMatrixZoomData(chrom, chrom, "observed", norm, "BP", binsize)
@@ -261,17 +232,17 @@ def matplot_colors():
 	# Add in custom colors to list
 	#REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1,1,1),(1,0,0)])
 	cmaps = plt.colormaps()
-	cmaps = cmaps + [i for i in coolboxcmaps.keys()]
+	#cmaps = cmaps + [i for i in coolboxcmaps.keys()]
 	return cmaps
 
 
 # Produce HiC map image saved to disk 
 def hic_plot(cmap, distnormmat, filepathpng, filepathsvg):
 
-	if cmap in [i for i in coolboxcmaps.keys()]:
-		cmap = coolboxcmaps[cmap]
-	else:
-		cmap
+	# if cmap in [i for i in coolboxcmaps.keys()]:
+	# 	cmap = coolboxcmaps[cmap]
+	# else:
+	# 	cmap
 	
 	# Save distance normalized HiC plot and display. This is base functionality of the app and 
 	# only requires a HiC file.
@@ -299,12 +270,12 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepa
 	mat = mat.astype(np.uint8)
 
 	# Set up CMAP for HiC background
-	if disthic_cmap in [i for i in coolboxcmaps.keys()]:
-		disthic_cmap = coolboxcmaps[disthic_cmap]
-	else:
-		disthic_cmap
+	# if disthic_cmap in [i for i in coolboxcmaps.keys()]:
+	# 	disthic_cmap = coolboxcmaps[disthic_cmap]
+	# else:
+        # disthic_cmap
 
-	img = Image.fromarray(mat)
+	#img = Image.fromarray(mat)
 				
 	fig = plt.figure()
 	ax = fig.add_subplot()
@@ -312,7 +283,7 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepa
 	# Show distance normalized HiC
 	ax.imshow(disthic, disthic_cmap, interpolation='none', alpha = hicalpha)
 	# Show ChIP-seq matrix
-	ax.imshow(img, interpolation='none', alpha = bedalpha)
+	ax.imshow(mat, interpolation='none', alpha = bedalpha)
 
 	ax.xaxis.set_visible(False)
 	ax.yaxis.set_visible(False)
@@ -477,7 +448,7 @@ def plotCompartments(disthic, comp, ABmat, colA, colB, filepathpng, filepathsvg)
     # Plot HiC map and compartment tracks
     mat = disthic.astype(np.uint8)
 
-    img = Image.fromarray(mat)
+    #img = Image.fromarray(mat)
                 
     fig, (ax2) = plt.subplots(ncols=1)
     

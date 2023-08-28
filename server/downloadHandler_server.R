@@ -1,5 +1,12 @@
-# Place generated files in a zip folder
+  
+  if (Sys.info()[['user']] == 'shiny'){
+    shiny::observe({
+      print(reticulate::py_config())
+    })
+  }
 
+
+# Place generated files in a zip folder
 zipfolder <- reactive({
 
     req(hicv$y)
