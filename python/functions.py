@@ -4,31 +4,10 @@ from matplotlib.colors import LinearSegmentedColormap
 import matplotlib.pyplot as plt 
 import pyBigWig
 import math
-from PIL import Image
-import os
-import glob
-from coolbox.core.track.hicmat.plot import cmaps as coolboxcmaps
-import h5py
-import cooler
 import pandas as pd
 import requests
 import re
 
-
-#random string generation
-import string
-import random
-
-
-def coolerMetadata(mcool):
-    h5 = h5py.File(mcool, 'r')
-    res = list(h5['resolutions'].keys())
-    res = sorted([int(x) for x in res], reverse=True)
-    cool = f"{mcool}::/resolutions/{res[0]}"
-    c = cooler.Cooler(cool)
-    chrlist = c.chromnames
-    
-    return chrlist, res
 
 def getHiCmetadata(hicfile):
 	# Given a hic-pro file upload, return
@@ -70,14 +49,6 @@ def checkURL(url, filetype):
             if(suffix in filetype):
                 return("Valid")
     return("Not valid")
-
-def readCoolHiC(mcool, chrom, start, stop, norm, binsize):
-    cool = f"{mcool}::/resolutions/{binsize}"
-    c = cooler.Cooler(cool)
-    string = f"{chrom}:{str(start)}-{str(stop+1)}"
-    mat = c.matrix().fetch(string)
-    return mat
-
 
 def hicMatrixZoom(hicdump, chrom, norm, binsize):
 	hicobject = hicdump.getMatrixZoomData(chrom, chrom, "observed", norm, "BP", binsize)
@@ -180,7 +151,6 @@ def processBigwigs(bigwig,binsize,chrom,start,stop, log):
 # TODO: have an option to also use HiC value
 # scale the alpha.
 def calcAlphaMatrix(chip,disthic,showhic,r,g,b):
-    print('calculating alpha...')
     matsize = len(chip)
     # Normalize chip list to between 0 and 1
     chip_arr = np.array(chip)
@@ -262,26 +232,18 @@ def matplot_colors():
 	# Add in custom colors to list
 	#REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1,1,1),(1,0,0)])
 	cmaps = plt.colormaps()
-	cmaps = cmaps + [i for i in coolboxcmaps.keys()]
+	#cmaps = cmaps + [i for i in coolboxcmaps.keys()]
 	return cmaps
 
 
 # Produce HiC map image saved to disk 
-def hic_plot(cmap, distnormmat, chrom, bin, start, stop, norm):
+def hic_plot(cmap, distnormmat, filepathpng, filepathsvg):
 
-	if cmap in [i for i in coolboxcmaps.keys()]:
-		cmap = coolboxcmaps[cmap]
-	else:
-		cmap
+	# if cmap in [i for i in coolboxcmaps.keys()]:
+	# 	cmap = coolboxcmaps[cmap]
+	# else:
+	# 	cmap
 	
-	# Remove previous versions of svg images
-	# to prevent bloat in images directory.
-	# NOTE: the file cannot be overwritten
-	# as webpage doesn't recognise it has
-	# changed if the filename hasn't changed.
-	for f in glob.glob('./www/images/HiC_*.*'):
-		os.remove(f)
-
 	# Save distance normalized HiC plot and display. This is base functionality of the app and 
 	# only requires a HiC file.
 	fig, (ax1) = plt.subplots(ncols=1)
@@ -291,24 +253,15 @@ def hic_plot(cmap, distnormmat, chrom, bin, start, stop, norm):
 	ax1.xaxis.set_visible(False)
 	ax1.yaxis.set_visible(False)
 
-	# random string for name
-	# using random.choices()
-	# generating random strings
-	res = ''.join(random.choices(string.ascii_uppercase +
-								string.digits, k=8))
-	figname = f"HiC_locus-{chrom}-{start}-{stop}_{bin}bp_norm-{norm}_{str(res)}"
-
-	directory = "images/"
-	wwwlocation = "www/" + directory + figname
-	notwwwlocation = directory + figname
-	plt.savefig(wwwlocation + '.svg', bbox_inches='tight')
-	plt.savefig(wwwlocation + '.png', bbox_inches='tight', dpi=300)
+    # Save figure to temp path
+	plt.savefig(filepathpng, bbox_inches='tight')
+	plt.savefig(filepathsvg, bbox_inches='tight', dpi=300)
 
 	plt.close()
-	return notwwwlocation
+	return filepathpng, filepathsvg
 
 
-def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, sample, hicalpha, bedalpha, chrom, bin, start, stop, name, norm):
+def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepathpng, filepathsvg):
 	# NOTES: the issue here is that the matrix is generated inside the plotting function with calcAlphaMatrix.
 	# Before, i was passing the r,g,b matrices inside, which can be 1 chip or 2 chips depending. I need to do this again,
 	# but instead having alpha value as well.
@@ -316,18 +269,13 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, sample, hicalpha, bedalpha
 	#color can be hexidecimal
 	mat = mat.astype(np.uint8)
 
-	#remove previously generated images
-
-	for f in glob.glob(f'./www/images/{sample}-*.*'):
-		os.remove(f)
-
 	# Set up CMAP for HiC background
-	if disthic_cmap in [i for i in coolboxcmaps.keys()]:
-		disthic_cmap = coolboxcmaps[disthic_cmap]
-	else:
-		disthic_cmap
+	# if disthic_cmap in [i for i in coolboxcmaps.keys()]:
+	# 	disthic_cmap = coolboxcmaps[disthic_cmap]
+	# else:
+        # disthic_cmap
 
-	img = Image.fromarray(mat)
+	#img = Image.fromarray(mat)
 				
 	fig = plt.figure()
 	ax = fig.add_subplot()
@@ -335,7 +283,7 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, sample, hicalpha, bedalpha
 	# Show distance normalized HiC
 	ax.imshow(disthic, disthic_cmap, interpolation='none', alpha = hicalpha)
 	# Show ChIP-seq matrix
-	ax.imshow(img, interpolation='none', alpha = bedalpha)
+	ax.imshow(mat, interpolation='none', alpha = bedalpha)
 
 	ax.xaxis.set_visible(False)
 	ax.yaxis.set_visible(False)
@@ -388,23 +336,11 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, sample, hicalpha, bedalpha
 	ax3.set_position((l2*(.7),b2, w2*.1, h2*(1)))
 	ax3.margins(y=0)
 
-
-	#write image to file
-	res = ''.join(random.choices(string.ascii_uppercase +
-								string.digits, k=8))
-	if(isinstance(name, list)):
-		name = '_'.join(name)
-
-	figname = f"{sample}-{name}-{chrom}-{start}-{stop}_{bin}bp_norm-{norm}_{str(res)}"
-
-	directory = "images/"
-	wwwlocation = "www/" + directory + figname
-	notwwwlocation = directory + figname #this path is for 'shiny'
-	plt.savefig(wwwlocation + '.svg', bbox_inches='tight')
-	plt.savefig(wwwlocation + '.png', bbox_inches='tight', dpi=300)
+	plt.savefig(filepathsvg, bbox_inches='tight')
+	plt.savefig(filepathpng, bbox_inches='tight', dpi=300)
 	plt.close()
 
-	return notwwwlocation
+	return filepathpng, filepathsvg
 
 # check that the bedgraph binsize matches that
 # of the chosen binsize of Hi-C
@@ -507,16 +443,12 @@ def scaleCompartments(disthic, comp_df, Acol, Bcol):
     return Amatrix, Bmatrix
 
 
-def plotCompartments(disthic, comp, ABmat, colA, colB, chrom, start, stop):
+def plotCompartments(disthic, comp, ABmat, colA, colB, filepathpng, filepathsvg):
     
-    # Remove previous images of compartments
-    for f in glob.glob('./www/images/compartments-*.*'):
-        os.remove(f)
-
     # Plot HiC map and compartment tracks
     mat = disthic.astype(np.uint8)
 
-    img = Image.fromarray(mat)
+    #img = Image.fromarray(mat)
                 
     fig, (ax2) = plt.subplots(ncols=1)
     
@@ -554,18 +486,8 @@ def plotCompartments(disthic, comp, ABmat, colA, colB, chrom, start, stop):
     ax4.xaxis.set_visible(False)
     ax4.yaxis.set_visible(False)
     
-    # random string for name
-    # using random.choices()
-    # generating random strings
-    res = ''.join(random.choices(string.ascii_uppercase +
-                                string.digits, k=8))
-    figname = f"compartments-{chrom}-{start}-{stop}_{str(res)}"
-
-    directory = "images/"
-    wwwlocation = "www/" + directory + figname
-    notwwwlocation = directory + figname
-    plt.savefig(wwwlocation + '.svg', bbox_inches='tight')
-    plt.savefig(wwwlocation + '.png', bbox_inches='tight', dpi=300)
+    plt.savefig(filepathsvg, bbox_inches='tight')
+    plt.savefig(filepathpng, bbox_inches='tight', dpi=300)
     
     plt.close()
-    return notwwwlocation
+    return filepathpng, filepathsvg

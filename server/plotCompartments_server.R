@@ -70,15 +70,34 @@ comp_plot <- reactive({
     req(hicv$y)
     validate(need(bedv$y, "Please upload compartments bed file"))
 
-    plotCompartments(
-        disthic = hic_distance(), 
-        #comp = filter_compartments(),
-        comp = addbins_compartments(),
-        ABmat = comp_LNERP(),
-        colA = input$colcompA,
-        colB = input$colcompB,
-        chrom = input$chr,
-        start = input$start,
-        stop = input$stop
-        )
+    patt <- str_glue(
+    "Compartment_{input$chr}_{input$start}_{input$stop}_{input$bin}_norm-{input$norm}_"
+    )
+
+    pngpath <- tempfile(
+        pattern = patt,
+        fileext = ".png",
+        tmpdir = userinfo)
+
+    svgpath <- tempfile(
+        pattern = patt,
+        fileext = ".svg",
+        tmpdir = userinfo)
+
+    plotcomps <- plotCompartments(
+            disthic = hic_distance(), 
+            comp = addbins_compartments(),
+            ABmat = comp_LNERP(),
+            colA = input$colcompA,
+            colB = input$colcompB,
+            filepathpng = pngpath, 
+            filepathsvg = svgpath
+            )
+    comppng <- tuple(plotcomps, convert = T)[0]
+    compsvg <- tuple(plotcomps, convert = T)[1]
+
+    return(list(
+        png = comppng,
+        svg = compsvg
+    ))
 }) 

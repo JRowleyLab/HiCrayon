@@ -19,7 +19,7 @@ dashboardBody(
     # First tab content
     tabItem(tabName = "Visualize",
             fluidRow(width=12,
-                    column(width=3,                            
+                    column(width=3,
                             fluidRow(width=12,
                                     box(width=12,title = "HiC",status = "primary", solidHeader = TRUE,
                                         collapsible = TRUE,collapsed = TRUE,

@@ -1,20 +1,22 @@
-# Place generated files in a zip folder
+  
+  if (Sys.info()[['user']] == 'shiny'){
+    shiny::observe({
+      print(reticulate::py_config())
+    })
+  }
 
+
+# Place generated files in a zip folder
 zipfolder <- reactive({
 
     req(hicv$y)
 
-    zipfile = "imagesZip.zip"
-
-    #remove existing images zip if exists
-    if(file.exists(zipfile)){
-        file.remove(zipfile)
-    }
+    zipfile = paste0(userinfo, "/imagesZip.zip")
 
     files = c()
 
-    files = append(files, paste("www/", hicplot(), ".svg", sep = "") )
-    files = append(files, paste("www/", hicplot(), ".png", sep = "") )
+    files = append(files, hicplot()$svg)
+    files = append(files, hicplot()$png)
 
     # Control inclusion through checkbox
     if(input$chip1){
@@ -23,30 +25,30 @@ zipfolder <- reactive({
 
           if(!is.null(bw1v[[paste0("bw",i)]])){
             files = append(
-              files, paste("www/", chipplot()[i], ".svg", sep = "")
+              files, chipplot()[[i]]$svg
               )
             files = append(
-              files, paste("www/", chipplot()[i], ".png", sep = "")
+              files, chipplot()[[i]]$png
               )
           }
         }
         if(length(combinedchips$chips) > 1){
             combname <- "" 
               files = append(
-                files, paste("www/",chipcombinedplot(), ".svg", sep = "")
+                files, chipcombinedplot()$svg
               )
               files = append(
-                files, paste("www/",chipcombinedplot(), ".png", sep = "")
+                files, chipcombinedplot()$png
               )
         }
     }
 
     if(input$bedgraph){
       files = append(
-                files, paste("www/",comp_plot(), ".svg", sep="")
+                files, comp_plot()$svg
               )
       files = append(
-                files, paste("www/",comp_plot(), ".png", sep="")
+                files, comp_plot()$png
               )
     }
 
@@ -60,7 +62,7 @@ zipfolder <- reactive({
 output$downloadtree <- downloadHandler(
 
   filename = function() {
-    paste(zipfolder())
+    paste("HiCrayonImages.zip")
   },
 
   content = function(file) {

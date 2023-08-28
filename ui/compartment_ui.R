@@ -2,19 +2,12 @@ comp_UI <- div(
   checkboxInput("bedgraph", "Include Compartments"),
           conditionalPanel(
                 condition = "input.bedgraph == true",
-    fluidRow(
-                column(5,
-                  shinyFilesButton(
-                    'bedg1', 
-                    label = 'Select bedGraph', 
-                    title = 'Please select a .bedgraph/.bed file', 
-                    multiple=FALSE),
-                ),
-                column(5,
-                  verbatimTextOutput('f1_bedg1')
-                )
+      fluidRow(
+              column(12,
+                fileInput("bedg1", "Select Bedgraph", accept = c(".bed", ".bedgraph"), multiple = FALSE)
               ),
-    fluidRow(
+            ),
+      fluidRow(
           column(5,
                   colourInput("colcompA", "Select colour: Pos", "red"),
                 ),
