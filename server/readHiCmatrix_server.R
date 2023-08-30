@@ -8,12 +8,6 @@ observeEvent(input$hic, {
     hicv$y <- file$datapath
 })
 
-# # hic url handling
-# observeEvent(input$loadurlhic, {
-#     hicv$y <- input$urlhic
-# })
-
-
 observe({
     isvalid = checkURL(input$urlhic, list('hic'))
 

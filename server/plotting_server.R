@@ -15,7 +15,7 @@ hicplot <- reactive({
         tmpdir = userinfo)
 
     path <- hic_plot(
-        cmap = input$map_colour,
+        cmap = hic_color(),
         distnormmat = hic_distance(),
         filepathpng = pngpath,
         filepathsvg = svgpath
@@ -99,7 +99,7 @@ chipplot <- reactive({
                 col1 = col,
                 mat = chipalpha()[[x]],
                 chip = track,
-                disthic_cmap = input$chip_cmap,
+                disthic_cmap = hic_color(),
                 hicalpha = input$hicalpha,
                 bedalpha = input$bedalpha,
                 filepathpng = pngpath,

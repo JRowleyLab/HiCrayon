@@ -8,12 +8,14 @@ source("ui/chiponeOptions_ui.R", local = TRUE)
 source("ui/compartment_ui.R", local = TRUE)
 source("radiobuttonswithimages.R", local = TRUE)
 
+reticulate::source_python("python/functions.py")
+
 ui <- shinyUI({
   source("ui/ui_shinydashboard.R", local = TRUE)[1]
 })
 
 server <- function(input, output, session) {
-  source("server/reticulateenv_server.R", local = TRUE)
+  #source("server/reticulateenv_server.R", local = TRUE)
   source("server/calcDistance_server.R", local = TRUE)
   source("server/processBigwigs_server.R", local = TRUE)
   source("server/plotting_server.R", local = TRUE)

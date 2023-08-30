@@ -15,11 +15,11 @@ observeEvent(input$addBtn, {
         #width=12,
         id = paste0("newInput",nr),
         fluidRow(
-            column(3,
-                fileInput(paste0('bw', nr), 
-                "Select Bigwig", accept = c(".bw", ".bigwig"),
-                 multiple = FALSE)
-            ),
+            # column(3,
+            #     fileInput(paste0('bw', nr), 
+            #     "Select Bigwig", accept = c(".bw", ".bigwig"),
+            #      multiple = FALSE)
+            # ),
             column(6,
                 textInput(
                     paste0('urlchip',nr),
