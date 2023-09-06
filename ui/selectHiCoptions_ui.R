@@ -15,25 +15,21 @@ selectHiCoptionsUI <- div(fluidRow(
                                 )
                             ),
                             fluidRow(
+                                column(6,
+                                    colourInput("colhic1", 
+                                                "Select colour", 
+                                                "white")
+                                ),
+                                column(6,
+                                    colourInput("colhic2",
+                                                "Select colour", 
+                                                "red")
+                                )
+                            ),
+                            fluidRow(
                                 column(4,
                                 selectizeInput("norm", label="Normalization", choices=c("VC", "VC_SQRT", "KR", "NONE"), selected="NONE")
                                 ),
-                                column(4,
-                                selectizeInput(
-                                    "map_colour", 
-                                    "HiC Color", 
-                                    choices = "",
-                                    selected = "JuiceBoxLike"
-                                )
-                                ),
-                                column(4,
-                                selectizeInput(
-                                    "chip_cmap", 
-                                    "HiC Color (ChIP)", 
-                                    choices = "",
-                                    selected = "JuiceBoxLike"
-                                )
-                                )
                             ),
                             fluidRow(
                             column(6,

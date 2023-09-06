@@ -15,7 +15,7 @@ hicplot <- reactive({
         tmpdir = userinfo)
 
     path <- hic_plot(
-        cmap = input$map_colour,
+        cmap = hic_color(),
         distnormmat = hic_distance(),
         filepathpng = pngpath,
         filepathsvg = svgpath

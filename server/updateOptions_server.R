@@ -1,21 +1,12 @@
-# Update dropdown with all possible sequential
-# matplotlib colormaps
-observe({
-    updateSelectizeInput(
-        session, "map_colour",
-        choices = matplot_colors(),
-        selected = "JuiceBoxLike",
-        server = TRUE
-        )
-
-    updateSelectizeInput(
-        session, "chip_cmap",
-        choices = matplot_colors(),
-        selected = "JuiceBoxLike",
-        server = TRUE
-        )
+# Linear interpolate CMAP for HiC
+hic_color <- reactive({
+    matplot_color(
+        gradient = list(
+            input$colhic1,
+            input$colhic2
+            )
+    )
 })
-
 
 # Update chromsome list
 observe(

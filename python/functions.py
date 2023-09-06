@@ -228,12 +228,9 @@ def lnerp_matrices(matrices):
 
 # Return a list of all possible sequential
 # matplotlib colormaps
-def matplot_colors():
-	# Add in custom colors to list
-	#REDMAP = LinearSegmentedColormap.from_list("bright_red", [(1,1,1),(1,0,0)])
-	cmaps = plt.colormaps()
-	#cmaps = cmaps + [i for i in coolboxcmaps.keys()]
-	return cmaps
+def matplot_color(gradient):
+    cmap = LinearSegmentedColormap.from_list('interaction', gradient)
+    return cmap
 
 
 # Produce HiC map image saved to disk 
