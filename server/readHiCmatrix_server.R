@@ -14,8 +14,7 @@ observe({
     if(isvalid=="Valid"){
         hicv$y <- input$urlhic
     }else{
-        #make this an actual error message
-        print("URL not valid: ERROR MESSAGE")
+        shinyCatch({message(paste(input$urlhic, " not valid"))}, prefix = '')
     }
     
 }) %>% bindEvent(input$loadurlhic)
@@ -45,6 +44,16 @@ HiCmetadata <- reactive({
 HiCMatrixZoom <- reactive({
     validate(need(hicv$y!="NULL", "Please upload a HiC file"))
 
+    matsize <- (as.integer(input$stop) - as.integer(input$start)) / as.integer(input$bin)
+    if(matsize > 5000){
+        shinyCatch({stop(paste0(
+            "Matrix with size: ", 
+            matsize, 
+            " is too large (>5000). Please reduce matrix size or switch to the local version of HiCrayon: github.com/JRowleylab/HiCrayon"))}, prefix = '')
+        return()
+    }
+    
+
     hicobject <- hicMatrixZoom(
         hicdump = HiCmetadata()$hicdump, 
         chrom = input$chr,
@@ -64,6 +73,7 @@ HiCMatrixZoom <- reactive({
 HiCmatrix <- reactive({
 
     validate(need(hicv$y!="NULL", "Please upload a HiC file"))
+    req(HiCMatrixZoom())
 
     if(hicv$type=='hic'){
         matrix <- readHiCasNumpy(

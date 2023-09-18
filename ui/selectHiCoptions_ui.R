@@ -1,10 +1,10 @@
 selectHiCoptionsUI <- div(
-                        # fluidRow(
-                        #     column(12,
-                        #     #shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
-                        #     fileInput("hic", "Select HiC", accept = ".hic", multiple = FALSE)
-                        #     ),
-                        #     ),
+                        fluidRow(
+                            column(12,
+                                #shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
+                                actionButton("encodehictable", "ENCODE HiC Datasets")
+                            ),
+                            ),
                             fluidRow(
                                 column(8,
                                     textInput('urlhic',
@@ -31,22 +31,6 @@ selectHiCoptionsUI <- div(
                                 column(4,
                                 selectizeInput("norm", label="Normalization", choices=c("VC", "VC_SQRT", "KR", "NONE"), selected="NONE")
                                 ),
-                                # column(4,
-                                # selectizeInput(
-                                #     "map_colour", 
-                                #     "HiC Color", 
-                                #     choices = "",
-                                #     selected = ""
-                                # )
-                                # ),
-                                # column(4,
-                                # selectizeInput(
-                                #     "chip_cmap", 
-                                #     "HiC Color (ChIP)", 
-                                #     choices = "",
-                                #     selected = ""
-                                # )
-                                # )
                             ),
                             fluidRow(
                             column(6,
