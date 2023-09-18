@@ -8,18 +8,22 @@ hic_color <- reactive({
     )
 })
 
-# Update chromsome list
-observe(
+# Update chromsome and resolution list
+observe({
     updateSelectizeInput(session, "chr",
         choices = HiCmetadata()$chrs)
-)
-
-# Update resolution list
-observe(
     updateSelectizeInput(session, "bin",
         choices = HiCmetadata()$res,
         selected = HiCmetadata()$res[1])
-)
+    shinyCatch({message("Hi-C Loaded")}, prefix = '')
+})
+
+#shinyCatch({message(paste(encodehic[selected, "Experiment"], "Hi-C Loading"))}, prefix = '') put in somewehere here
+
+observeEvent(input$generate_hic, {
+    matsize <- (as.integer(input$stop) - as.integer(input$start)) / as.integer(input$bin)
+    shinyCatch({message(paste0("Loading Hi-C with matrix size: ", matsize))}, prefix = '')
+})
 
 # Set maximum value for coordinates based on chromosome
 idx <- reactive({
@@ -49,13 +53,6 @@ observeEvent(input$endofchrom, {
             inputId = "stop",
             value = HiCmetadata()$lengths[idx()]
         )
-})
-
-# bedgraph file handling
-bedv <- reactiveValues()
-observeEvent(input$bedg1, {
-    inFile <- input$bedg1 
-    bedv$y <- inFile$datapath
 })
 
 # Store HiC file type as reactive value

@@ -1,14 +1,15 @@
 selectHiCoptionsUI <- div(fluidRow(
                             column(12,
                             #shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
-                            shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE)
+                            shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
+                            actionButton("encodehictable", "ENCODE HiC Datasets")
                             ),
                             ),
                             fluidRow(
                                 column(8,
                                     textInput('urlhic',
                                     label="",
-                                    placeholder = "https://www.encodeproject.org/files/ENCFF750AOC/@@download/ENCFF750AOC.hic")
+                                    placeholder = "https://www.encode.com/xyz.hic")
                                 ),
                                 column(4,
                                     actionButton('loadurlhic', label = "Load URL")

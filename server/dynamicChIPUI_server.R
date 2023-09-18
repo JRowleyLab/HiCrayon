@@ -62,7 +62,7 @@ observeEvent(input$addBtn, {
       #print(str(reactiveValuesToList(bw1v)))
     })
     # Set up file handling for local files
-    #shinyFileChoose(input, paste0("bw",nr), root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
+    shinyFileChoose(input, paste0("bw",nr), root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
     # Add file path to reactive variable
     observeEvent(input[[paste0("bw",nr)]], {
         inFile <- parseFilePaths(roots = c(wd = workingdir), input[[paste0("bw",nr)]])

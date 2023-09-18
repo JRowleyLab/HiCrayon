@@ -51,8 +51,6 @@ HiCMatrixZoom <- reactive({
         norm = input$norm,
         binsize = as.integer(input$bin))
 
-     message("Loading Hi-C from URL")
-
     return(hicobject)
 })
 

@@ -259,20 +259,7 @@ def hic_plot(cmap, distnormmat, filepathpng, filepathsvg):
 
 
 def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepathpng, filepathsvg):
-	# NOTES: the issue here is that the matrix is generated inside the plotting function with calcAlphaMatrix.
-	# Before, i was passing the r,g,b matrices inside, which can be 1 chip or 2 chips depending. I need to do this again,
-	# but instead having alpha value as well.
-	# The chosen colour needs to be passed to calcAlphaMatrix and then I can pass the rmat ,gmat ,bmat  to this function again
-	#color can be hexidecimal
 	mat = mat.astype(np.uint8)
-
-	# Set up CMAP for HiC background
-	# if disthic_cmap in [i for i in coolboxcmaps.keys()]:
-	# 	disthic_cmap = coolboxcmaps[disthic_cmap]
-	# else:
-        # disthic_cmap
-
-	#img = Image.fromarray(mat)
 				
 	fig = plt.figure()
 	ax = fig.add_subplot()
