@@ -197,7 +197,7 @@ chipcombinedplot <- reactive({
             col1 = cols,
             mat = m3,
             chip = tracks,
-            disthic_cmap = input$chip_cmap,
+            disthic_cmap = hic_color(),
             hicalpha = input$hicalpha,
             bedalpha = input$bedalpha,
             filepathpng = pngpath,
