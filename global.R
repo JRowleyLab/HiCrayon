@@ -14,6 +14,7 @@ library(zip)
 library(stringr)
 library(BH)
 library(DT)
+library(eulerr)
 
 # load encode hic data
 encodehic <- read.table("https://s3.amazonaws.com/igv.org.app/encode/hic/hic.txt", header=T, sep="\t")
