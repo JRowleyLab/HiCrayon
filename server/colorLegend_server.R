@@ -1,7 +1,7 @@
 ####################################
 # dynamically create euler plot
 ####################################
-outputLegend <- function(colors){
+outputLegend <- function(colors, labels){
     # Given a vector of colors selected for 
     # combination, return a venn diagram of 
     # rgb linear interpolation color intersects
@@ -23,6 +23,8 @@ outputLegend <- function(colors){
     return(combinations)
     }
 
+    # calculate hex from rgb
+    rgb2hex <- function(rgb) rgb(rgb[1], rgb[2], rgb[3], maxColorValue = 255)
 
     combinations <- generate_color_combinations(colors)
 
@@ -39,6 +41,26 @@ outputLegend <- function(colors){
 
     vals <- rep(1, length(combinations))
     names(vals) <- combinations
-    plot(euler(vals), fill = fills)
+    plot(euler(vals), fill = fills, labels = labels)
 }
 
+output$colorlegend <- renderPlot({
+    # for the combined chips, display 
+    # color legend
+    chipstocombine <- combinedchips$chips
+    print(chipstocombine)
+
+    req(length(chipstocombine)>1)
+
+    cols <- c()
+    names <- c()
+    for(x in seq_along(chipstocombine)){
+        cols <- append(cols, input[[paste0("col", chipstocombine[x])]])
+        names <- append(names, input[[paste0("n", chipstocombine[x])]])
+    }
+    print(cols)
+    print(names)
+
+    # make venn diagram of colour combinations
+    outputLegend(cols, names)
+})

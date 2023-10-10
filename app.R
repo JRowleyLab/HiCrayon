@@ -26,6 +26,7 @@ server <- function(input, output, session) {
   source("server/plotCompartments_server.R", local = TRUE)
   source("server/downloadHandler_server.R", local = TRUE)
   source("server/dynamicChIPUI_server.R", local = TRUE)
+  source("server/colorLegend_server.R", local = TRUE)
 }
 
 shinyApp(ui, server)

@@ -14,8 +14,7 @@ observe({
     if(isvalid=="Valid"){
         hicv$y <- input$urlhic
     }else{
-        #make this an actual error message
-        print("URL not valid: ERROR MESSAGE")
+        shinyCatch({message(paste(input$urlhic, " not valid"))}, prefix = '')
     }
     
 }) %>% bindEvent(input$loadurlhic)
