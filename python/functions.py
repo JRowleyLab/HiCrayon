@@ -142,6 +142,8 @@ def processBigwigs(bigwig,binsize,chrom,start,stop, log):
 	# 1e-5 added to avoid log(0)
 	bwlog = []
 	for i in bwraw:
+		if i == None:
+			i = 0
 		bwlog.append(math.log(i+0.01))
 		
 	return bwlog, bwraw
@@ -329,7 +331,8 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepa
 # check that the bedgraph binsize matches that
 # of the chosen binsize of Hi-C
 def checkBedBinsize(df, binsize):
-    bedbinsize = df['stop'].iloc[10] - df['start'].iloc[10]
+    bedbinsize = df['stop'].iloc[2] - df['start'].iloc[2]
+    print('yes')
     return bedbinsize == binsize
 
 # Add missing bins and store as 0
