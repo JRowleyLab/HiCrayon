@@ -43,14 +43,14 @@ dashboardBody(
                                     #generateHiCbuttonUI
                             ), #end row
                     ), # end column
-                    column(width = 6,
+                    column(width = 7,
                            galleryUI,
                            tags$script(
                                 HTML('panzoom($("#gallery")[0])')
                             )
                            )
             ),
-            column(width = 3,
+            column(width = 2,
                         plotOutput("colorlegend"))
         )
     ), # /tabItems

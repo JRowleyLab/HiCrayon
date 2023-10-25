@@ -7,6 +7,7 @@ filter_compartments <- reactive({
         input$start, 
         input$stop)
 
+    validate(need(nrow(compsdf)>2, "No bedgraph data for the selected region"))
     # Check binsize of bedgraph
     boolean <- checkBedBinsize(compsdf, as.integer(input$bin))
     validate(need(
