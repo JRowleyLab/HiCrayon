@@ -31,34 +31,6 @@ hicplot <- reactive({
 }) 
 
 
-chipalpha <- reactive({
-
-    req(input$chip1)
-
-    chipalphas <- list()
-
-    lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
-
-        if(!is.null(bw1v[[paste0("bw",x)]])){
-
-            col <- input[[paste0("col", x)]]
-            rgb <- col2rgb(col)
-
-            m1 <- calcAlphaMatrix(
-                bwlist_ChIP1()$logs[[x]],
-                hic_distance(),
-                input$chipscale,
-                rgb[1], 
-                rgb[2], 
-                rgb[3])
-
-            chipalphas[[x]] <<- m1
-        }
-    })
-
-    return(chipalphas)
-}) 
-
 chipplot <- reactive({
 
     req(input$chip1)
@@ -73,12 +45,15 @@ chipplot <- reactive({
         
             # Overwrite the colour and track for single chips
             col[1] <- input[[paste0("col", x)]]
+            
+            # Value clipped bigwig track with raw values
+            track[[1]] <- chipalpha()$chipclipped[[x]]
 
-            if(input$log==TRUE){
-                track[[1]] <- bwlist_ChIP1()$logs[[x]]
-            }else {
-                track[[1]] <- bwlist_ChIP1()$raws[[x]]
-            }
+            # List of min/max values [[1,2]]. TODO: Ensure it's not [1,2]
+            minmaxlist <- minmaxargs[[paste0("mm",x)]]
+            print("plot:")
+            print(minmaxlist)
+
 
             patt <- str_glue(
             "ChIP_{input[[paste0('n',x)]]}_{input$chr}_{input$start}_{input$stop}_{input$bin}_norm-{input$norm}_"
@@ -97,13 +72,14 @@ chipplot <- reactive({
             p1_plot <- ChIP_plot(
                 disthic = hic_distance(),
                 col1 = col,
-                mat = chipalpha()[[x]],
+                mat = chipalpha()$chipalphas[[x]],
                 chip = track,
                 disthic_cmap = hic_color(),
                 hicalpha = input$hicalpha,
                 bedalpha = input$bedalpha,
                 filepathpng = pngpath,
-                filepathsvg = svgpath
+                filepathsvg = svgpath,
+                minmaxs = minmaxlist #[[1,2]]
                 )
 
             pngimage <- tuple(p1_plot, convert = T)[0]

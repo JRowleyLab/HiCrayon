@@ -3,6 +3,7 @@
 
 # bw1 file handling
 bw1v <- reactiveValues()
+minmaxargs <- reactiveValues()
 
 observeEvent(input$addBtn, {
     nr <- input$addBtn
@@ -15,13 +16,15 @@ observeEvent(input$addBtn, {
         #width=12,
         id = paste0("newInput",nr),
         fluidRow(
-            column(3,
+            column(12,
                 shinyFilesButton(
                 paste0('bw', nr),
                 label = 'Select bigwig',
                 title = 'Please select a .bigwig/.bw file',
-                multiple=FALSE),
+                multiple=FALSE)
+            )
             ),
+          fluidRow(
             column(6,
                 textInput(
                     paste0('urlchip',nr),
@@ -30,7 +33,7 @@ observeEvent(input$addBtn, {
             ),
             column(2,
                 actionButton(paste0('loadurlchip',nr), label = "Add URL"))
-        ),
+          ),
         fluidRow(
             # Update in server to the basename minus the suffix
             column(4,
@@ -48,6 +51,14 @@ observeEvent(input$addBtn, {
                               "Combination")
                 )
                 ),
+        fluidRow(
+          column(6,
+            numericInput(paste0("minargs",nr), "Min", value = "")
+            ),
+          column(6,
+            numericInput(paste0("maxargs",nr), "Max", value = "")
+            )
+        ),
         actionButton(paste0('removeBtn',nr), 'Remove')
       )
     )
@@ -91,4 +102,12 @@ observeEvent(input$addBtn, {
           print("URL not valid: ERROR MESSAGE")
       }
     }) %>% bindEvent(input[[paste0('loadurlchip',nr)]])
+
+    observe({
+      minmaxlist <- list(
+        as.double(input[[paste0("minargs",nr)]]),
+        as.double(input[[paste0("maxargs",nr)]])
+        )
+      minmaxargs[[paste0("mm",nr)]] <- minmaxlist
+    })
   })

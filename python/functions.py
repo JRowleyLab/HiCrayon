@@ -117,7 +117,7 @@ def distanceMatHiC(hicnumpy, thresh, distnorm):
 
 # Read in bigwig file and return a list of
 # bigwig peak values
-def processBigwigs(bigwig,binsize,chrom,start,stop, log):
+def processBigwigs(bigwig,binsize,chrom,start,stop):
 
 	start=int(start)
 	binsize=int(binsize)
@@ -152,11 +152,19 @@ def processBigwigs(bigwig,binsize,chrom,start,stop, log):
 # with the A value scaled by bigwig value
 # TODO: have an option to also use HiC value
 # scale the alpha.
-def calcAlphaMatrix(chip,disthic,showhic,r,g,b):
+def calcAlphaMatrix(chip,disthic,showhic,r,g,b, minarg, maxarg):
     matsize = len(chip)
     # Normalize chip list to between 0 and 1
     chip_arr = np.array(chip)
-    chip_norm = (chip_arr-np.min(chip_arr))/(np.max(chip_arr)-np.min(chip_arr))
+    minimum = minarg if isinstance(minarg, float) else np.min(chip_arr)
+    maximum = maxarg if isinstance(maxarg, float) else np.max(chip_arr)
+    print(minimum, maximum)
+    #raw values from bigwig, clipped data to specified values
+    chip_clipped = np.clip(chip_arr, a_min = minimum, a_max = maximum)
+
+    # normalized to between 0 and 1 after clipping. 0 and 1 being scaled
+    # from user specified min and max
+    chip_norm = (chip_clipped-minimum)/(maximum-minimum)
 
     # True: scale ChIP by Hi-C
     # false: raw ChIP not weighted by Hi-C
@@ -199,7 +207,7 @@ def calcAlphaMatrix(chip,disthic,showhic,r,g,b):
 
     mat = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
 
-    return mat
+    return mat, chip_clipped
 
 # Use Linear interpolation to calculate
 # the alpha weighted color mixing ratio
@@ -260,7 +268,7 @@ def hic_plot(cmap, distnormmat, filepathpng, filepathsvg):
 	return filepathpng, filepathsvg
 
 
-def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepathpng, filepathsvg):
+def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepathpng, filepathsvg, minmaxs):
 	mat = mat.astype(np.uint8)
 				
 	fig = plt.figure()
@@ -273,13 +281,13 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepa
 
 	ax.xaxis.set_visible(False)
 	ax.yaxis.set_visible(False)
+	print('check')
 
 	#############################
 	# Create bigwigs dynamically, 
 	# given a vector of names, 
 	# bigwigs and colors, do whatever
-	# length, so works with 1 up to 26 bigwigs
-	# # 26 (letters in alphabet).
+	# length.
 	#############################
 	# x-axis plot setup
 	ax1 = fig.add_subplot()
@@ -292,10 +300,18 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepa
 		# x-axis track
 		ax2 = ax1.twinx()
 		ax2.plot(chip[i], color=col1[i], linewidth = 1)
+		#set y-axis to custom range
+		print('check2')
+		blim = min(chip[i]) if isinstance(minmaxs[i][0], float) else minmaxs[i][0]
+		tlim = max(chip[i]) if isinstance(minmaxs[i][1], float) else minmaxs[i][1]
+		lims = [blim, tlim]
+		print(lims)
+		ax2.set_ylim(lims)
 		# y-axis track
 		ax4 = ax3.twiny()
 		a = [x for x in range(len(chip[i]))]
 		ax4.plot(chip[i][::-1], a, color=col1[i], linewidth = 1)
+		ax4.set_xlim(lims)
 
 		# x-axis Remove ticks
 		ax1.set_xticks([])
@@ -332,7 +348,6 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepa
 # of the chosen binsize of Hi-C
 def checkBedBinsize(df, binsize):
     bedbinsize = df['stop'].iloc[2] - df['start'].iloc[2]
-    print('yes')
     return bedbinsize == binsize
 
 # Add missing bins and store as 0

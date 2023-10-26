@@ -1,6 +1,6 @@
 # variable for starting root directory
 # When used by others: TODO: change to root
-workingdir = '/'
+workingdir = '/Zulu/bnolan/HiC_data'
 
 ## Server side file-selection
 shinyFileChoose(input, 'hic', root = c(wd = workingdir), filetypes=c('hic'))

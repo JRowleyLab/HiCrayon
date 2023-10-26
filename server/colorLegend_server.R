@@ -48,7 +48,6 @@ output$colorlegend <- renderPlot({
     # for the combined chips, display 
     # color legend
     chipstocombine <- combinedchips$chips
-    print(chipstocombine)
 
     req(length(chipstocombine)>1)
 
@@ -58,8 +57,6 @@ output$colorlegend <- renderPlot({
         cols <- append(cols, input[[paste0("col", chipstocombine[x])]])
         names <- append(names, input[[paste0("n", chipstocombine[x])]])
     }
-    print(cols)
-    print(names)
 
     # make venn diagram of colour combinations
     outputLegend(cols, names)
