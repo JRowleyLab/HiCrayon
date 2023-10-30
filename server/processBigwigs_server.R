@@ -35,6 +35,7 @@ chipalpha <- reactive({
 
     chipalphas <- list()
     chipclipped <- list()
+    minmaxclip <- list()
 
     lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
 
@@ -62,11 +63,13 @@ chipalpha <- reactive({
             # outside lapply function
             chipalphas[[x]] <<- tuple(m1, convert=T)[0]
             chipclipped[[x]] <<- tuple(m1, convert=T)[1]
+            minmaxclip[[x]] <<- tuple(m1, convert=T)[2]
         }
     })
 
     return(list(
         chipalphas = chipalphas,
-        chipclipped = chipclipped
+        chipclipped = chipclipped,
+        minmaxclip = minmaxclip
     ))
 }) 

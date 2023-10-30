@@ -50,7 +50,7 @@ chipplot <- reactive({
             track[[1]] <- chipalpha()$chipclipped[[x]]
 
             # List of min/max values [[1,2]]. TODO: Ensure it's not [1,2]
-            minmaxlist <- minmaxargs[[paste0("mm",x)]]
+            minmaxlist <- list(minmaxargs[[paste0("mm",x)]])
             print("plot:")
             print(minmaxlist)
 
