@@ -111,23 +111,29 @@ observeEvent(input$addBtn, {
       minmaxargs[[paste0("mm",nr)]] <- minmaxlist
     })
 
-    # Update chip-seq min values if nan
-      observe({
-          updateNumericInput(
-              session = session,
-              inputId = paste0("minargs",nr),
-              value = chipalpha()$minmax[[nr]][[1]]
-          )
+    # # Update chip-seq min values if nan
+    #   observe({
+    #     print(chipalpha()$minmax[[nr]])
+    #     if(!is.null(chipalpha()$minmax[[nr]])){
 
+    #         minvalue = chipalpha()$minmax[[nr]][[1]]
+
+    #         updateNumericInput(
+    #           session = session,
+    #           inputId = paste0("minargs",nr),
+    #           value = minvalue)
+    #     }
+    #   }) %>% bindEvent(input$generate_hic)
+
+    #   # Update chip-seq max values if nan
+    #   observe({
+    #     if(!is.null(chipalpha()$minmax[[nr]])){
+    #       maxvalue = chipalpha()$minmax[[nr]][[2]]
           
-      }) %>% bindEvent(input$generate_hic)
-
-      # Update chip-seq max values if nan
-      observe({
-          updateNumericInput(
-              session = session,
-              inputId = paste0("maxargs",nr),
-              value = chipalpha()$minmaxclip[[nr]][[2]]
-          )
-      }) %>% bindEvent(input$generate_hic)
+    #       updateNumericInput(
+    #           session = session,
+    #           inputId = paste0("maxargs",nr),
+    #           value = maxvalue)
+    #     }
+    #   }) %>% bindEvent(input$generate_hic)
   })

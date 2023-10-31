@@ -64,6 +64,19 @@ chipalpha <- reactive({
             chipalphas[[x]] <<- tuple(m1, convert=T)[0]
             chipclipped[[x]] <<- tuple(m1, convert=T)[1]
             minmaxclip[[x]] <<- tuple(m1, convert=T)[2]
+
+            # Update chip-seq min values if nan
+            updateNumericInput(
+                    session = session,
+                    inputId = paste0("minargs",x),
+                    value = minmaxclip[[x]][[1]])
+
+            # Update chip-seq max values if nan
+            updateNumericInput(
+                    session = session,
+                    inputId = paste0("maxargs",x),
+                    value = minmaxclip[[x]][[2]])
+
         }
     })
 
