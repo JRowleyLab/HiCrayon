@@ -49,11 +49,9 @@ chipplot <- reactive({
             # Value clipped bigwig track with raw values
             track[[1]] <- chipalpha()$chipclipped[[x]]
 
-            # List of min/max values [[1,2]]. TODO: Ensure it's not [1,2]
+            # List of min/max values [[1,2]].
             minmaxlist <- list(minmaxargs[[paste0("mm",x)]])
-            print("plot:")
             print(minmaxlist)
-
 
             patt <- str_glue(
             "ChIP_{input[[paste0('n',x)]]}_{input$chr}_{input$start}_{input$stop}_{input$bin}_norm-{input$norm}_"
@@ -126,30 +124,33 @@ chipcombinedplot <- reactive({
 
     #this doesn't seem to work when you skip a chip for
     # combination
+    print(1)
     allchips <- list()
     counter = 1
     for(x in seq_along(chipstocombine)){
-        allchips[[counter]] <- chipalpha()[[chipstocombine[x]]]
+        allchips[[counter]] <- chipalpha()$chipalphas[[chipstocombine[x]]]
         counter = counter + 1
     }
-
+    print(2)
     m3 <- lnerp_matrices(allchips)
-
+    print(3)
     # bigwig tracks
     tracks <- list()
     cols <- c()
     names <- list()
+    # List of min/max values [[1,2]].
+    minmaxlist_list <- list()
 
     counter = 1
     # Create lists of info for combination plot
     for(x in seq_along(chipstocombine)){
-        if(input$log==TRUE){
-            tracks[[counter]] <- bwlist_ChIP1()$logs[[chipstocombine[x]]]
-        }else{
-            tracks[[counter]] <- bwlist_ChIP1()$raws[[chipstocombine[x]]]
-        }
+        
+        tracks[[counter]] <- chipalpha()$chipclipped[[chipstocombine[x]]]
+        
         cols <- append(cols, input[[paste0("col", chipstocombine[x])]])
         names <- append(names, input[[paste0("n", chipstocombine[x])]])
+        # List of min/max values [[1,2]].
+        minmaxlist_list <- append(minmaxlist_list, list(minmaxargs[[paste0("mm",x)]]) )
 
         counter = counter + 1
     }
@@ -177,7 +178,8 @@ chipcombinedplot <- reactive({
             hicalpha = input$hicalpha,
             bedalpha = input$bedalpha,
             filepathpng = pngpath,
-            filepathsvg = svgpath
+            filepathsvg = svgpath,
+            minmaxs = minmaxlist_list
             )
 
     chippng <- tuple(chipcomb, convert = T)[0]

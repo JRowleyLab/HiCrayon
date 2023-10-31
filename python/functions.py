@@ -156,14 +156,9 @@ def calcAlphaMatrix(chip,disthic,showhic,r,g,b, minarg, maxarg):
     matsize = len(chip)
     # Normalize chip list to between 0 and 1
     chip_arr = np.array(chip)
-    print(minarg)
-    print(type(minarg))
-    print(minarg=='nan')
-    print(math.isnan(minarg))
 	
     minimum = np.min(chip_arr) if math.isnan(minarg) else minarg
     maximum = np.max(chip_arr) if math.isnan(maxarg) else maxarg
-    print(minimum, maximum)
     minmax = [minimum, maximum]
     #raw values from bigwig, clipped data to specified values
     chip_clipped = np.clip(chip_arr, a_min = minimum, a_max = maximum)
@@ -213,7 +208,7 @@ def calcAlphaMatrix(chip,disthic,showhic,r,g,b, minarg, maxarg):
 
     mat = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
 
-    return mat, chip_clipped, minmax
+    return mat, chip_norm, minmax
 
 # Use Linear interpolation to calculate
 # the alpha weighted color mixing ratio
@@ -287,7 +282,6 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepa
 
 	ax.xaxis.set_visible(False)
 	ax.yaxis.set_visible(False)
-	print('check')
 
 	#############################
 	# Create bigwigs dynamically, 
@@ -307,13 +301,9 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepa
 		ax2 = ax1.twinx()
 		ax2.plot(chip[i], color=col1[i], linewidth = 1)
 		#set y-axis to custom range
-		print('check2')
-		print('MIN:', minmaxs[i][0])
-		print('MAX:', minmaxs[i][1])
 		blim = min(chip[i]) if math.isnan(minmaxs[i][0]) else minmaxs[i][0]
 		tlim = max(chip[i]) if math.isnan(minmaxs[i][1]) else minmaxs[i][1]
-		lims = [blim, tlim]
-		print(lims)
+		lims = [0, 1]
 		ax2.set_ylim(lims)
 		# y-axis track
 		ax4 = ax3.twiny()
