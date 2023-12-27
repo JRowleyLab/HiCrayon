@@ -18,42 +18,11 @@ observe({
     shinyCatch({message("Hi-C Loaded")}, prefix = '')
 })
 
+#shinyCatch({message(paste(encodehic[selected, "Experiment"], "Hi-C Loading"))}, prefix = '') put in somewehere here
+
 observeEvent(input$generate_hic, {
     matsize <- (as.integer(input$stop) - as.integer(input$start)) / as.integer(input$bin)
     shinyCatch({message(paste0("Loading Hi-C with matrix size: ", matsize))}, prefix = '')
-})
-
-# Encode datatable modal
-#modal popup
-#encodehictable
-output$encodehicoutput = DT::renderDataTable(
-    DT::datatable(
-        encodehic[, c("Assembly","Biosample","Description", "BioRep","TechRep","Experiment")], 
-        options = list(lengthChange = FALSE) 
-  )
-)
-
-observeEvent(input$encodehictable, {
-    showModal(
-        modalDialog(
-            dataTableOutput("encodehicoutput"),
-            title = 'ENCODE HiC Datasets',
-            size = "l",
-            easyClose = TRUE,
-            footer = tagList(
-                actionButton("loadhicencode", "Load"),
-                modalButton('Close')
-        )
-        )
-    )
-})
-
-observeEvent(input$loadhicencode, {
-    selected <- input$encodehicoutput_rows_selected
-    href <- encodehic[selected, "HREF"]
-    dataurl <- paste0("https://www.encodeproject.org/", href)
-    hicv$y <- dataurl
-    shinyCatch({message(paste(encodehic[selected, "Experiment"], "Hi-C Loading"))}, prefix = '')
 })
 
 # Set maximum value for coordinates based on chromosome
@@ -84,13 +53,6 @@ observeEvent(input$endofchrom, {
             inputId = "stop",
             value = HiCmetadata()$lengths[idx()]
         )
-})
-
-# bedgraph file handling
-bedv <- reactiveValues()
-observeEvent(input$bedg1, {
-    inFile <- input$bedg1 
-    bedv$y <- inFile$datapath
 })
 
 # Store HiC file type as reactive value

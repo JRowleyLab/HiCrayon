@@ -3,9 +3,9 @@ options(shiny.maxRequestSize=10000*1024^2)
 # hic file handling
 hicv <- reactiveValues()
 observeEvent(input$hic, {
-    #inFile <- parseFilePaths(roots = c(wd = workingdir), input$hic)
-    file <- input$hic
-    hicv$y <- file$datapath
+    inFile <- parseFilePaths(roots = c(wd = workingdir), input$hic)
+    #file <- input$hic
+    hicv$y <- inFile$datapath
 })
 
 observe({
@@ -59,8 +59,6 @@ HiCMatrixZoom <- reactive({
         chrom = input$chr,
         norm = input$norm,
         binsize = as.integer(input$bin))
-
-     message("Loading Hi-C from URL")
 
     return(hicobject)
 })

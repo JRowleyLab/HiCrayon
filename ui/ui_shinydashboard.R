@@ -1,5 +1,4 @@
 ## app.R ##
-
 dashboardPage(title = "HiCrayon",
                     dashboardHeader(title = tags$a(span(img(src="logo/HiCrayon_logo2.png",height=60,align="left")),href="https://github.com/JRowleyLab/HiCrayon"),titleWidth = 600),
 dashboardSidebar(
@@ -15,7 +14,6 @@ dashboardBody(
     # Zoomy zoom
     tags$head(
         tags$script(src = "https://unpkg.com/panzoom@9.4.0/dist/panzoom.min.js"),
-
   ),
     tabItems(
     # First tab content
@@ -45,13 +43,15 @@ dashboardBody(
                                     #generateHiCbuttonUI
                             ), #end row
                     ), # end column
-                    column(width = 8,
+                    column(width = 7,
                            galleryUI,
                            tags$script(
                                 HTML('panzoom($("#gallery")[0])')
                             )
                            )
-            )
+            ),
+            column(width = 2,
+                        plotOutput("colorlegend"))
         )
     ), # /tabItems
     )

@@ -20,6 +20,9 @@ dependencies:
   - r-spsComps=0.3.2
   - r-colourpicker=1.2
   - r-zip
+  - r-shinybs=0.61
+  - r-dt=0.23
+  - r-eulerr
 
   - pip:
       - coolbox==0.3.8

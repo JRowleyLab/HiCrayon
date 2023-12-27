@@ -1,19 +1,4 @@
-# Original program script
-python/HiC_Crayon_v0*
-
-# All test data
-data/
-
-# test python script
-*test*
-
 # any images
-www/images
-images*
-
-# workshop files
-workshop
-python/segfault.py
-python/functions.ipynb
-hover_image_app/www/createHoverLines.js
-settings.json
+www/*
+!www/styles.css
+!www/logo

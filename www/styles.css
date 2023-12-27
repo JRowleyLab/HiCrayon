@@ -88,39 +88,6 @@ h6,.h6{
   margin-top: 2px;
 }
 
-/* original font sizes:
-   h1 - 280%, h2 - 230%, h3 - 185%, h4 - 140%, h5 - 110%, h6 - 90% 
-   font weight: 500 */
-
-#InfoAboutBox .box-body h4{
- font-size: 97%;
- font-weight: 400;
- margin-top: 7px;
- margin-bottom: 8px;
- color: #abbed1;
- letter-spacing: .4px;
- line-height: 140%;
-}
-   
-#InfoAboutBox .box-body h6{
- font-size: 97%;
- font-weight: 300;
- margin-top: 7px;
- margin-bottom: 0px;
- line-height: 140%;
- color:#b5c7d8; 
- letter-spacing: .4px;
-}
-
-#InfoAboutBox .box-body {
- font-size: 97%;
- font-weight: 300;
- line-height: 140%;
- color:#b5c7d8; 
- letter-spacing: .4px;
-}
-
-
 blockquote{
   font-family: inherit;
   font-size: 100%;
@@ -128,23 +95,6 @@ blockquote{
   margin-bottom: 0px;
 }
 
-#InfoBranchColorBox .box-body blockquote{
-   border-left: 4px solid #000000;
-}
-
-#InfoNodeColorBox .box-body blockquote{
-   border-left: 4px solid #000000;
-}
-
-#InfoNodeSizeBox .box-body blockquote{
-   border-left: 4px solid #000000;
-}
-
-#InfoAdvancedOptionsBox .box-body blockquote{
-   border-left: 4px solid #000000;
-}
-
-/* plot button titles */
 button#generate_hic,
 .box.box-solid.box-primary>.box-header>h3.box-title,
 .box.box-solid.box-success>.box-header>h3.box-title,
@@ -168,129 +118,21 @@ button#generate_hic,
  padding-bottom: 9px;
 }
 
-/* form input text */
 .form-control.shiny-colour-input.shinyjs-resettable.colourpicker-input.shiny-bound-input{
  font-size: 100%;
 }
 
-/* header logo text */
 .main-header .logo {
   font-family: "Heebo", sans-serif;
   font-weight: 400;
 }
 
-/*  header */
 .skin-blue .main-header .navbar,
 .skin-blue .main-header .logo,
 .skin-blue .main-header .logo:hover{
   background-color: #ffce22;
-}        
+}    
 
-/* slider bar */
-.js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar, .js-irs-0 .irs-from, .js-irs-0 .irs-to,
-.js-irs-1 .irs-single, .js-irs-1 .irs-bar-edge, .js-irs-1 .irs-bar, .js-irs-1 .irs-from, .js-irs-1 .irs-to{
-  background: #6f64bd;
-}
-
-.js-irs-0 .irs-bar, .js-irs-0 .irs-bar-edge,
-.js-irs-1 .irs-bar, .js-irs-1 .irs-bar-edge{
-  border: #6f64bd;
-}
-
-.js-irs-2 .irs-single, .js-irs-2 .irs-bar-edge, .js-irs-2 .irs-bar, .js-irs-2 .irs-from, .js-irs-2 .irs-to,
-.js-irs-3 .irs-single, .js-irs-3 .irs-bar-edge, .js-irs-3 .irs-bar, .js-irs-3 .irs-from, .js-irs-3 .irs-to,
-.js-irs-4 .irs-single, .js-irs-4 .irs-bar-edge, .js-irs-4 .irs-bar, .js-irs-4 .irs-from, .js-irs-4 .irs-to,
-.js-irs-5 .irs-single, .js-irs-5 .irs-bar-edge, .js-irs-5 .irs-bar, .js-irs-5 .irs-from, .js-irs-5 .irs-to{
-  background: #605587;
-}
-
-.js-irs-2 .irs-bar, .js-irs-2 .irs-bar-edge,
-.js-irs-3 .irs-bar, .js-irs-3 .irs-bar-edge,
-.js-irs-4 .irs-bar, .js-irs-4 .irs-bar-edge,
-.js-irs-5 .irs-bar, .js-irs-5 .irs-bar-edge{
-  border: #605587;
-}
-
-.irs-line{
- background: #dde1e6;
- border:none;
-}
-
-/* slider circle */
-.irs-slider.single,
-.irs-slider.from,
-.irs-slider.to{
- background: #fff;
- border-color: #c4c8cc;
- border-width: 6px;
- -webkit-box-shadow: none;
-	-moz-box-shadow: none;
-	box-shadow: none;
-}
-
-.irs-shadow{
- opacity: 0;
- background: #fff;
- display: none;
-}
-
-/* slider value box */
-.irs-single, .irs-from, .irs-to{
-  padding: 2px 3px 0px 3px;
-  vertical-align: bottom;
-}
-
-.irs-min, .irs-max{
- background: #eceff3;
-}
-
-/* info-plot radio button */
-.btn.radiobtn.btn-primary{
-  color:#eceff3;
-  background: #b5b1cc;
-  border-bottom-color:#eceff3;
-  border-left-color:#eceff3;
-  border-right-color:#eceff3;
-  border-top-color:#eceff3;
-  border-radius: 0px;
-  padding-top: 7px;
-  height: 42px;
-  font-family: inherit;
-  font-weight: 400;
-  font-size: 110%;
-  line-height: 140%;
-  letter-spacing: .5px;
-  text-transform: uppercase;
-}
-
-.btn.radiobtn.btn-primary:hover{
-  background: #aaa9c2;
-}
-
-.btn.radiobtn.btn-primary.active{
-  color: #fff;
-  background:#2d383a;
-  border-bottom-color:#eceff3;
-  border-left-color:#eceff3;
-  border-right-color:#eceff3;
-  border-top-color:#eceff3;
-}
-
-.btn.radiobtn.btn-primary.active{
-  -webkit-box-shadow: none; 
-  -moz-box-shadow: none;
-  box-shadow: none;
-}
-
-.btn-group{
-   padding: 0px 0px 2px 0px;
-}
-
-/* info buttons*/
-#InfoBranchColorButton.btn.btn-default.action-button.shiny-bound-input,
-#InfoNodeColorButton.btn.btn-default.action-button.shiny-bound-input,
-#InfoNodeSizeButton.btn.btn-default.action-button.shiny-bound-input,
-#InfoAdvancedSettingsButton.btn.btn-default.action-button.shiny-bound-input,
 #generate_hic.btn.btn-default.action-button.shiny-bound-input{
   width: 100%; 
   text-align: left; 
@@ -306,9 +148,7 @@ button#generate_hic,
   padding-left: 10px;
 }
 
-/* plot button 1 */
-.box.box-solid.box-primary>.box-header,
-#InfoBranchColorButton.btn.btn-default.action-button.shiny-bound-input{
+.box.box-solid.box-primary>.box-header{
   color:#fff;
   background:#ed0a3f;
 }
@@ -320,13 +160,7 @@ button#generate_hic,
   border-top-color:#eceff3;
 }
 
-/* .box.box-primary{
- border-top-color:#;
-} */
-
-/* plot button 2 */
-.box.box-solid.box-success>.box-header,
-#InfoNodeColorButton.btn.btn-default.action-button.shiny-bound-input{
+.box.box-solid.box-success>.box-header{
   color:#fff;
   background:#e77200;
 }
@@ -338,9 +172,7 @@ button#generate_hic,
   border-top-color:#eceff3;
 }
 
-/* plot button 3 */
-.box.box-solid.box-info>.box-header,
-#InfoNodeSizeButton.btn.btn-default.action-button.shiny-bound-input{
+.box.box-solid.box-info>.box-header{
   color:#fff;
   background:#01786f;
 }
@@ -352,9 +184,7 @@ button#generate_hic,
   border-top-color:#eceff3;
 }
 
-/* plot button 4 */
-.box.box-solid.box-warning>.box-header,
-#InfoAdvancedSettingsButton.btn.btn-default.action-button.shiny-bound-input{
+.box.box-solid.box-warning>.box-header{
   color:#fff;
   background:#605587;
 }
@@ -365,10 +195,6 @@ button#generate_hic,
   border-right-color:#eceff3;
   border-top-color:#eceff3;
 }
-
-/* .box.box-warning{
- border-top-color:#;
-} */
 
 /* Generate Button */
 .box.box-solid.box-danger>.box-header,
@@ -396,9 +222,7 @@ button#addBtn{
  border-style: none;
 }
 
-#downloadtree.btn.btn-default, 
-#downloadcircle.btn.btn-default, 
-#downloadforce.btn.btn-default{
+#downloadtree.btn.btn-default{
   width: 100%; 
   text-align: left; 
   color: #fff; 
@@ -413,101 +237,15 @@ button#addBtn{
   margin-top: 17px;
 }
 
-
-/* plot button +/- */
-.btn.btn-box-tool>.fa.fa-plus,
-.btn.btn-box-tool>.fa.fa-minus{
- color: #fff;
- padding: 5px 0px 0px 0px;
-}
-
-/* tooltip button */
-.btn.action-button.btn-primary.btn-xs.shiny-bound-input{
- background: #c4c8cc;
- border: #fff;
-}
-
-.btn.action-button.btn-primary.btn-xs.shiny-bound-input>.fa.fa-question{
- color: #fff;
-}
-
-.btn.action-button.btn-primary.btn-xs.shiny-bound-input{
-  width: 14px;
-  height: 17px;
-  line-height: 16px;
-  min-height: 16px;
-  vertical-align: center;
-  font-size: 11px;
-  padding: 1.5px 1.25px 0px 1px;
-  margin: 0;
-}
-
-/* remove shadows */
-.box{
+ .box{
   -webkit-box-shadow: none; 
   -moz-box-shadow: none;
   box-shadow: none;
 }
 
-.nav-tabs-custom{
-  -webkit-box-shadow: none; 
-  -moz-box-shadow: none;
-  box-shadow: none;
-}
-
-/* active tab */
-.nav-tabs-custom .nav-tabs li.active {
-     border-top-color: #878de3;
-}
-
-/* content box */
-/* .box{
- border-top-color: #;
-} */
-
-/* info box margins */
-#InfoBranchColorBox .box-body,
-#InfoNodeColorBox .box-body,
-#InfoNodeSizeBox .box-body,
-#InfoAdvancedOptionsBox .box-body{
- margin-left: 30px;
- margin-right: 30px;
-}
-
-#InfoAboutBox .box-body{
- margin-left: 30px;
-}
-
-#InfoAboutBox .box{
- background-color: #333;
-}
-
-/* dashboard background */
 .content-wrapper,
 .right-side {
 background-color: #ffffff;
-}
-
-/* info box top borders */
-
-#InfoBranchColorBox .box{
- border-top-color: #eceff3;
-}
-
-#InfoNodeColorBox .box{
- border-top-color: #eceff3;
-}
-
-#InfoNodeSizeBox .box{
- border-top-color: #eceff3;
-}
-
-#InfoAdvancedOptionsBox .box{
- border-top-color: #eceff3;
-}
-
-#InfoAboutBox .box{
- border-top-color: #eceff3;
 }
 
 .tab-pane.active {

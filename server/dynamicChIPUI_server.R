@@ -3,6 +3,7 @@
 
 # bw1 file handling
 bw1v <- reactiveValues()
+minmaxargs <- reactiveValues()
 
 observeEvent(input$addBtn, {
     nr <- input$addBtn
@@ -28,7 +29,7 @@ observeEvent(input$addBtn, {
             ),
             column(2,
                 actionButton(paste0('loadurlchip',nr), label = "Add URL"))
-        ),
+          ),
         fluidRow(
             # Update in server to the basename minus the suffix
             column(4,
@@ -46,6 +47,14 @@ observeEvent(input$addBtn, {
                               "Combination")
                 )
                 ),
+        fluidRow(
+          column(6,
+            numericInput(paste0("minargs",nr), "Min", value = "")
+            ),
+          column(6,
+            numericInput(paste0("maxargs",nr), "Max", value = "")
+            )
+        ),
         actionButton(paste0('removeBtn',nr), 'Remove')
       )
     )
@@ -60,13 +69,11 @@ observeEvent(input$addBtn, {
       #print(str(reactiveValuesToList(bw1v)))
     })
     # Set up file handling for local files
-    #shinyFileChoose(input, paste0("bw",nr), root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
+    shinyFileChoose(input, paste0("bw",nr), root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
     # Add file path to reactive variable
     observeEvent(input[[paste0("bw",nr)]], {
-        #inFile <- parseFilePaths(roots = c(wd = workingdir), input[[paste0("bw",nr)]])
-        file <- input[[paste0('bw', nr)]]
-        bw1v[[paste0("bw",nr)]] <- file$datapath
-         #print(str(reactiveValuesToList(bw1v)))
+        inFile <- parseFilePaths(roots = c(wd = workingdir), input[[paste0("bw",nr)]])
+        bw1v[[paste0("bw",nr)]] <- inFile$datapath
         # Update text with file name
          updateTextInput(
             session,
@@ -91,4 +98,38 @@ observeEvent(input$addBtn, {
           print("URL not valid: ERROR MESSAGE")
       }
     }) %>% bindEvent(input[[paste0('loadurlchip',nr)]])
+
+    observe({
+      minmaxlist <- list(
+        as.double(input[[paste0("minargs",nr)]]),
+        as.double(input[[paste0("maxargs",nr)]])
+        )
+      minmaxargs[[paste0("mm",nr)]] <- minmaxlist
+    })
+
+    # # Update chip-seq min values if nan
+    #   observe({
+    #     print(chipalpha()$minmax[[nr]])
+    #     if(!is.null(chipalpha()$minmax[[nr]])){
+
+    #         minvalue = chipalpha()$minmax[[nr]][[1]]
+
+    #         updateNumericInput(
+    #           session = session,
+    #           inputId = paste0("minargs",nr),
+    #           value = minvalue)
+    #     }
+    #   }) %>% bindEvent(input$generate_hic)
+
+    #   # Update chip-seq max values if nan
+    #   observe({
+    #     if(!is.null(chipalpha()$minmax[[nr]])){
+    #       maxvalue = chipalpha()$minmax[[nr]][[2]]
+          
+    #       updateNumericInput(
+    #           session = session,
+    #           inputId = paste0("maxargs",nr),
+    #           value = maxvalue)
+    #     }
+    #   }) %>% bindEvent(input$generate_hic)
   })

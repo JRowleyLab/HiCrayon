@@ -9,7 +9,7 @@ selectHiCoptionsUI <- div(
                                 column(8,
                                     textInput('urlhic',
                                     label="",
-                                    placeholder = "https://www.encodeproject.org/files/ENCFF750AOC/@@download/ENCFF750AOC.hic")
+                                    placeholder = "https://www.encode.com/xyz.hic")
                                 ),
                                 column(4,
                                     actionButton('loadurlhic', label = "Load URL")
