@@ -1,44 +1,45 @@
 ![](www/logo/HiCrayon_logo2.png)
 
-## Co-visualisation of Hi-C and ChIP-seq data
+## Co-visualisation of Hi-C with signal track data
+
+
+Visualize Hi-C with any bigwig or bedGraph to combine both forms of data in a single image.
+
+### Bigwig
+- Values > 0 (ChIP-seq, RNA-seq, etc.) 
+- chr | start | stop | value
+
+### bedGraph
+- Values below and above 0 (Hi-C Compartment calls)
+- chr | start | stop | value
 
 ---------------------------------------------
 
 # Quick-start
 
-### **Docker**
+## **Singularity**
 
-**NOTE:** Not yet available, docker repo is private
+Singularity allows deployment of HiCrayon using a container so you don't need to worry about software compatibility issues.
 
-1. Pull the docker image:
+#### Build singularity image from docker image
 
-`docker pull nolandocker/hicrayon`
-
-2. Run a hicrayon container, attaching your data directory:
-
-`docker run --rm -p 3838:3838 -v <data_dir>:<name_in_container> nolandocker/hicrayon`
-
-3. Access HiCrayon on any web browser:
-
-`0.0.0.0:3838`
-
-### **Singularity**
-
-Sometimes you don't have the admin access that docker requires. Singularity works instead, although you need to clone the repo too
-
-Build singularity image from docker image
+Build a singularity container from a docker image.
 
 1. `singularity build hicrayon.sif docker://nolandocker/hicrayon`
 
-Clone the hicrayon git repo
+Clone the hicrayon git repository.
 
 2. `git clone https://github.com/JRowleyLab/HiCrayon.git`
 
 `cd` into the HiCrayon directory and run the app inside the container
 
-3. `singularity exec ~/Containers/hicrayon.sif R -e "shiny::runApp('app.R', launch.browser=F, port = 3838)" ` 
+3. `singularity exec ~/Containers/hicrayon.sif R -e "shiny::runApp('app.R', launch.browser=F, port = 3838)" `
 
-### **Conda**
+Additional parameters:
+- if you'd like to attach a directory outside of your own: `-B /:/filesystem/`
+- host application to allow access on another device (beware security risks): `shiny::runApp(..., host="IPADDRESS")`
+
+### **Conda** (Not recommended)
 
 1. Create a conda environment with the hicrayon yaml file
 
@@ -56,30 +57,25 @@ Run HiCrayon
 
 -----------------------------------------------------------------
 
-# What to expect!
+## Examples
 
-![](www/logo/hicrayon_github_images/HiCrayon_image.png)
+### Accurately visualize protein binding in Hi-C Maps
 
+![Overview](./www/logo/hicrayon_github_images/overviewfigure.png)
 
-### Generate a HiC image with overlay ChIP-seq tracks on top!
+<br>
 
-HiC                       |  CTCF                    |  RAD21        
-:-------------------------:|:-------------------------:|:-------------------------:
-![](www/logo/hicrayon_github_images/HiC_B7Y32S1W.svg)  |  ![](www/logo/hicrayon_github_images/ChIP1_CTCF_strawhic.svg) |  ![](www/logo/hicrayon_github_images/ChIP1_RAD21_strawhic.svg)
+### Reveal distinct layers of multi-state 3D chromatin organization.
 
+![Histone](./www/logo/hicrayon_github_images/multicomp.png)
 
-### Let's see how both proteins co-localize on our HiC map (Change HiC color to greyscale to help viewing)
+<br>
 
+### Accurately demonstrate chromatin changes in differentiation
 
-CTCF                       |  RAD21                    |  Combined        
-:-------------------------:|:-------------------------:|:-------------------------:
-![](www/logo/hicrayon_github_images/ChIP1_G4FMPVRG.svg)  |  ![](www/logo/hicrayon_github_images/ChIP2_PFCCU5N4.svg) |  ![](www/logo/hicrayon_github_images/ChIP_combined_L1915GOD.svg)
-
+![differentiation](./www/logo/hicrayon_github_images/Differentiation.png)
 
 
+### Visualize chromatin loops
 
-
-
-
-
-
+![loops](./www/logo/hicrayon_github_images/CTCFLoops.png)
