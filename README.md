@@ -1,5 +1,7 @@
 ![](www/logo/HiCrayon_logo2.png)
 
+------------------------------------------
+
 ## Co-visualisation of Hi-C with signal track data
 
 
