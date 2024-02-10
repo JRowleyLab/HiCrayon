@@ -17,6 +17,14 @@ Visualize Hi-C with any bigwig or bedGraph to combine both forms of data in a si
 
 ---------------------------------------------
 
+# Web version
+
+A light version of HiCrayon that allows import of publically availble Hi-C maps, bigwigs through URL eg. from ENCODE (https://www.encodeproject.org/), and locally stored small bedGraph files.
+
+https://jrowleylab.com/HiCrayon/
+
+To fully avail of the utility of HiCrayon, please proceed with installation below
+
 # Quick-start
 
 ## **Singularity**
