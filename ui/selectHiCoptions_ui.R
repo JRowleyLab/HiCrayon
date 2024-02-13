@@ -1,6 +1,9 @@
 selectHiCoptionsUI <- div(
                         fluidRow(
                             column(12,
+                                actionButton("exampleset", "Example Setup")
+                            ),
+                            column(12,
                                 #shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
                                 actionButton("encodehictable", "ENCODE HiC Datasets")
                             ),

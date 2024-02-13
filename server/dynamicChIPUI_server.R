@@ -4,7 +4,7 @@
 # bw1 file handling
 bw1v <- reactiveValues()
 minmaxargs <- reactiveValues()
-
+#TODO: if examBtn increment it by 3
 observeEvent(input$addBtn, {
     nr <- input$addBtn
     id <- paste0("input",input$addBtn)

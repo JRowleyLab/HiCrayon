@@ -10,13 +10,16 @@ hic_color <- reactive({
 
 # Update chromsome and resolution list
 observe({
-    updateSelectizeInput(session, "chr",
-        choices = HiCmetadata()$chrs)
-    updateSelectizeInput(session, "bin",
-        choices = HiCmetadata()$res,
-        selected = HiCmetadata()$res[1])
-    shinyCatch({message("Hi-C Loaded")}, prefix = '')
-})
+    if(!examBtn()){
+         updateSelectizeInput(session, "chr",
+            choices = HiCmetadata()$chrs)
+        updateSelectizeInput(session, "bin",
+            choices = HiCmetadata()$res,
+            selected = HiCmetadata()$res[1])
+        shinyCatch({message("Hi-C Loaded")}, prefix = '')
+    }
+   
+}) 
 
 #shinyCatch({message(paste(encodehic[selected, "Experiment"], "Hi-C Loading"))}, prefix = '') put in somewehere here
 
