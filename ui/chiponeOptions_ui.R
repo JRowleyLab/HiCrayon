@@ -33,7 +33,7 @@ chiponeOptionsUI <- div(
                         label = "HiC Alpha",
                         min = 0,
                         max = 1,
-                        value = .5,
+                        value = 1,
                         step = .05,
                         round = FALSE,
                         ticks = TRUE

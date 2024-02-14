@@ -54,6 +54,20 @@ observe({
             value = 106000000
         )
 
+        # Update colors
+        updateColourInput(
+          session = session,
+          inputId = "colhic1",
+          value = "black"
+        )
+
+        # Update colors
+        updateColourInput(
+          session = session,
+          inputId = "colhic2",
+          value = "white"
+        )
+
         shinyCatch({message("Loading example set")}, prefix = '')
     }
     
@@ -164,7 +178,27 @@ addInputSection <- function(nr, preselectedParams = list()) {
 }
 
 observe({
+  #reset hic if encode button clicked
+
+})
+
+observe({
     if(examBtn()) {
+
+      updateCheckboxInput(session, "chip1", value = TRUE)
+
+    # remove all input divs prior to exampleset
+    for (i in 1:100){
+          shiny::removeUI(
+      selector = paste0("div#newInput", i)
+      )
+    }
+
+        
+        # NULL the filepath
+        #bw1v <- NULL # [[paste0("bw",nr)]]
+        #print(str(reactiveValuesToList(bw1v)))
+
         addInputSection(1, list(url = h3k27ac, label = "H3K27ac", color = "green"))
         addInputSection(2, list(url = h3k9me3, label = "H3K9me3", color = "purple"))
         addInputSection(3, list(url = h3k27me3, label = "H3K27me3", color = "orange"))

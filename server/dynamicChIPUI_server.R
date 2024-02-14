@@ -7,6 +7,9 @@ minmaxargs <- reactiveValues()
 #TODO: if examBtn increment it by 3
 observeEvent(input$addBtn, {
     nr <- input$addBtn
+    if(examBtn()){
+      nr <- nr + 3
+    }
     id <- paste0("input",input$addBtn)
     insertUI(
       selector = '#inputList',
