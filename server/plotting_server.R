@@ -39,9 +39,9 @@ chipplot <- reactive({
     track <- list()
     col <- list()
 
-    lapply(seq_along(reactiveValuesToList(bw1v)), function(x){
+    lapply(seq_along(bw1v$features), function(x){
 
-        if(!is.null(bw1v[[paste0("bw",x)]])){
+        if(!is.null(bw1v$features[[x]][[1]])){
         
             # Overwrite the colour and track for single chips
             col[1] <- input[[paste0("col", x)]]
@@ -50,7 +50,7 @@ chipplot <- reactive({
             track[[1]] <- chipalpha()$chipclipped[[x]]
 
             # List of min/max values [[1,2]].
-            minmaxlist <- list(minmaxargs[[paste0("mm",x)]])
+            minmaxlist <- list(minmaxargs$nums[[x]][[1]])
             print(minmaxlist)
 
             patt <- str_glue(
@@ -94,12 +94,14 @@ chipplot <- reactive({
 
 combinedchips <- reactiveValues()
 observeEvent(input$generate_hic, {
+    req(input$chip1)
+    
     chipstocombine <- c()
     # Combine ChIPs that are selected for
     # combination from checkbox
-    for(i in seq_along(reactiveValuesToList(bw1v))){
+    for(i in seq_along(bw1v$features)){
 
-        if(!is.null(bw1v[[paste0("bw",i)]])){
+        if(!is.null(bw1v$features[[i]][[1]])){
 
             if(input[[paste0("comb", i)]] == TRUE){
                 chipstocombine = append(chipstocombine, i)
@@ -150,7 +152,7 @@ chipcombinedplot <- reactive({
         cols <- append(cols, input[[paste0("col", chipstocombine[x])]])
         names <- append(names, input[[paste0("n", chipstocombine[x])]])
         # List of min/max values [[1,2]].
-        minmaxlist_list <- append(minmaxlist_list, list(minmaxargs[[paste0("mm",x)]]) )
+        minmaxlist_list <- append(minmaxlist_list, list(minmaxargs$nums[[x]][[1]]) )
 
         counter = counter + 1
     }

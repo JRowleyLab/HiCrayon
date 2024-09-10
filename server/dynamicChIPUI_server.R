@@ -4,6 +4,9 @@
 # bw1 file handling
 bw1v <- reactiveValues(features=list(list()))
 
+# Include feature 2 list
+f2v <- reactiveValues()
+
 # Initialize list of lists
 minmaxargs <- reactiveValues(nums=list(list(list())))
 
@@ -221,6 +224,13 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
       bw1v$features[[nr]][2] <- "NULL"
     })
 
+observeEvent(input[[paste0('cosignal', nr)]], {
+  key <- as.character(nr)
+  f2v[[key]] <- input[[paste0('cosignal', nr)]]
+  # print(f2v)
+  # print(f2v[[key]])
+})
+
 # Toggle the collapsible section when collapse button is clicked
   observeEvent(input[[paste0('collapseBtn', nr)]], {
     shinyjs::toggle(paste0("collapseSection", nr))  # Toggle the collapsible section
@@ -267,8 +277,8 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
       # where each is the bigwig path or NULL
       if(!rlang::is_empty(inFile$datapath)){
         bw1v$features[[nr]][1] <- inFile$datapath
-        print(bw1v$features[[nr]][[1]])
-        print(bw1v$features[[nr]][1])
+        # print(bw1v$features[[nr]][[1]])
+        # print(bw1v$features[[nr]][1])
         # Update text with file name
         updateTextInput(
           session,
@@ -288,7 +298,7 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
         # Update list by index for feature 2
         if(!rlang::is_empty(inFile$datapath)){
           bw1v$features[[nr]][2] <- inFile$datapath
-          print(bw1v$features)
+          # print(bw1v$features)
           # Update text with file name
           updateTextInput(
             session,
@@ -354,7 +364,7 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
           minmaxargs$nums[[nr]][[1]] <- minmaxlist
           # print(minmaxargs$nums[[nr]][[1]])
 
-          print(minmaxargs$nums)
+          # print(minmaxargs$nums)
   })
 
   # Update minmax arguments and store as variable list for FEATURE 2

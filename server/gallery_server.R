@@ -14,9 +14,9 @@ output$gallery <- renderUI({
     # Control inclusion through checkbox
     if(input$chip1){
         # Dynamically add chip data
-        for(i in seq_along(reactiveValuesToList(bw1v))){
+        for(i in seq_along(bw1v$features)){
 
-            if(!is.null(bw1v[[paste0("bw",i)]])){
+            if(!is.null(bw1v$features[[i]])){
                 texts = append(texts, input[[paste0("n", i)]])
                 hrefs = append(hrefs, "")
                 images = append(images, gsub("www/", "", chipplot()[[i]]$svg))
