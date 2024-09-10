@@ -2,6 +2,9 @@
 # record bigwig value for each
 # binsize across selected genomic
 # region
+
+# Just put them in lists, do if checked, do 1 vs 1, if not do 1 vs 2.
+# Or go through each
 bwlist_ChIP1 <- reactive({
 
     logs = list()

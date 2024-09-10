@@ -2,12 +2,16 @@
 # elements
 
 # bw1 file handling
-bw1v <- reactiveValues()
-minmaxargs <- reactiveValues()
+bw1v <- reactiveValues(features=list(list()))
+
+# Initialize list of lists
+minmaxargs <- reactiveValues(nums=list(list(list())))
 
 
 observeEvent(input$addBtn, {
     nr <- input$addBtn
+    # Initialize bigwig path list for features 1,2
+    bw1v$features[[nr]] <- list("NULL", "NULL")
     id <- paste0("input",input$addBtn)
     ####### Dynamic UI update START #####################
 insertUI(
@@ -211,8 +215,10 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
         selector = paste0("#newInput",nr)
       )
       # NULL the filepath
-      bw1v[[paste0("bw",nr, 1)]] <- NULL
-      bw1v[[paste0("bw",nr, 2)]] <- NULL
+      # bw1v[[paste0("bw",nr, 1)]] <- NULL
+      # bw1v[[paste0("bw",nr, 2)]] <- NULL
+      bw1v$features[[nr]][1] <- "NULL"
+      bw1v$features[[nr]][2] <- "NULL"
     })
 
 # Toggle the collapsible section when collapse button is clicked
@@ -250,59 +256,27 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
   })
 
 
-#############################
-# Instead:
-# check if 'feature 2' button is clicked
-# # Update bigwig path and minmax values for FEATURE 2 based on co-signal check.
-# observeEvent(input[[paste0('cosignal',nr)]],{
-#   # Mirror Feature 2 to be Feature 1
-#   bw1v[[paste0("bw",nr, 2)]] <- bw1v[[paste0("bw",nr, 1)]]
-# })
-# # If feature 2 is empty, copy bigwig and minmax values from feature 1
-# observe({
-#   if(rlang::is_empty(bw1v[[paste0('bw', nr, 2)]])){
-#     bw1v[[paste0('bw', nr, 2)]] <- bw1v[[paste0('bw', nr, 1)]]
-#     minmaxargs[[paste0("mm",nr, 2)]] <- minmaxargs[[paste0("mm",nr, 1)]]
-#   }
-# })
-###############################
-
-
-  # If co-signal is unchecked, copy following to nr, 2
-  # bwpath, minmax
-  observeEvent(input[[paste0('cosignal',nr)]],{
-    if (!input[[paste0('cosignal',nr)]]) {
-      # Mirror values to feature 2 from feature 1
-      # bigwig paths
-      bw1v[[paste0("bw",nr, 2)]] <- bw1v[[paste0("bw",nr, 1)]]
-      # minmax values
-      minmaxargs[[paste0("mm",nr, 2)]] <- minmaxargs[[paste0("mm",nr, 1)]]
-    }
-  })
-
-  observe({
-    print("BIGWIG PATHS:")
-    print(bw1v)
-    print(reactiveValuesToList(bw1v))
-    print("MINMAXARGS:")
-    print(minmaxargs)
-    print(reactiveValuesToList(minmaxargs))
-  })
-
   # Set up file handling for local files for FEATURE 1
   shinyFileChoose(input, paste0("bw",nr, 1), root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
   # Add file path to reactive variable
   observeEvent(input[[paste0("bw",nr, 1)]], {
       inFile <- parseFilePaths(roots = c(wd = workingdir), input[[paste0("bw",nr, 1)]])
-      bw1v[[paste0("bw", nr, 1)]] <- inFile$datapath
-      print(bw1v)
-      # Update text with file name
+      #bw1v[[paste0("bw", nr, 1)]] <- inFile$datapath
+
+      # GOAL: bw1v -> [1,2,3,4,5] -> [1,2], [1,2], [1,2]...
+      # where each is the bigwig path or NULL
+      if(!rlang::is_empty(inFile$datapath)){
+        bw1v$features[[nr]][1] <- inFile$datapath
+        print(bw1v$features[[nr]][[1]])
+        print(bw1v$features[[nr]][1])
+        # Update text with file name
         updateTextInput(
           session,
-          inputId = paste0("n", nr, 1),
-          value = tools::file_path_sans_ext(basename(bw1v[[paste0("bw",nr, 1)]]))
+          inputId = paste0("n", nr),
+          value = tools::file_path_sans_ext(basename(bw1v$features[[nr]][[1]]))
           )
-  }) 
+      }
+  })
 
 
   # Set up file handling for local files for FEATURE 2
@@ -310,14 +284,18 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
     # Add file path to reactive variable
     observeEvent(input[[paste0("bw",nr, 2)]], {
         inFile <- parseFilePaths(roots = c(wd = workingdir), input[[paste0("bw",nr, 2)]])
-        bw1v[[paste0("bw",nr, 2)]] <- inFile$datapath
-        print(bw1v)
-        # Update text with file name
+        #bw1v[[paste0("bw",nr, 2)]] <- inFile$datapath
+        # Update list by index for feature 2
+        if(!rlang::is_empty(inFile$datapath)){
+          bw1v$features[[nr]][2] <- inFile$datapath
+          print(bw1v$features)
+          # Update text with file name
           updateTextInput(
             session,
-            inputId = paste0("n", nr, 2),
-            value = tools::file_path_sans_ext(basename(bw1v[[paste0("bw",nr, 2)]]))
+            inputId = paste0("n", nr),
+            value = tools::file_path_sans_ext(basename(bw1v$features[[nr]][[2]]))
             )
+      }
     })
 
 
@@ -359,47 +337,34 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
   }) %>% bindEvent(input[[paste0('loadurlchip', nr, 2)]])
 
 
+
+  # Ensure minmaxargs$nums is initialized for the current index
+    if (length(minmaxargs$nums) < nr) {
+        minmaxargs$nums[[nr]] <- list(list(NULL, NULL))
+    }
+
+
   # Update minmax arguments and store as variable list for FEATURE 1
   observe({
-    minmaxlist <- list(
-      as.double(input[[paste0("minargs",nr, 1)]]),
-      as.double(input[[paste0("maxargs",nr, 1)]])
-      )
-    minmaxargs[[paste0("mm",nr, 1)]] <- minmaxlist
+         minmaxlist <- list(
+            as.double(input[[paste0("minargs",nr, 1)]]),
+            as.double(input[[paste0("maxargs",nr, 1)]])
+            )
+
+          minmaxargs$nums[[nr]][[1]] <- minmaxlist
+          # print(minmaxargs$nums[[nr]][[1]])
+
+          print(minmaxargs$nums)
   })
 
   # Update minmax arguments and store as variable list for FEATURE 2
   observe({
-    minmaxlist <- list(
-      as.double(input[[paste0("minargs", nr, 2)]]),
-      as.double(input[[paste0("maxargs", nr, 2)]])
-      )
-    minmaxargs[[paste0("mm", nr, 2)]] <- minmaxlist
+         minmaxlist <- list(
+            as.double(input[[paste0("minargs",nr, 2)]]),
+            as.double(input[[paste0("maxargs",nr, 2)]])
+            )
+          minmaxargs$nums[[nr]][[2]] <- minmaxlist
+          # print(minmaxargs$nums[[nr]][[2]])
   })
 
-    # # Update chip-seq min values if nan
-    #   observe({
-    #     print(chipalpha()$minmax[[nr]])
-    #     if(!is.null(chipalpha()$minmax[[nr]])){
-
-    #         minvalue = chipalpha()$minmax[[nr]][[1]]
-
-    #         updateNumericInput(
-    #           session = session,
-    #           inputId = paste0("minargs",nr),
-    #           value = minvalue)
-    #     }
-    #   }) %>% bindEvent(input$generate_hic)
-
-    #   # Update chip-seq max values if nan
-    #   observe({
-    #     if(!is.null(chipalpha()$minmax[[nr]])){
-    #       maxvalue = chipalpha()$minmax[[nr]][[2]]
-          
-    #       updateNumericInput(
-    #           session = session,
-    #           inputId = paste0("maxargs",nr),
-    #           value = maxvalue)
-    #     }
-    #   }) %>% bindEvent(input$generate_hic)
-  })
+})
