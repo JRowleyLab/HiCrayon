@@ -4,38 +4,43 @@
 # region
 bwlist_ChIP1 <- reactive({
 
-    logs = list()
-    raws = list()
-
-    print("n")
+    logs = list(list())
+    raws = list(list())
 
     lapply(seq_along(bw1v$features), function(x){
         # bw1v$features[[nr]][[1]]
-        # Different signals checked?
-        #if(f2v[[as.character(x)]]){
-            feature1 = bw1v$features[[x]][1]
-            feature2 = bw1v$features[[x]][1]
+        # If "different signals" checked TRUE
+        if(f2v[[as.character(x)]]){
+            req(!is.null(bw1v$features[[x]][[2]]))
+            feature1 = bw1v$features[[x]][[1]]
+            feature2 = bw1v$features[[x]][[2]]
+            wigs = list(feature1, feature2)
+        }else{
+            feature1 = bw1v$features[[x]][[1]]
+            wigs = list(feature1)
+        }
         
-            if(!is.null(bw1v$features[[x]][[1]])){
-                bwlist <- processBigwigs(
-                    bigwig = bw1v$features[[x]][[1]],
-                    binsize = as.integer(input$bin),
-                    chrom = input$chr,
-                    start = input$start,
-                    stop = input$stop
-                )
-                print("done")
-            logs[[x]] <<- tuple(bwlist, convert=T)[0]
-            raws[[x]] <<- tuple(bwlist, convert=T)[1]
-            }
-        #}
+        for(i in seq_along(wigs)){
+            req(bw1v$features[[x]][[1]])
+            bwlist <- processBigwigs(
+                bigwig = wigs[[i]],
+                binsize = as.integer(input$bin),
+                chrom = input$chr,
+                start = input$start,
+                stop = input$stop
+            )
+
+        logs[[x]][[i]] <<- tuple(bwlist, convert=T)[0]
+        raws[[x]][[i]] <<- tuple(bwlist, convert=T)[1]
+        #print(logs[[1]][[1]])
+        }
     })
 
     return(list(
         logs = logs,
         raws = raws
         ))
-}) 
+})
 
 
 chipalpha <- reactive({

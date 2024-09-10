@@ -152,10 +152,13 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
 # with the A value scaled by bigwig value
 # TODO: have an option to also use HiC value
 # scale the alpha.
-def calcAlphaMatrix(chip,disthic,showhic,r,g,b, minarg, maxarg):
-    matsize = len(chip)
+def calcAlphaMatrix(chip1, chip2, disthic,showhic, r,g,b, minarg1, maxarg1, minarg2, maxarg2):
+    
+    # go through chip1 and chip2, but if cosignal FALSE do s1xs1
+	
+    matsize = len(chip1)
     # Normalize chip list to between 0 and 1
-    chip_arr = np.array(chip)
+    chip_arr = np.array(chip1)
 	
     minimum = np.min(chip_arr) if math.isnan(minarg) else minarg
     maximum = np.max(chip_arr) if math.isnan(maxarg) else maxarg
