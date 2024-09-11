@@ -52,11 +52,12 @@ chipplot <- reactive({
             tracks[[1]][[2]] <- "NULL"
             # Feature 2
             if(f2v[[as.character(x)]]){
+                req(!is.null(bw1v$features[[x]][[2]]))
                 tracks[[1]][[2]] <- chipalpha()$chipclipped[[x]][[2]]
             }
                 
             # List of min/max values [[1,2]].
-            minmaxlist <- list(minmaxargs$nums[[x]][[1]])
+            minmaxlist <- list(minmaxargs$nums[[x]][[1]], minmaxargs$nums[[x]][[2]])
             print(minmaxlist)
 
             patt <- str_glue(

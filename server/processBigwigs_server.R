@@ -55,29 +55,46 @@ chipalpha <- reactive({
 
         if(!is.null(bw1v$features[[x]][[1]])){
 
-            col <- input[[paste0("col", x)]]
-            rgb <- col2rgb(col)
-            #min and max values chosen by user. No input is ""
-            # Feature 2
+            # Norm Tracks
+            feature1 = bwlist_ChIP1()$logs[[x]][[1]]
+            feature2 = "NULL"
+            # Minmax
+            # Feature 1
             minarg1 <- minmaxargs$nums[[x]][[1]][[1]]
             maxarg1 <- minmaxargs$nums[[x]][[1]][[2]]
-            # Feature 2
-            minarg2 <- minmaxargs$nums[[x]][[2]][[1]]
-            maxarg2 <- minmaxargs$nums[[x]][[2]][[2]]
+            minmaxs1 = list(minarg1, maxarg1)
+            minmaxs2 = list("nan", "nan")
+
+            if(f2v[[as.character(x)]]){
+                req(!is.null(bw1v$features[[x]][[2]]))
+                # Norm Tracks
+                feature2 = bwlist_ChIP1()$logs[[x]][[2]]
+                # Minmax
+                #min and max values chosen by user. No input is ""
+                # Feature 2
+                minarg2 <- minmaxargs$nums[[x]][[2]][[1]]
+                maxarg2 <- minmaxargs$nums[[x]][[2]][[2]]
+                minmaxs2 = list(minarg2, maxarg2)
+            }
+            # minmax Lists
+            minmaxlist = list(minmaxs1, minmaxs2)
+
+            # Feature lists
+            wigs = list(feature1, feature2)
+
+            col <- input[[paste0("col", x)]]
+            rgb <- col2rgb(col)
+            
 
             m1 <- calcAlphaMatrix(
-                chip1=bwlist_ChIP1()$logs[[x]],
-                chip2=, 
+                chiplist=wigs,
+                minmaxlist = minmaxlist, #[1][[1]][[2]] [2][[1]][[2]]
                 f2=f2v[[as.character(x)]],
                 disthic=hic_distance(),
-                showchic=input$chipscale,
+                showhic=input$chipscale,
                 r=rgb[1],
                 g=rgb[2],
-                b=rgb[3],
-                minarg1=minarg1,
-                maxarg1=maxarg1,
-                minarg2=minarg2,
-                maxarg2=maxarg1
+                b=rgb[3]
                 )
             
 
@@ -86,33 +103,35 @@ chipalpha <- reactive({
             chipalphas[[x]] <<- tuple(m1, convert=T)[0]
             chipclipped[[x]] <<- tuple(m1, convert=T)[1]
             minmaxclip[[x]] <<- tuple(m1, convert=T)[2]
+            print(paste0("R:", minmaxclip[[x]]))
 
             #FEATURE 1
             # Update chip-seq min values if nan
             updateNumericInput(
                     session = session,
                     inputId = paste0("minargs",x, 1),
-                    value = minmaxclip[[x]][[1]])
+                    value = minmaxclip[[x]][1])
 
             # Update chip-seq max values if nan
             updateNumericInput(
                     session = session,
                     inputId = paste0("maxargs",x, 1),
-                    value = minmaxclip[[x]][[2]])
+                    value = minmaxclip[[x]][2])
 
-            #FEATURE 2
-            # Update chip-seq min values if nan
-            updateNumericInput(
-                    session = session,
-                    inputId = paste0("minargs",x, 2),
-                    value = minmaxclip[[x]][[1]])
+            if(f2v[[as.character(x)]]){
+                #FEATURE 2
+                # Update chip-seq min values if nan
+                updateNumericInput(
+                        session = session,
+                        inputId = paste0("minargs",x, 2),
+                        value = minmaxclip[[x]][1])
 
-            # Update chip-seq max values if nan
-            updateNumericInput(
-                    session = session,
-                    inputId = paste0("maxargs",x, 2),
-                    value = minmaxclip[[x]][[2]])
-
+                # Update chip-seq max values if nan
+                updateNumericInput(
+                        session = session,
+                        inputId = paste0("maxargs",x, 2),
+                        value = minmaxclip[[x]][2])
+            }
         }
     })
 
