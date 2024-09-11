@@ -152,23 +152,46 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
 # with the A value scaled by bigwig value
 # TODO: have an option to also use HiC value
 # scale the alpha.
-def calcAlphaMatrix(chip1, chip2, disthic,showhic, r,g,b, minarg1, maxarg1, minarg2, maxarg2):
+def calcAlphaMatrix(chip1, chip2, f2, disthic,showhic, r,g,b, minarg1, maxarg1, minarg2, maxarg2):
     
     # go through chip1 and chip2, but if cosignal FALSE do s1xs1
-	
-    matsize = len(chip1)
-    # Normalize chip list to between 0 and 1
-    chip_arr = np.array(chip1)
-	
-    minimum = np.min(chip_arr) if math.isnan(minarg) else minarg
-    maximum = np.max(chip_arr) if math.isnan(maxarg) else maxarg
-    minmax = [minimum, maximum]
-    #raw values from bigwig, clipped data to specified values
-    chip_clipped = np.clip(chip_arr, a_min = minimum, a_max = maximum)
+	# If cosignal is TRUE 
+	# perform each chip separately
+    if f2==True:
+        chips = [chip1, chip2]
+    else:
+        chips = [chip1]
 
-    # normalized to between 0 and 1 after clipping. 0 and 1 being scaled
-    # from user specified min and max
-    chip_norm = (chip_clipped-minimum)/(maximum-minimum)
+    # Initialize list for normalized chip tracks
+    chipnorms = []
+    minmaxs = []
+
+    for chip in chips:
+        matsize = len(chip)
+        # Normalize chip list to between 0 and 1
+        chip_arr = np.array(chip)
+        
+        if(chip==chip1):      
+            minimum = np.min(chip_arr) if math.isnan(minarg1) else minarg1
+            maximum = np.max(chip_arr) if math.isnan(maxarg1) else maxarg1
+        else:
+            minimum = np.min(chip_arr) if math.isnan(minarg2) else minarg2
+            maximum = np.max(chip_arr) if math.isnan(maxarg2) else maxarg2                  
+
+        minmax = [minimum, maximum]
+        minmaxs = minmaxs.append(minmax)
+        #raw values from bigwig, clipped data to specified values
+        chip_clipped = np.clip(chip_arr, a_min = minimum, a_max = maximum)
+
+        # normalized to between 0 and 1 after clipping. 0 and 1 being scaled
+        # from user specified min and max
+        if(chip==chip1):   
+            chip_norm1 = (chip_clipped-minimum)/(maximum-minimum)
+            chipnorms = chipnorms.append(chip_norm1)
+        else:
+            chip_norm2 = (chip_clipped-minimum)/(maximum-minimum)
+            chipnorms = chipnorms.append(chip_norm2)
+
 
     # True: scale ChIP by Hi-C
     # false: raw ChIP not weighted by Hi-C
@@ -176,6 +199,7 @@ def calcAlphaMatrix(chip1, chip2, disthic,showhic, r,g,b, minarg1, maxarg1, mina
         # Normalize hic matrix to between 0 and 1
         distscaled = (disthic-np.min(disthic))/(np.max(disthic)-np.min(disthic))
     else:
+		 # Hi-C is all ones, therefore not impacting ChIP matrix at all
          distscaled = np.ones((len(disthic), len(disthic)))
 
     # RGBA
@@ -196,13 +220,17 @@ def calcAlphaMatrix(chip1, chip2, disthic,showhic, r,g,b, minarg1, maxarg1, mina
 	
     for x in range(0,matsize):
             for y in range(x,matsize):
-				# TO have a diagonal line, 
+				# To have a diagonal line, 
 				# uncomment the below:
 				# if x==y line
                 # if x==y:
                 #     newscore = 255
                 # else:
-                newscore = (chip_norm[x] * chip_norm[y])*255
+                if(f2==True):
+                      newscore = (chip_norm1[x] * chip_norm2[y])*255
+                else:
+                      newscore = (chip_norm1[x] * chip_norm2[y])*255
+
                 # Multiply by HiC distance-normalized and 0-1 scaled
                 newscore = newscore * distscaled[x,y]
                 #alpha value
@@ -211,7 +239,7 @@ def calcAlphaMatrix(chip1, chip2, disthic,showhic, r,g,b, minarg1, maxarg1, mina
 
     mat = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
 
-    return mat, chip_norm, minmax
+    return mat, chipnorms, minmax
 
 # Use Linear interpolation to calculate
 # the alpha weighted color mixing ratio
@@ -272,19 +300,18 @@ def hic_plot(cmap, distnormmat, filepathpng, filepathsvg):
 	return filepathpng, filepathsvg
 
 
-def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepathpng, filepathsvg, minmaxs):
-	mat = mat.astype(np.uint8)
-				
-	fig = plt.figure()
-	ax = fig.add_subplot()
-
-	# Show distance normalized HiC
-	ax.imshow(disthic, disthic_cmap, interpolation='none', alpha = hicalpha)
+def ChIP_plot(chip, chip2, f2, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepathpng, filepathsvg):
+    mat = mat.astype(np.uint8)
+    fig = plt.figure()
+    ax = fig.add_subplot()
+    
+    # Show distance normalized HiC
+    ax.imshow(disthic, disthic_cmap, interpolation='none', alpha = hicalpha)
 	# Show ChIP-seq matrix
-	ax.imshow(mat, interpolation='none', alpha = bedalpha)
+    ax.imshow(mat, interpolation='none', alpha = bedalpha)
 
-	ax.xaxis.set_visible(False)
-	ax.yaxis.set_visible(False)
+    ax.xaxis.set_visible(False)
+    ax.yaxis.set_visible(False)
 
 	#############################
 	# Create bigwigs dynamically, 
@@ -293,57 +320,62 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepa
 	# length.
 	#############################
 	# x-axis plot setup
-	ax1 = fig.add_subplot()
+    ax1 = fig.add_subplot()
 
 	# y-axis plot setup
-	ax3 = fig.add_subplot()
-
+    ax3 = fig.add_subplot()
+      
 	# Dynamically add subplots
-	for i in range(len(chip)):
+    for i in range(len(chip)):
 		# x-axis track
-		ax2 = ax1.twinx()
-		ax2.plot(chip[i], color=col1[i], linewidth = 1)
-		#set y-axis to custom range
-		blim = min(chip[i]) if math.isnan(minmaxs[i][0]) else minmaxs[i][0]
-		tlim = max(chip[i]) if math.isnan(minmaxs[i][1]) else minmaxs[i][1]
-		lims = [0, 1]
-		ax2.set_ylim(lims)
+        ax2 = ax1.twinx()
+        ax2.plot(chip[i], color=col1[i], linewidth = 1)
+		#set y-axis to custom range #NOT USED #y-axis is baked into the data range itself.
+		# blim = min(chip[i]) if math.isnan(minmaxs[i][0]) else minmaxs[i][0]
+		# tlim = max(chip[i]) if math.isnan(minmaxs[i][1]) else minmaxs[i][1]
+        lims = [0, 1]
+        ax2.set_ylim(lims)
 		# y-axis track
-		ax4 = ax3.twiny()
-		a = [x for x in range(len(chip[i]))]
-		ax4.plot(chip[i][::-1], a, color=col1[i], linewidth = 1)
-		ax4.set_xlim(lims)
+        if f2:
+            ychip = chip2[i]
+        else:
+            ychip          
+
+        ax4 = ax3.twiny()
+        a = [x for x in range(len(chip[i]))]
+        ax4.plot(chip[i][::-1], a, color=col1[i], linewidth = 1)
+        ax4.set_xlim(lims)
 
 		# x-axis Remove ticks
-		ax1.set_xticks([])
-		ax1.set_yticks([])
-		ax2.set_xticks([])
-		ax2.set_yticks([])
+        ax1.set_xticks([])
+        ax1.set_yticks([])
+        ax2.set_xticks([])
+        ax2.set_yticks([])
 
 		# y-axis Remove ticks
-		ax3.set_xticks([])
-		ax3.set_yticks([])
-		ax4.set_xticks([])
-		ax4.set_yticks([])
+        ax3.set_xticks([])
+        ax3.set_yticks([])
+        ax4.set_xticks([])
+        ax4.set_yticks([])
 
 
 	# Format plots
-	l1, b1, w1, h1 = ax.get_position().bounds
+    l1, b1, w1, h1 = ax.get_position().bounds
 	#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
-	ax1.set_position((l1*(1),0.02, w1*1, .075))
-	ax1.margins(x=0)
+    ax1.set_position((l1*(1),0.02, w1*1, .075))
+    ax1.margins(x=0)
 	# ax2.xaxis.set_visible(False)
 	# ax2.yaxis.set_visible(False)
 
-	l2, b2, w2, h2 = ax.get_position().bounds
-	ax3.set_position((l2*(.7),b2, w2*.1, h2*(1)))
-	ax3.margins(y=0)
+    l2, b2, w2, h2 = ax.get_position().bounds
+    ax3.set_position((l2*(.7),b2, w2*.1, h2*(1)))
+    ax3.margins(y=0)
 
-	plt.savefig(filepathsvg, bbox_inches='tight')
-	plt.savefig(filepathpng, bbox_inches='tight', dpi=300)
-	plt.close()
+    plt.savefig(filepathsvg, bbox_inches='tight')
+    plt.savefig(filepathpng, bbox_inches='tight', dpi=300)
+    plt.close()
 
-	return filepathpng, filepathsvg
+    return filepathpng, filepathsvg
 
 # check that the bedgraph binsize matches that
 # of the chosen binsize of Hi-C

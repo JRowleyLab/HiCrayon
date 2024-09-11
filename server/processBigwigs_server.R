@@ -58,20 +58,26 @@ chipalpha <- reactive({
             col <- input[[paste0("col", x)]]
             rgb <- col2rgb(col)
             #min and max values chosen by user. No input is ""
-            minarg <- minmaxargs$nums[[x]][[1]][[1]]
-            maxarg <- minmaxargs$nums[[x]][[1]][[2]]
-            print(minarg)
-            print(maxarg)
+            # Feature 2
+            minarg1 <- minmaxargs$nums[[x]][[1]][[1]]
+            maxarg1 <- minmaxargs$nums[[x]][[1]][[2]]
+            # Feature 2
+            minarg2 <- minmaxargs$nums[[x]][[2]][[1]]
+            maxarg2 <- minmaxargs$nums[[x]][[2]][[2]]
 
             m1 <- calcAlphaMatrix(
-                bwlist_ChIP1()$logs[[x]],
-                hic_distance(),
-                input$chipscale,
-                rgb[1], 
-                rgb[2], 
-                rgb[3],
-                minarg=minarg,#minarg,
-                maxarg=maxarg #maxarg
+                chip1=bwlist_ChIP1()$logs[[x]],
+                chip2=, 
+                f2=f2v[[as.character(x)]],
+                disthic=hic_distance(),
+                showchic=input$chipscale,
+                r=rgb[1],
+                g=rgb[2],
+                b=rgb[3],
+                minarg1=minarg1,
+                maxarg1=maxarg1,
+                minarg2=minarg2,
+                maxarg2=maxarg1
                 )
             
 

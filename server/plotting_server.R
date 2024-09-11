@@ -36,7 +36,7 @@ chipplot <- reactive({
     req(input$chip1)
 
     images <- c()
-    track <- list()
+    tracks <- list(list())
     col <- list()
 
     lapply(seq_along(bw1v$features), function(x){
@@ -47,8 +47,14 @@ chipplot <- reactive({
             col[1] <- input[[paste0("col", x)]]
             
             # Value clipped bigwig track with raw values
-            track[[1]] <- chipalpha()$chipclipped[[x]]
-
+            # Feature 1
+            tracks[[1]][[1]] <- chipalpha()$chipclipped[[x]][[1]]
+            tracks[[1]][[2]] <- "NULL"
+            # Feature 2
+            if(f2v[[as.character(x)]]){
+                tracks[[1]][[2]] <- chipalpha()$chipclipped[[x]][[2]]
+            }
+                
             # List of min/max values [[1,2]].
             minmaxlist <- list(minmaxargs$nums[[x]][[1]])
             print(minmaxlist)
@@ -71,13 +77,14 @@ chipplot <- reactive({
                 disthic = hic_distance(),
                 col1 = col,
                 mat = chipalpha()$chipalphas[[x]],
-                chip = track,
+                chip = tracks,
+                f2 = f2v[[as.character(x)]],
                 disthic_cmap = hic_color(),
                 hicalpha = input$hicalpha,
                 bedalpha = input$bedalpha,
                 filepathpng = pngpath,
-                filepathsvg = svgpath,
-                minmaxs = minmaxlist #[[1,2]]
+                filepathsvg = svgpath
+                #minmaxs = minmaxlist #[[1,2]] #not used.
                 )
 
             pngimage <- tuple(p1_plot, convert = T)[0]
