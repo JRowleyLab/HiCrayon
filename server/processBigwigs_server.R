@@ -3,6 +3,8 @@
 # binsize across selected genomic
 # region
 bwlist_ChIP1 <- reactive({
+    # Need at least one chip uploaded.
+    # validate(need(hicv$y!="NULL", "Please upload a HiC file"))
 
     # Create nested lists
     logs <- lapply(1:length(bw1v$features), function(i) lapply(1:2, function(j) "NULL" ))
@@ -10,7 +12,8 @@ bwlist_ChIP1 <- reactive({
     
     lapply(seq_along(bw1v$features), function(x){
 
-        
+        feature1 = "NULL"
+        print("1")
         if(!is.null(bw1v$features[[x]][[1]])){
             # bw1v$features[[nr]][[1]]
             # If "different signals" checked TRUE
@@ -28,8 +31,6 @@ bwlist_ChIP1 <- reactive({
             #print(paste0("wigs: :", wigs))
 
             for(i in seq_along(wigs)){
-                # logs[[x]][[i]] <- "NULL"
-                # raws[[x]][[i]] <- "NULL"
 
                 bwlist <- processBigwigs(
                     bigwig = wigs[[i]],
@@ -40,12 +41,10 @@ bwlist_ChIP1 <- reactive({
                 )
             logs[[x]][[i]] <<- tuple(bwlist, convert=T)[0]
             raws[[x]][[i]] <<- tuple(bwlist, convert=T)[1]
+            print("2")
         }
     }
     })
-
-    print(logs)
-    print(raws)
 
     return(list(
         logs = logs,
@@ -65,6 +64,7 @@ chipalpha <- reactive({
     lapply(seq_along(bw1v$features), function(x){
 
         if(!is.null(bw1v$features[[x]][[1]])){
+            print("1")
 
             # Norm Tracks
             feature1 = bwlist_ChIP1()$logs[[x]][[1]]

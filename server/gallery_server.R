@@ -5,7 +5,6 @@
 output$gallery <- renderUI({
 
     validate(need(hicv$y!="NULL", "Please upload a HiC file"))
-
     # Initialise with HiC data
     texts <- c("HiC")
     images <- c(gsub("www/", "", hicplot()$svg))
@@ -15,19 +14,12 @@ output$gallery <- renderUI({
     if(input$chip1){
         # Dynamically add chip data
         for(i in seq_along(bw1v$features)){
-            print(bw1v$features)
-
             if(!is.null(bw1v$features[[i]][[1]])){
-                print("hello mr.")
-                print(bw1v$features[[i]][[1]])
-                
                 texts = append(texts, input[[paste0("n", i)]])
                 hrefs = append(hrefs, "")
                 images = append(images, gsub("www/", "", chipplot()[[i]]$svg))
         }
-        print(texts)
-        print(hrefs)
-        print(images)
+        
         }
         if(length(combinedchips$chips) > 1){
             combname <- "" 

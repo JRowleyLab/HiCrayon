@@ -2,7 +2,7 @@
 # elements
 
 # bw1 file handling
-bw1v <- reactiveValues(features=list(list()))
+bw1v <- reactiveValues(features=list(list(NULL, NULL)))
 
 # Include feature 2 list
 f2v <- reactiveValues()
