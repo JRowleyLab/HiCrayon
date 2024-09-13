@@ -14,7 +14,7 @@ minmaxargs <- reactiveValues(nums=list(list(list())))
 observeEvent(input$addBtn, {
     nr <- input$addBtn
     # Initialize bigwig path list for features 1,2
-    bw1v$features[[nr]] <- list("NULL", "NULL")
+    bw1v$features[[nr]] <- list(NULL, NULL)
     id <- paste0("input",input$addBtn)
     ####### Dynamic UI update START #####################
 insertUI(
@@ -220,8 +220,12 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
       # NULL the filepath
       # bw1v[[paste0("bw",nr, 1)]] <- NULL
       # bw1v[[paste0("bw",nr, 2)]] <- NULL
-      bw1v$features[[nr]][1] <- "NULL"
-      bw1v$features[[nr]][2] <- "NULL"
+      bw1v$features[[nr]][[1]] <- NULL
+      bw1v$features[[nr]][[2]] <- NULL
+      print(
+        paste0("-------------",
+          bw1v$features[[nr]],
+        "------------"))
     })
 
 observeEvent(input[[paste0('cosignal', nr)]], {
@@ -276,7 +280,7 @@ observeEvent(input[[paste0('cosignal', nr)]], {
       # GOAL: bw1v -> [1,2,3,4,5] -> [1,2], [1,2], [1,2]...
       # where each is the bigwig path or NULL
       if(!rlang::is_empty(inFile$datapath)){
-        bw1v$features[[nr]][1] <- inFile$datapath
+        bw1v$features[[nr]][[1]] <- inFile$datapath
         # print(bw1v$features[[nr]][[1]])
         # print(bw1v$features[[nr]][1])
         # Update text with file name
@@ -297,7 +301,7 @@ observeEvent(input[[paste0('cosignal', nr)]], {
         #bw1v[[paste0("bw",nr, 2)]] <- inFile$datapath
         # Update list by index for feature 2
         if(!rlang::is_empty(inFile$datapath)){
-          bw1v$features[[nr]][2] <- inFile$datapath
+          bw1v$features[[nr]][[2]] <- inFile$datapath
           # print(bw1v$features)
           # Update text with file name
           updateTextInput(

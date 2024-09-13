@@ -118,35 +118,38 @@ def distanceMatHiC(hicnumpy, thresh, distnorm):
 # Read in bigwig file and return a list of
 # bigwig peak values
 def processBigwigs(bigwig,binsize,chrom,start,stop):
+    
+    start=int(start)
+    binsize=int(binsize)
+    stop=int(stop)
 
-	start=int(start)
-	binsize=int(binsize)
-	stop=int(stop)
+    nochr = chrom.strip('chr')
+    wchr = "chr" + str(nochr)
+    
+    if bigwig == "NULL":
+        return("NULL", "NULL")
+    
+    bwopen = pyBigWig.open(bigwig)        
+    bwraw = []
 
-	nochr = chrom.strip('chr')
-	wchr = "chr" + str(nochr)
+    # Store raw bigwig values
+    for walker in range(start, stop+binsize, binsize):
+        try:
+            bwraw.append(bwopen.stats(nochr, walker, walker+binsize)[0])
+        except RuntimeError:
+            bwraw.append(bwopen.stats(wchr, walker, walker+binsize)[0])
+        except ValueError:
+            bwraw.append(0)
 
-	bwopen = pyBigWig.open(bigwig)		
-	bwraw = []
-
-	# Store raw bigwig values
-	for walker in range(start, stop+binsize, binsize):
-		try:
-			bwraw.append(bwopen.stats(nochr, walker, walker+binsize)[0])
-		except RuntimeError:
-			bwraw.append(bwopen.stats(wchr, walker, walker+binsize)[0])
-		except ValueError:
-			bwraw.append(0)
-
-	# Perform log operation on all values
-	# 1e-5 added to avoid log(0)
-	bwlog = []
-	for i in bwraw:
-		if i == None:
-			i = 0
-		bwlog.append(math.log(i+0.01))
-		
-	return bwlog, bwraw
+    # Perform log operation on all values
+    # 1e-5 added to avoid log(0)
+    bwlog = []
+    for i in bwraw:
+        if i == None:
+            i = 0
+        bwlog.append(math.log(i+0.01))
+        
+    return bwlog, bwraw
 
 # Convert bigwig values to an RGBA array
 # with the A value scaled by bigwig value

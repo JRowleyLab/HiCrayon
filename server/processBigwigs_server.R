@@ -4,37 +4,48 @@
 # region
 bwlist_ChIP1 <- reactive({
 
-    logs = list(list())
-    raws = list(list())
-
+    # Create nested lists
+    logs <- lapply(1:length(bw1v$features), function(i) lapply(1:2, function(j) "NULL" ))
+    raws <- lapply(1:length(bw1v$features), function(i) lapply(1:2, function(j) "NULL" ))
+    
     lapply(seq_along(bw1v$features), function(x){
-        # bw1v$features[[nr]][[1]]
-        # If "different signals" checked TRUE
-        if(f2v[[as.character(x)]]){
-            req(!is.null(bw1v$features[[x]][[2]]))
-            feature1 = bw1v$features[[x]][[1]]
-            feature2 = bw1v$features[[x]][[2]]
-            wigs = list(feature1, feature2)
-        }else{
-            feature1 = bw1v$features[[x]][[1]]
-            wigs = list(feature1)
-        }
-        
-        for(i in seq_along(wigs)){
-            req(bw1v$features[[x]][[1]])
-            bwlist <- processBigwigs(
-                bigwig = wigs[[i]],
-                binsize = as.integer(input$bin),
-                chrom = input$chr,
-                start = input$start,
-                stop = input$stop
-            )
 
-        logs[[x]][[i]] <<- tuple(bwlist, convert=T)[0]
-        raws[[x]][[i]] <<- tuple(bwlist, convert=T)[1]
-        #print(logs[[1]][[1]])
+        
+        if(!is.null(bw1v$features[[x]][[1]])){
+            # bw1v$features[[nr]][[1]]
+            # If "different signals" checked TRUE
+
+            # Norm Tracks
+            feature1 = bw1v$features[[x]][[1]]
+            feature2 = "NULL"
+            
+            if(f2v[[as.character(x)]]){
+                req(!is.null(bw1v$features[[x]][[2]]))
+                feature2 = bw1v$features[[x]][[2]]
+            }
+
+            wigs = list(feature1, feature2)
+            #print(paste0("wigs: :", wigs))
+
+            for(i in seq_along(wigs)){
+                # logs[[x]][[i]] <- "NULL"
+                # raws[[x]][[i]] <- "NULL"
+
+                bwlist <- processBigwigs(
+                    bigwig = wigs[[i]],
+                    binsize = as.integer(input$bin),
+                    chrom = input$chr,
+                    start = input$start,
+                    stop = input$stop
+                )
+            logs[[x]][[i]] <<- tuple(bwlist, convert=T)[0]
+            raws[[x]][[i]] <<- tuple(bwlist, convert=T)[1]
         }
+    }
     })
+
+    print(logs)
+    print(raws)
 
     return(list(
         logs = logs,
@@ -78,9 +89,11 @@ chipalpha <- reactive({
             }
             # minmax Lists
             minmaxlist = list(minmaxs1, minmaxs2)
+            print(minmaxlist)
 
             # Feature lists
             wigs = list(feature1, feature2)
+            print(wigs)
 
             col <- input[[paste0("col", x)]]
             rgb <- col2rgb(col)
@@ -96,27 +109,28 @@ chipalpha <- reactive({
                 g=rgb[2],
                 b=rgb[3]
                 )
-            
 
             # global variable to allow accessing of value 
             # outside lapply function
             chipalphas[[x]] <<- tuple(m1, convert=T)[0]
             chipclipped[[x]] <<- tuple(m1, convert=T)[1]
             minmaxclip[[x]] <<- tuple(m1, convert=T)[2]
-            print(paste0("R:", minmaxclip[[x]]))
+            print(paste0("R:", as.list(minmaxclip[[x]])))
 
             #FEATURE 1
             # Update chip-seq min values if nan
             updateNumericInput(
                     session = session,
                     inputId = paste0("minargs",x, 1),
-                    value = minmaxclip[[x]][1])
+                    value = as.list(minmaxclip[[x]])[1]
+                    )
 
             # Update chip-seq max values if nan
             updateNumericInput(
                     session = session,
                     inputId = paste0("maxargs",x, 1),
-                    value = minmaxclip[[x]][2])
+                    value = as.list(minmaxclip[[x]])[2]
+                    )
 
             if(f2v[[as.character(x)]]){
                 #FEATURE 2

@@ -18,8 +18,7 @@ hicplot <- reactive({
         cmap = hic_color(),
         distnormmat = hic_distance(),
         filepathpng = pngpath,
-        filepathsvg = svgpath
-             )
+        filepathsvg = svgpath)
 
     pngout <- tuple(path, convert = T)[0]
     svgout <- tuple(path, convert = T)[1]
@@ -49,7 +48,7 @@ chipplot <- reactive({
             # Value clipped bigwig track with raw values
             # Feature 1
             tracks[[1]][[1]] <- chipalpha()$chipclipped[[x]][[1]]
-            tracks[[1]][[2]] <- "NULL"
+            tracks[[1]][[2]] <- NULL
             # Feature 2
             if(f2v[[as.character(x)]]){
                 req(!is.null(bw1v$features[[x]][[2]]))
@@ -93,6 +92,7 @@ chipplot <- reactive({
 
             images[[x]] <<- list(png = pngimage, svg = svgimage)
         }
+    
     })
 
     return(images)
