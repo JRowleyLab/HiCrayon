@@ -78,7 +78,7 @@ chipplot <- reactive({
                 col1 = col,
                 mat = chipalpha()$chipalphas[[x]],
                 chip = tracks,
-                f2 = f2v[[as.character(x)]],
+                #f2 = f2v[[as.character(x)]],
                 disthic_cmap = hic_color(),
                 hicalpha = input$hicalpha,
                 bedalpha = input$bedalpha,
@@ -117,6 +117,8 @@ observeEvent(input$generate_hic, {
         }
         combinedchips$chips <- chipstocombine
     }
+    print("Combined")
+    print(combinedchips$chips)
 })
 
 
@@ -134,33 +136,50 @@ chipcombinedplot <- reactive({
 
     #this doesn't seem to work when you skip a chip for
     # combination
-    print(1)
+    #print(1)
     allchips <- list()
     counter = 1
     for(x in seq_along(chipstocombine)){
+        print('counter')
         allchips[[counter]] <- chipalpha()$chipalphas[[chipstocombine[x]]]
         counter = counter + 1
     }
-    print(2)
+    #print(2)
     m3 <- lnerp_matrices(allchips)
-    print(3)
+    #print(3)
     # bigwig tracks
     tracks <- list()
     cols <- c()
     names <- list()
     # List of min/max values [[1,2]].
-    minmaxlist_list <- list()
+    #minmaxlist_list <- list()
 
     counter = 1
     # Create lists of info for combination plot
     for(x in seq_along(chipstocombine)){
+        print(paste0(chipstocombine[x], "'nd turn"))
+        print("check")
+
+        tracks[[counter]] <- list()
+
+        # Tracks for feature 1 and feature 2
+        tracks[[counter]][[1]] <- chipalpha()$chipclipped[[chipstocombine[x]]][[1]]
+        tracks[[counter]][[2]] <- NULL
+
+        print("point 2")
         
-        tracks[[counter]] <- chipalpha()$chipclipped[[chipstocombine[x]]]
+        if(f2v[[as.character(x)]]){
+            req(!is.null(bw1v$features[[x]][[2]]))
+            tracks[[counter]][[2]] <- chipalpha()$chipclipped[[chipstocombine[x]]][[2]]
+        }
+
+        print("point 3")
         
         cols <- append(cols, input[[paste0("col", chipstocombine[x])]])
         names <- append(names, input[[paste0("n", chipstocombine[x])]])
         # List of min/max values [[1,2]].
-        minmaxlist_list <- append(minmaxlist_list, list(minmaxargs$nums[[x]][[1]]) )
+        #minmaxlist_list <- append(minmaxlist_list, list(minmaxargs$nums[[x]][[1]]) )
+        print("point 3.1")
 
         counter = counter + 1
     }
@@ -179,8 +198,11 @@ chipcombinedplot <- reactive({
         fileext = ".svg",
         tmpdir = userinfo)
 
+    print("point 4")
+
     chipcomb <- ChIP_plot(
             disthic = hic_distance(),
+            #f2 = FALSE, #f2v[[as.character(x)]],
             col1 = cols,
             mat = m3,
             chip = tracks,
@@ -188,9 +210,11 @@ chipcombinedplot <- reactive({
             hicalpha = input$hicalpha,
             bedalpha = input$bedalpha,
             filepathpng = pngpath,
-            filepathsvg = svgpath,
-            minmaxs = minmaxlist_list
+            filepathsvg = svgpath#,
+            #minmaxs = minmaxlist_list
             )
+
+    print("point 4")
 
     chippng <- tuple(chipcomb, convert = T)[0]
     chipsvg <- tuple(chipcomb, convert = T)[1]

@@ -334,11 +334,11 @@ def hic_plot(cmap, distnormmat, filepathpng, filepathsvg):
 	return filepathpng, filepathsvg
 
 
-def ChIP_plot(chip, f2, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepathpng, filepathsvg):
+def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepathpng, filepathsvg):
     mat = mat.astype(np.uint8)
     fig = plt.figure()
     ax = fig.add_subplot()
-    
+
     # Show distance normalized HiC
     ax.imshow(disthic, disthic_cmap, interpolation='none', alpha = hicalpha)
 	# Show ChIP-seq matrix
@@ -361,6 +361,13 @@ def ChIP_plot(chip, f2, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, fi
       
 	# Dynamically add subplots
     for i in range(len(chip)):
+        if len(chip[i]) == 2:
+            f2 = True
+        else:
+            f2 = False
+        print("F2:")
+        print(f2)
+
 		# x-axis track
         ax2 = ax1.twinx()
         ax2.plot(chip[i][0], color=col1[i], linewidth = 1)
@@ -373,7 +380,8 @@ def ChIP_plot(chip, f2, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, fi
         if f2:
             ychip = chip[i][1]
         else:
-            ychip = chip[i][0]        
+            ychip = chip[i][0]   
+        print("point")     
 
         ax4 = ax3.twiny()
         a = [x for x in range(len(ychip))]
