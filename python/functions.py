@@ -242,8 +242,29 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
                 # Multiply by HiC distance-normalized and 0-1 scaled
                 newscore = newscore * distscaled[x,y]
                 #alpha value
-                amat[x,y] = newscore
                 amat[y,x] = newscore
+
+                if f2==False:
+                     amat[x,y] = newscore
+                     
+    for x in range(0,matsize):
+        for y in range(x,matsize):
+            # To have a diagonal line, 
+            # uncomment the below:
+            # if x==y line
+            # if x==y:
+            #     newscore = 255
+            # else:
+            if(f2==True):
+                    newscore = (chipnorms[0][y] * chipnorms[1][x])*255
+            else:
+                    newscore = (chipnorms[0][x] * chipnorms[0][y])*255
+
+            # Multiply by HiC distance-normalized and 0-1 scaled
+            newscore = newscore * distscaled[x,y]
+            #alpha value
+            amat[x,y] = newscore
+            #amat[x,y] = newscore
 
     mat = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
     # print("done calclpha")
