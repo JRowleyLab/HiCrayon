@@ -13,7 +13,6 @@ bwlist_ChIP1 <- reactive({
     lapply(seq_along(bw1v$features), function(x){
 
         feature1 = "NULL"
-        print("1")
         if(!is.null(bw1v$features[[x]][[1]])){
             # bw1v$features[[nr]][[1]]
             # If "different signals" checked TRUE
@@ -21,7 +20,7 @@ bwlist_ChIP1 <- reactive({
             # Norm Tracks
             feature1 = bw1v$features[[x]][[1]]
             feature2 = "NULL"
-            
+
             if(f2v[[as.character(x)]]){
                 req(!is.null(bw1v$features[[x]][[2]]))
                 feature2 = bw1v$features[[x]][[2]]
@@ -41,7 +40,6 @@ bwlist_ChIP1 <- reactive({
                 )
             logs[[x]][[i]] <<- tuple(bwlist, convert=T)[0]
             raws[[x]][[i]] <<- tuple(bwlist, convert=T)[1]
-            print("2")
         }
     }
     })
@@ -64,7 +62,6 @@ chipalpha <- reactive({
     lapply(seq_along(bw1v$features), function(x){
 
         if(!is.null(bw1v$features[[x]][[1]])){
-            print("1")
 
             # Norm Tracks
             feature1 = bwlist_ChIP1()$logs[[x]][[1]]
@@ -89,11 +86,11 @@ chipalpha <- reactive({
             }
             # minmax Lists
             minmaxlist = list(minmaxs1, minmaxs2)
-            print(minmaxlist)
+            #print(minmaxlist)
 
             # Feature lists
             wigs = list(feature1, feature2)
-            print(wigs)
+            #print(wigs)
 
             col <- input[[paste0("col", x)]]
             rgb <- col2rgb(col)
@@ -114,22 +111,29 @@ chipalpha <- reactive({
             # outside lapply function
             chipalphas[[x]] <<- tuple(m1, convert=T)[0]
             chipclipped[[x]] <<- tuple(m1, convert=T)[1]
-            minmaxclip[[x]] <<- tuple(m1, convert=T)[2]
-            print(paste0("R:", as.list(minmaxclip[[x]])))
+            #minmaxclip[[x]] <<- as.list(tuple(m1, convert=T)[2])
+            # Enter the minmax values for feature 1
+            # [[window]][[feature]][[minORmax]]
+            minmaxclip[[x]] <<- list()
+            minmaxclip[[x]][[1]] <<- as.list(tuple(m1, convert=T)[2][[1]])
+            if(f2v[[as.character(x)]]){
+                minmaxclip[[x]][[2]] <<- as.list(tuple(m1, convert=T)[2][[2]])
+            }
+
 
             #FEATURE 1
             # Update chip-seq min values if nan
             updateNumericInput(
                     session = session,
-                    inputId = paste0("minargs",x, 1),
-                    value = as.list(minmaxclip[[x]])[1]
+                    inputId = paste0("minargs", x, 1),
+                    value = minmaxclip[[x]][[1]][[1]]
                     )
 
             # Update chip-seq max values if nan
             updateNumericInput(
                     session = session,
-                    inputId = paste0("maxargs",x, 1),
-                    value = as.list(minmaxclip[[x]])[2]
+                    inputId = paste0("maxargs", x, 1),
+                    value = minmaxclip[[x]][[1]][[2]]
                     )
 
             if(f2v[[as.character(x)]]){
@@ -138,13 +142,15 @@ chipalpha <- reactive({
                 updateNumericInput(
                         session = session,
                         inputId = paste0("minargs",x, 2),
-                        value = minmaxclip[[x]][1])
+                        value = minmaxclip[[x]][[2]][[1]]
+                )
 
                 # Update chip-seq max values if nan
                 updateNumericInput(
                         session = session,
                         inputId = paste0("maxargs",x, 2),
-                        value = minmaxclip[[x]][2])
+                        value = minmaxclip[[x]][[2]][[2]]
+                )
             }
         }
     })

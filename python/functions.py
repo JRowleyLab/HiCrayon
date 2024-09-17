@@ -156,13 +156,12 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
 # TODO: have an option to also use HiC value
 # scale the alpha.
 def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
-    print("F2:", f2)
-    
     # go through chip1 and chip2, but if cosignal FALSE do s1xs1
 	# If cosignal is TRUE 
 	# perform each chip separately
     if f2==True:
         chips = [chiplist[0], chiplist[1]]
+        print(chips)
     else:
         chips = [chiplist[0]]
 
@@ -174,17 +173,21 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
         # Normalize chip list to between 0 and 1
         chip_arr = np.array(chip)
 
-        if(n==0): #If we're doing feature 1   # fix to use minmaxlist 
+        if(n==0): #If we're doing feature 1
             minimum = np.min(chip_arr) if math.isnan(minmaxlist[0][0]) else minmaxlist[0][0]
-            maximum = np.max(chip_arr) if math.isnan(minmaxlist[0][1]) else minmaxlist[0][1] 
+            minimum = round(minimum, 2)
+            
+            maximum = np.max(chip_arr) if math.isnan(minmaxlist[0][1]) else minmaxlist[0][1]
+            maximum = round(maximum, 2) 
         else: # Or feature 2
             minimum = np.min(chip_arr) if math.isnan(minmaxlist[1][0]) else minmaxlist[1][0]
-            maximum = np.max(chip_arr) if math.isnan(minmaxlist[1][1]) else minmaxlist[1][1]                  
+            minimum = round(minimum, 2)
+
+            maximum = np.max(chip_arr) if math.isnan(minmaxlist[1][1]) else minmaxlist[1][1]
+            maximum = round(maximum, 2)                  
 
         minmax = [minimum, maximum]
-        print(minmax)
         minmaxs.append(minmax)
-        print(minmaxs)
         #raw values from bigwig, clipped data to specified values
         chip_clipped = np.clip(chip_arr, a_min = minimum, a_max = maximum)
 
@@ -243,8 +246,11 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
                 amat[y,x] = newscore
 
     mat = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
-    print("done calclpha")
-    print("Python:, ", minmaxs) #should be 1 list of two items
+    # print("done calclpha")
+    # print("Python:, ", minmaxs) #should be 1 list of two items
+
+    # print(chipnorms)
+    # print(minmaxs)
 
     return mat, chipnorms, minmaxs
 
