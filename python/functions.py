@@ -461,7 +461,7 @@ def filterCompartments(comp, chrom, start, stop):
     return comp_filt
 
 
-def scaleCompartments(disthic, comp_df, Acol, Bcol):
+def scaleCompartments(disthic, comp_df, Acol, Bcol, ABcol):
     #distance normalized hic matrix
     distscaled = (disthic-np.min(disthic))/(np.max(disthic)-np.min(disthic))
 
@@ -517,7 +517,43 @@ def scaleCompartments(disthic, comp_df, Acol, Bcol):
         else:
             Bmatrix = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
 
-    return Amatrix, Bmatrix
+    # Create A-B compartment matrix
+    matsize = len(comp)
+    # RGBA
+    rmat = np.zeros((matsize,matsize))
+    gmat = np.zeros((matsize,matsize))
+    bmat = np.zeros((matsize,matsize))
+    amat = np.zeros((matsize,matsize))
+
+    rmat.fill(ABcol[0])
+    gmat.fill(ABcol[1])
+    bmat.fill(ABcol[2])
+
+    # Calculate the alpha value for each 
+    for x in range(0,matsize):
+        for y in range(x,matsize):
+
+            newscore = (Acomp[x] * Bcomp[y])*255
+            # Multiply by HiC distance-normalized and 0-1 scaled
+            newscore = newscore * distscaled[x,y]
+            #alpha value
+            #amat[x,y] = newscore
+            amat[y,x] = newscore
+
+    for x in range(0,matsize):
+        for y in range(x,matsize):
+
+            newscore = (Acomp[y] * Bcomp[x])*255
+            # Multiply by HiC distance-normalized and 0-1 scaled
+            newscore = newscore * distscaled[x,y]
+            #alpha value
+            amat[x,y] = newscore
+            #amat[y,x] = newscore
+
+    
+    ABmatrix = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
+
+    return Amatrix, Bmatrix, ABmatrix
 
 
 def plotCompartments(disthic, comp, ABmat, colA, colB, filepathpng, filepathsvg):

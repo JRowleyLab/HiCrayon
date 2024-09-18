@@ -1,5 +1,12 @@
 chiponeOptionsUI <- div(
         checkboxInput("chip1", "Include ChIP"),
+        #shinyBS::bsTooltip(id = "chip1", title ="Include ChIP features in the visualization panel. If unchecked, data won't be lost. Simply recheck the box to include the ChIP features again."),
+          tippy_this(
+              elementId = "chip1", 
+              tooltip = "<span style='font-size:15px;'>Include ChIP features in the visualization panel. If unchecked, data won't be lost. Simply recheck the box to include the ChIP features again.<span>", 
+              allowHTML = TRUE,
+              placement = 'right'
+          ),
           conditionalPanel(
                 condition = "input.chip1 == true",
               fluidRow(
@@ -8,10 +15,25 @@ chiponeOptionsUI <- div(
                   color = "default", 
                   size = "sm"),
                 ),
+
+          tippy_this(
+              elementId = "addBtn", 
+              tooltip = "<span style='font-size:15px;'>Add another ChIP feature. Each will appear in a separate panel, unless 'combination' is checked. See expand button on each feature.<span>", 
+              allowHTML = TRUE,
+              placement = 'right'
+          ),
                 tags$div(id='inputList'),
                 # Dynamic ChIP UI
                 #uiOutput("chipUI"),
               checkboxInput("advancedparameters", "Advanced Parameters"),
+              
+          tippy_this(
+              elementId = "advancedparameters", 
+              tooltip = "<span style='font-size:15px;'>Applies to all ChIP features<span>", 
+              allowHTML = TRUE,
+              placement = 'right'
+          ),
+
           conditionalPanel(
                 condition = "input.advancedparameters == true",
           fluidRow(
@@ -27,6 +49,14 @@ chiponeOptionsUI <- div(
                         ticks = TRUE
                         )
                   ),
+                                
+          tippy_this(
+              elementId = "bedalpha", 
+              tooltip = "<span style='font-size:15px;'>Transparency value for ChIP features<span>", 
+              allowHTML = TRUE,
+              placement = 'right'
+          ),
+
             column(
               6,
               sliderInput("hicalpha",
@@ -38,7 +68,15 @@ chiponeOptionsUI <- div(
                         round = FALSE,
                         ticks = TRUE
                         )
-                  )
+                  ),
+                  shinyBS::bsTooltip(id = "hicalpha", title = "Transparency value for Hi-C map"),
+                                       
+          tippy_this(
+              elementId = "hicalpha", 
+              tooltip = "<span style='font-size:15px;'>Transparency value for Hi-C map<span>", 
+              allowHTML = TRUE,
+              placement = 'right'
+          ),
           ),
               ),
           )

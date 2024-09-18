@@ -157,30 +157,22 @@ chipcombinedplot <- reactive({
     counter = 1
     # Create lists of info for combination plot
     for(x in seq_along(chipstocombine)){
-        print(paste0(chipstocombine[x], "'nd turn"))
-        print("check")
 
         tracks[[counter]] <- list()
 
         # Tracks for feature 1 and feature 2
         tracks[[counter]][[1]] <- chipalpha()$chipclipped[[chipstocombine[x]]][[1]]
         tracks[[counter]][[2]] <- NULL
-
-        print("point 2")
         
         if(f2v[[as.character(x)]]){
             req(!is.null(bw1v$features[[x]][[2]]))
             tracks[[counter]][[2]] <- chipalpha()$chipclipped[[chipstocombine[x]]][[2]]
         }
-
-        print("point 3")
         
         cols <- append(cols, input[[paste0("col", chipstocombine[x])]])
         names <- append(names, input[[paste0("n", chipstocombine[x])]])
         # List of min/max values [[1,2]].
         #minmaxlist_list <- append(minmaxlist_list, list(minmaxargs$nums[[x]][[1]]) )
-        print("point 3.1")
-
         counter = counter + 1
     }
 

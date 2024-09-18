@@ -15,6 +15,7 @@ library(stringr)
 library(BH)
 library(DT)
 library(eulerr)
+library(tippy)
 
 # load encode hic data
 encodehic <- read.table("hic.txt", header=T, sep="\t")

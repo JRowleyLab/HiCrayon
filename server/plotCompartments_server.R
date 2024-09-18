@@ -33,22 +33,25 @@ scale_compartments <- reactive({
 
     rgbA <- col2rgb(input$colcompA)
     rgbB <- col2rgb(input$colcompB)
+    rgbAB <- col2rgb(input$colcompAB)
 
     
     comps <- scaleCompartments(
         disthic = hic_distance(),
-        #comp_df = filter_compartments(),
         comp_df = addbins_compartments(),
         Acol = rgbA,
-        Bcol = rgbB
+        Bcol = rgbB,
+        ABcol = rgbAB
         )
 
      Amatrix = tuple(comps, convert = T)[0]
      Bmatrix = tuple(comps, convert = T)[1]
+     ABmatrix = tuple(comps, convert = T)[2]
 
      return(list(
         Amatrix = Amatrix,
-        Bmatrix = Bmatrix
+        Bmatrix = Bmatrix,
+        ABmatrix = ABmatrix
      ))
 
 }) 
@@ -59,8 +62,10 @@ comp_LNERP <- reactive({
     validate(need(bedv$y, "Please upload compartments bed file"))
     m1 <- scale_compartments()$Amatrix
     m2 <- scale_compartments()$Bmatrix
+    m12 <- scale_compartments()$ABmatrix
 
-    m3 = lnerp_matrices(list(m1, m2))
+
+    m3 = lnerp_matrices(list(m1, m2, m12))
 
     return(m3)
 }) 

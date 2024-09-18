@@ -12,11 +12,14 @@ comp_UI <- div(
               ),
             ),
       fluidRow(
-          column(5,
-                  colourInput("colcompA", "Select colour: Pos", "red"),
+          column(12,
+                  colourInput("colcompA", "A compartment", "red"),
                 ),
-          column(5,
-                  colourInput("colcompB", "Select colour: Neg", "blue"),
+          column(12,
+                  colourInput("colcompB", "B compartment", "blue"),
+                ),
+          column(12,
+                  colourInput("colcompAB", "A-B compartment", "green"),
                 )
     )
           )

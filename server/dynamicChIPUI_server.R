@@ -30,7 +30,8 @@ insertUI(
         ),
         column(2,
                actionButton(paste0('collapseBtn', nr), label = "", icon = icon("angle-double-down"), style = "width: 100%;")
-        )
+        ),
+        shinyBS::bsTooltip(id = paste0('collapseBtn', nr), title ="Open options for color, label and data range"),
       ),
       
       # File selection button and toggle button
@@ -47,6 +48,7 @@ insertUI(
                  ),
                  id = paste0('fileSelectDiv', nr, 1)
                ),
+               shinyBS::bsTooltip(id = paste0('fileSelectDiv', nr), title ="Select local .bigwig/ .bw file"),
                
                # Wrapper div that will hold the URL input and Add URL button (initially hidden)
                tags$div(
@@ -66,11 +68,13 @@ insertUI(
                           actionButton(paste0('loadurlchip', nr, 1), label = "", icon = icon("check"), style = "width: 100%;"),
                           id = paste0('urlInputDiv', nr, 1),
                           style = "display:none;"  # Initially hidden
-                   )
+                   ),
+                   shinyBS::bsTooltip(id = paste0('loadurlchip', nr, 1), title ="Upload URL for .bigwig/ .bw file"),
                  )
                ),
                # Checkbox for co-signaling with a different feature
-               checkboxInput(paste0('cosignal', nr), "Co-signal with a different feature?", value = FALSE),
+               checkboxInput(paste0('cosignal', nr), "Separate signals?", value = FALSE),
+               shinyBS::bsTooltip(id = paste0('cosignal', nr), title ="Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1."),
         ),
         column(3,
                # The toggle button always stays visible, so it's outside the toggleable divs
