@@ -69,7 +69,6 @@ chiponeOptionsUI <- div(
                         ticks = TRUE
                         )
                   ),
-                  shinyBS::bsTooltip(id = "hicalpha", title = "Transparency value for Hi-C map"),
                                        
           tippy_this(
               elementId = "hicalpha", 

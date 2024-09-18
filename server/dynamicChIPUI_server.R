@@ -31,7 +31,13 @@ insertUI(
         column(2,
                actionButton(paste0('collapseBtn', nr), label = "", icon = icon("angle-double-down"), style = "width: 100%;")
         ),
-        shinyBS::bsTooltip(id = paste0('collapseBtn', nr), title ="Open options for color, label and data range"),
+        #shinyBS::bsTooltip(id = paste0('collapseBtn', nr), title ="Open options for color, label and data range"),
+        tippy_this(
+            elementId = paste0('collapseBtn', nr), 
+            tooltip = "<span style='font-size:15px;'>Open options for color, label and data range<span>", 
+            allowHTML = TRUE,
+            placement = 'right'
+        )
       ),
       
       # File selection button and toggle button
@@ -48,7 +54,12 @@ insertUI(
                  ),
                  id = paste0('fileSelectDiv', nr, 1)
                ),
-               shinyBS::bsTooltip(id = paste0('fileSelectDiv', nr), title ="Select local .bigwig/ .bw file"),
+               tippy_this(
+                      elementId = paste0('fileSelectDiv', nr), 
+                      tooltip = "<span style='font-size:15px;'>Select local .bigwig/ .bw file<span>", 
+                      allowHTML = TRUE,
+                      placement = 'right'
+                  ),
                
                # Wrapper div that will hold the URL input and Add URL button (initially hidden)
                tags$div(
@@ -68,13 +79,25 @@ insertUI(
                           actionButton(paste0('loadurlchip', nr, 1), label = "", icon = icon("check"), style = "width: 100%;"),
                           id = paste0('urlInputDiv', nr, 1),
                           style = "display:none;"  # Initially hidden
-                   ),
-                   shinyBS::bsTooltip(id = paste0('loadurlchip', nr, 1), title ="Upload URL for .bigwig/ .bw file"),
+                   ),                   
+               tippy_this(
+                      elementId = paste0('loadurlchip', nr, 1), 
+                      tooltip = "<span style='font-size:15px;'>Upload URL for .bigwig/ .bw file<span>", 
+                      allowHTML = TRUE,
+                      placement = 'right'
+                  ),
                  )
                ),
                # Checkbox for co-signaling with a different feature
                checkboxInput(paste0('cosignal', nr), "Separate signals?", value = FALSE),
-               shinyBS::bsTooltip(id = paste0('cosignal', nr), title ="Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1."),
+               #shinyBS::bsTooltip(id = paste0('cosignal', nr), title ="Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1."),
+            
+               tippy_this(
+                      elementId = paste0('cosignal', nr), 
+                      tooltip = "<span style='font-size:15px;'>Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1.<span>", 
+                      allowHTML = TRUE,
+                      placement = 'right'
+                  ),
         ),
         column(3,
                # The toggle button always stays visible, so it's outside the toggleable divs

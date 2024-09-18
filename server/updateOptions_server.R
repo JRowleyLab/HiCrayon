@@ -16,6 +16,14 @@ observe({
         choices = HiCmetadata()$res,
         selected = HiCmetadata()$res[1])
     shinyCatch({message("Hi-C Loaded")}, prefix = '')
+
+
+    tippy_this(
+        elementId = "chr", 
+        tooltip = "<span style='font-size:15px;'>Select chromosome. Values populate automatically when Hi-C successfully loads.<span>", 
+        allowHTML = TRUE,
+        placement = 'right'
+    )
 })
 
 #shinyCatch({message(paste(encodehic[selected, "Experiment"], "Hi-C Loading"))}, prefix = '') put in somewehere here
