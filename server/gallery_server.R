@@ -35,13 +35,12 @@ output$gallery <- renderUI({
         }
     }
 
-    if(input$bedgraph){
-        #add begraph to texts, hrefs, images
-        texts = append(texts, "Combination")
-        hrefs = append(hrefs, "")
-        images = append(images, gsub("www/", "", comp_plot()$svg))
-    }
-
+    # if(input$bedgraph){
+    #     #add begraph to texts, hrefs, images
+    #     texts = append(texts, "Combination")
+    #     hrefs = append(hrefs, "")
+    #     images = append(images, gsub("www/", "", comp_plot()$svg))
+    # }
     gallery(
         texts = texts,
         hrefs = hrefs,

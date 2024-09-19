@@ -25,15 +25,18 @@ insertUI(
       
       # Title with a toggle button to collapse/expand the section
       fluidRow(
-        column(10,
+        column(8,
                h4("Feature 1", style = "margin-bottom: 15px;")
+        ),
+        column(2,
+          materialSwitch(inputId = paste0('bedswitch', nr), label = "Bedgraph", value = FALSE)
         ),
         column(2,
                actionButton(paste0('collapseBtn', nr), label = "", icon = icon("angle-double-down"), style = "width: 100%;")
         ),
         #shinyBS::bsTooltip(id = paste0('collapseBtn', nr), title ="Open options for color, label and data range"),
         tippy_this(
-            elementId = paste0('collapseBtn', nr), 
+            elementId = paste0('collapseBtn', nr),
             tooltip = "<span style='font-size:15px;'>Open options for color, label and data range<span>", 
             allowHTML = TRUE,
             placement = 'right'
@@ -42,62 +45,123 @@ insertUI(
       
       # File selection button and toggle button
       fluidRow(
-        column(9,
-               # Wrapper div that will hold the "Select Bigwig" button
-               tags$div(
-                 shinyFilesButton(
-                   paste0('bw', nr, 1),
-                   label = 'Select bigwig',
-                   title = 'Please select a .bigwig/.bw file',
-                   multiple = FALSE,
-                   style = "width: 100%;"
-                 ),
-                 id = paste0('fileSelectDiv', nr, 1)
-               ),
-               tippy_this(
-                      elementId = paste0('fileSelectDiv', nr), 
-                      tooltip = "<span style='font-size:15px;'>Select local .bigwig/ .bw file<span>", 
-                      allowHTML = TRUE,
-                      placement = 'right'
+        div(id = paste0("bigwigdiv", nr, 1),
+          column(9,
+                # Wrapper div that will hold the "Select Bigwig" button
+                tags$div(
+                  shinyFilesButton(
+                    paste0('bw', nr, 1),
+                    label = 'Select bigwig',
+                    title = 'Please select a .bigwig/.bw file',
+                    multiple = FALSE,
+                    style = "width: 100%;"
                   ),
-               
-               # Wrapper div that will hold the URL input and Add URL button (initially hidden)
-               tags$div(
-                 fluidRow(
-                   column(9,
-                          tags$div(
-                            textInput(
-                              paste0('urlchip', nr, 1),
-                              label = NULL,
-                              placeholder = "https://<file.bigwig>"
-                            ),
-                            style = "width: 100%; display:none;",
-                            id = paste0('textInputDiv', nr, 1)
-                          )
-                   ),
-                   column(3,
-                          actionButton(paste0('loadurlchip', nr, 1), label = "", icon = icon("check"), style = "width: 100%;"),
-                          id = paste0('urlInputDiv', nr, 1),
-                          style = "display:none;"  # Initially hidden
-                   ),                   
-               tippy_this(
-                      elementId = paste0('loadurlchip', nr, 1), 
-                      tooltip = "<span style='font-size:15px;'>Upload URL for .bigwig/ .bw file<span>", 
-                      allowHTML = TRUE,
-                      placement = 'right'
+                  id = paste0('fileSelectDiv', nr, 1)
+                ),
+                tippy_this(
+                        elementId = paste0('fileSelectDiv', nr), 
+                        tooltip = "<span style='font-size:15px;'>Select local .bigwig/ .bw file<span>", 
+                        allowHTML = TRUE,
+                        placement = 'right'
+                    ),
+                
+                # Wrapper div that will hold the URL input and Add URL button (initially hidden)
+                tags$div(
+                  fluidRow(
+                    column(9,
+                            tags$div(
+                              textInput(
+                                paste0('urlchip', nr, 1),
+                                label = NULL,
+                                placeholder = "https://<file.bigwig>"
+                              ),
+                              style = "width: 100%; display:none;",
+                              id = paste0('textInputDiv', nr, 1)
+                            )
+                    ),
+                    column(3,
+                            actionButton(paste0('loadurlchip', nr, 1), label = "", icon = icon("check"), style = "width: 100%;"),
+                            id = paste0('urlInputDiv', nr, 1),
+                            style = "display:none;"  # Initially hidden
+                    ),                   
+                tippy_this(
+                        elementId = paste0('loadurlchip', nr, 1), 
+                        tooltip = "<span style='font-size:15px;'>Upload URL for .bigwig/ .bw file<span>", 
+                        allowHTML = TRUE,
+                        placement = 'right'
+                    ),
+                  )
+                ),
+                # Checkbox for co-signaling with a different feature
+                checkboxInput(paste0('cosignal', nr), "Separate signals?", value = FALSE),
+                #shinyBS::bsTooltip(id = paste0('cosignal', nr), title ="Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1."),
+              
+                tippy_this(
+                        elementId = paste0('cosignal', nr), 
+                        tooltip = "<span style='font-size:15px;'>Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1.<span>", 
+                        allowHTML = TRUE,
+                        placement = 'right'
+                    ),
+          )
+        ),
+        div(id = paste0("bedgraphdiv", nr, 1),
+          column(9,
+                # Wrapper div that will hold the "Select Bigwig" button
+                tags$div(
+                  shinyFilesButton(
+                    paste0('bed', nr, 1),
+                    label = 'Select bedgraph',
+                    title = 'Please select a .bedgraph/.bed file',
+                    multiple = FALSE,
+                    style = "width: 100%;"
                   ),
-                 )
-               ),
-               # Checkbox for co-signaling with a different feature
-               checkboxInput(paste0('cosignal', nr), "Separate signals?", value = FALSE),
-               #shinyBS::bsTooltip(id = paste0('cosignal', nr), title ="Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1."),
-            
-               tippy_this(
-                      elementId = paste0('cosignal', nr), 
-                      tooltip = "<span style='font-size:15px;'>Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1.<span>", 
-                      allowHTML = TRUE,
-                      placement = 'right'
-                  ),
+                  id = paste0('bedSelectDiv', nr, 1)
+                ),
+                tippy_this(
+                        elementId = paste0('bedSelectDiv', nr), 
+                        tooltip = "<span style='font-size:15px;'>Select local .bedgraph/ .bed file<span>", 
+                        allowHTML = TRUE,
+                        placement = 'right'
+                    ),
+                
+                # Wrapper div that will hold the URL input and Add URL button (initially hidden)
+                tags$div(
+                  fluidRow(
+                    column(9,
+                            tags$div(
+                              textInput(
+                                paste0('urlbed', nr, 1),
+                                label = NULL,
+                                placeholder = "https://<file.bedgraph/bed>"
+                              ),
+                              style = "width: 100%; display:none;",
+                              id = paste0('bedtextInputDiv', nr, 1)
+                            )
+                    ),
+                    column(3,
+                            actionButton(paste0('loadurlbed', nr, 1), label = "", icon = icon("check"), style = "width: 100%;"),
+                            id = paste0('urlInputDivbed', nr, 1),
+                            style = "display:none;"  # Initially hidden
+                    ),                   
+                tippy_this(
+                        elementId = paste0('loadurlbed', nr, 1), 
+                        tooltip = "<span style='font-size:15px;'>Upload URL for .bedgraph/ .bed file<span>", 
+                        allowHTML = TRUE,
+                        placement = 'right'
+                    ),
+                  )
+                ),
+                # # Checkbox for co-signaling with a different feature
+                # checkboxInput(paste0('cosignal', nr), "Separate signals?", value = FALSE),
+                # #shinyBS::bsTooltip(id = paste0('cosignal', nr), title ="Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1."),
+              
+                # tippy_this(
+                #         elementId = paste0('cosignal', nr), 
+                #         tooltip = "<span style='font-size:15px;'>Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1.<span>", 
+                #         allowHTML = TRUE,
+                #         placement = 'right'
+                #     ),
+          )
         ),
         column(3,
                # The toggle button always stays visible, so it's outside the toggleable divs
@@ -161,40 +225,40 @@ insertUI(
         
         # File selection button and toggle button
         fluidRow(
-          column(9,
-                # Wrapper div that will hold the "Select Bigwig" button
-                tags$div(
-                  shinyFilesButton(
-                    paste0('bw', nr, 2),
-                    label = 'Select bigwig',
-                    title = 'Please select a .bigwig/.bw file',
-                    multiple = FALSE,
-                    style = "width: 100%;"
-                  ),
-                  id = paste0('fileSelectDiv', nr, 2)
-                ),
-                
-                # Wrapper div that will hold the URL input and Add URL button (initially hidden)
-                tags$div(
-                  fluidRow(
-                    column(9,
-                            tags$div(
-                              textInput(
-                                paste0('urlchip', nr, 2),
-                                label = NULL,
-                                placeholder = "https://<file.bigwig>"
-                              ),
-                              style = "width: 100%; display:none;",
-                              id = paste0('textInputDiv', nr, 2)
-                            )
+              column(9,
+                    # Wrapper div that will hold the "Select Bigwig" button
+                    tags$div(
+                      shinyFilesButton(
+                        paste0('bw', nr, 2),
+                        label = 'Select bigwig',
+                        title = 'Please select a .bigwig/.bw file',
+                        multiple = FALSE,
+                        style = "width: 100%;"
+                      ),
+                      id = paste0('fileSelectDiv', nr, 2)
                     ),
-                    column(3,
-                            actionButton(paste0('loadurlchip', nr, 2), label = "", icon = icon("check"), style = "width: 100%;"),
-                            id = paste0('urlInputDiv', nr, 2),
-                            style = "display:none;"  # Initially hidden
+                    
+                    # Wrapper div that will hold the URL input and Add URL button (initially hidden)
+                    tags$div(
+                      fluidRow(
+                        column(9,
+                                tags$div(
+                                  textInput(
+                                    paste0('urlchip', nr, 2),
+                                    label = NULL,
+                                    placeholder = "https://<file.bigwig>"
+                                  ),
+                                  style = "width: 100%; display:none;",
+                                  id = paste0('textInputDiv', nr, 2)
+                                )
+                        ),
+                        column(3,
+                                actionButton(paste0('loadurlchip', nr, 2), label = "", icon = icon("check"), style = "width: 100%;"),
+                                id = paste0('urlInputDiv', nr, 2),
+                                style = "display:none;"  # Initially hidden
+                        )
                     )
-                  )
-                )
+              )
           ),
           column(3,
                 # The toggle button always stays visible, so it's outside the toggleable divs
@@ -203,8 +267,6 @@ insertUI(
         ),
 
       ),
-
-
       #
       tags$div(
         id = paste0("collapseSection2", nr),
@@ -249,23 +311,37 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
       # bw1v[[paste0("bw",nr, 2)]] <- NULL
       bw1v$features[[nr]][[1]] <- NULL
       bw1v$features[[nr]][[2]] <- NULL
-      print(
-        paste0("-------------",
-          bw1v$features[[nr]],
-        "------------"))
     })
 
 observeEvent(input[[paste0('cosignal', nr)]], {
   key <- as.character(nr)
   f2v[[key]] <- input[[paste0('cosignal', nr)]]
-  # print(f2v)
-  # print(f2v[[key]])
 })
 
 # Toggle the collapsible section when collapse button is clicked
   observeEvent(input[[paste0('collapseBtn', nr)]], {
     shinyjs::toggle(paste0("collapseSection", nr))  # Toggle the collapsible section
   })
+
+
+  # When bedgraph is toggled, hide bigwig local and url buttons
+  observe(
+    # is compartment?
+    print(input[[paste0("bedswitch", nr)]])
+    # then hide cosignal button and erase paths for any previously selected.
+  )
+
+# When bedgraph is toggled, hide bigwig local and url buttons and
+# show the bedgraph buttons
+  observeEvent(input[[paste0("bedswitch", nr)]], {
+    if (input[[paste0("bedswitch", nr)]] == FALSE) {
+      shinyjs::show(paste0("bigwigdiv", nr, 1))    # Toggle the Add URL button
+      shinyjs::hide(paste0("bedgraphdiv", nr, 1))
+    } else {
+      shinyjs::hide(paste0("bigwigdiv", nr, 1))  # Toggle the Select Bigwig button
+      shinyjs::show(paste0("bedgraphdiv", nr, 1))
+    }
+})
 
 # Toggle the collapsible section 2 (for feature 2)
   observeEvent(input[[paste0('collapseBtn2', nr)]], {
@@ -278,16 +354,27 @@ observeEvent(input[[paste0('cosignal', nr)]], {
     shinyjs::toggle(paste0("toggleFeature2", nr))  # Toggle the collapsible section
   })
 
-
     
-  ### Toggle url and local bigwig upload
+  ### Toggle url and local BIGWIG upload
   # Toggle between "Select Bigwig" and URL input + Add URL button
   observeEvent(input[[paste0('toggleBtn', nr, 1)]], {
-    shinyjs::toggle(paste0('fileSelectDiv', nr, 1))  # Toggle the Select Bigwig button
+    shinyjs::toggle(paste0('bedSelectDiv', nr, 1))  # Toggle the Select Bigwig button
     shinyjs::toggle(paste0('urlInputDiv', nr, 1))    # Toggle the Add URL button
     shinyjs::toggle(paste0('textInputDiv', nr, 1))    # Toggle the URL input 
   })
 
+
+  ### Toggle url and local BEDGRAPH upload
+  # Toggle between "Select Bedgraph" and URL input + Add URL button
+  observeEvent(input[[paste0('toggleBtn', nr, 1)]], {
+    shinyjs::toggle(paste0('fileSelectDiv', nr, 1))  # Toggle the Select Bigwig button
+    shinyjs::toggle(paste0('urlInputDivbed', nr, 1))    # Toggle the Add URL button
+    shinyjs::toggle(paste0('bedtextInputDiv', nr, 1))    # Toggle the URL input 
+  })
+
+
+
+#-------------Feature 2-----------------
 ### Toggle url and local bigwig upload for FEATURE 2
   # Toggle between "Select Bigwig" and URL input + Add URL button for FEATURE 2
   observeEvent(input[[paste0('toggleBtn', nr, 2)]], {
@@ -297,6 +384,9 @@ observeEvent(input[[paste0('cosignal', nr)]], {
   })
 
 
+#---File handling---
+
+# BIGWIG FILE HANDLING
   # Set up file handling for local files for FEATURE 1
   shinyFileChoose(input, paste0("bw",nr, 1), root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
   # Add file path to reactive variable
@@ -308,8 +398,30 @@ observeEvent(input[[paste0('cosignal', nr)]], {
       # where each is the bigwig path or NULL
       if(!rlang::is_empty(inFile$datapath)){
         bw1v$features[[nr]][[1]] <- inFile$datapath
-        # print(bw1v$features[[nr]][[1]])
-        # print(bw1v$features[[nr]][1])
+        # Update text with file name
+        updateTextInput(
+          session,
+          inputId = paste0("n", nr),
+          value = tools::file_path_sans_ext(basename(bw1v$features[[nr]][[1]]))
+          )
+      }
+  })
+
+
+
+  #BEGRAPH file hanlding
+  #assign to same list as the bigwigs. Handle the difference in python function.
+  # Set up file handling for local files for FEATURE 1
+  shinyFileChoose(input, paste0("bed",nr, 1), root = c(wd = workingdir), filetypes=c('bed', 'bedgraph'))
+  # Add file path to reactive variable
+  observeEvent(input[[paste0("bed",nr, 1)]], {
+      inFile <- parseFilePaths(roots = c(wd = workingdir), input[[paste0("bed",nr, 1)]])
+      #bw1v[[paste0("bw", nr, 1)]] <- inFile$datapath
+
+      # GOAL: bw1v -> [1,2,3,4,5] -> [1,2], [1,2], [1,2]...
+      # where each is the bigwig path or NULL
+      if(!rlang::is_empty(inFile$datapath)){
+        bw1v$features[[nr]][[1]] <- inFile$datapath
         # Update text with file name
         updateTextInput(
           session,

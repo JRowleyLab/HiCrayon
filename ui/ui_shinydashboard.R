@@ -21,18 +21,18 @@ dashboardBody(
             fluidRow(width=12,
                     column(width=3,
                             fluidRow(width=12,
-                                    box(width=12,title = "HiC",status = "primary", solidHeader = TRUE,
+                                    box(width=12,title = "Hi-C (2D)",status = "primary", solidHeader = TRUE,
                                         collapsible = TRUE,collapsed = TRUE,
                                         selectHiCoptionsUI
                                     ), # end box
-                                    box(width=12,title = "ChIP-seq",status = "success", solidHeader = TRUE,
+                                    box(width=12,title = "Features (1D)",status = "success", solidHeader = TRUE,
                                         collapsible = TRUE,collapsed = TRUE,
                                         chiponeOptionsUI
                                     ), # end box
-                                    box(width=12,title = "Colour Compartments",status = "warning", solidHeader = TRUE,
-                                        collapsible = TRUE,collapsed = TRUE,
-                                        comp_UI
-                                    ),
+                                    # box(width=12,title = "Colour Compartments",status = "warning", solidHeader = TRUE,
+                                    #     collapsible = TRUE,collapsed = TRUE,
+                                    #     comp_UI
+                                    # ),
                                     column(width = 12,
                                         actionButton("generate_hic", label="Generate")
                                     ),

@@ -114,6 +114,77 @@ def distanceMatHiC(hicnumpy, thresh, distnorm):
 				#satscore = hicscore/thresh
 	return(distnormmat)
 
+# Convert bedgraph to bigwig
+def bedgraph_to_bigwig(bedgraph, output_bigwig, binsize):
+    chrom_sizes = {}
+    
+    with open(bedgraph, 'r') as f:
+        for line in f:
+            # Skip comment lines or headers (if any)
+            if line.startswith("#") or line.strip() == "":
+                continue
+            
+            # Split the line into components
+            components = line.strip().split()
+            
+            # Check if the line has exactly 4 components (chrom, start, end, value)
+            if len(components) != 4:
+                print(f"Skipping invalid line: {line.strip()} (Expected 4 components)")
+                continue
+            
+            chrom, start, end, value = components
+            start = int(start)
+            end = int(end)
+            
+            # Track the largest `end` value for each chromosome
+            if chrom not in chrom_sizes:
+                chrom_sizes[chrom] = end
+            else:
+                if end > chrom_sizes[chrom]:
+                    chrom_sizes[chrom] = end + binsize
+
+    # Step 2: Create the BigWig file
+    bw = pyBigWig.open(output_bigwig, "w")
+    
+    # Convert chrom_sizes to list of tuples and add header
+    chrom_sizes_list = [(chrom, size) for chrom, size in chrom_sizes.items()]
+    bw.addHeader(chrom_sizes_list)
+    
+    # Step 3: Read the BEDGraph again and add entries to BigWig
+    with open(bedgraph, 'r') as f:
+        chroml = []
+        startl = []
+        endsl = []
+        valuesl = []
+        print('starting')
+        for line in f:
+            if line.startswith("#") or line.strip() == "":
+                continue
+            
+            components = line.strip().split()
+            
+            # Check if the line has exactly 4 components
+            if len(components) != 4:
+                continue
+            
+            chrom, start, end, value = components
+            start = int(start)
+            end = int(end)
+            value = float(value)
+            chroml.append(chrom)
+            startl.append(start)
+            endsl.append(end)
+            valuesl.append(value)
+
+        #print(chroml)
+            
+        # Add the entries to BigWig
+        bw.addEntries(chroml, startl, ends=endsl, values=valuesl)
+
+    # Step 4: Close the BigWig file
+    bw.close()
+    return(output_bigwig)
+
 
 # Read in bigwig file and return a list of
 # bigwig peak values
@@ -129,7 +200,15 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
     if bigwig == "NULL":
         return("NULL", "NULL")
     
-    bwopen = pyBigWig.open(bigwig)        
+    if bigwig.endswith(('.bigwig', '.bw')):
+        bwopen = pyBigWig.open(bigwig)  
+    elif bigwig.endswith(('.bedgraph', '.bed')):
+        # convert to bigwig
+        bigwigfile = "tmp.bw"
+        #check that it's 4 column. If not trim to 4
+        outbig = bedgraph_to_bigwig(bedgraph = bigwig, output_bigwig = bigwigfile, binsize=binsize)
+        bwopen = pyBigWig.open(outbig)
+    
     bwraw = []
 
     # Store raw bigwig values

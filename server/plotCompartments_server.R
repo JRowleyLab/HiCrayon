@@ -16,8 +16,9 @@ filter_compartments <- reactive({
 
     return(compsdf)
 
-})  
+})
 
+# Potentially scrap if not needed
 addbins_compartments <- reactive({
     #add in addemptybins section
     addEmptyBins(df = filter_compartments(),

@@ -39,6 +39,7 @@ observeEvent(input$loadhicencode, {
     shinyCatch({message(paste(encodehic[selected, "Experiment"], "Hi-C Loading"))}, prefix = '')
 })
 
+# Update when switch is clicked
 # bedgraph file handling
 bedv <- reactiveValues()
 observeEvent(input$bedg1, {

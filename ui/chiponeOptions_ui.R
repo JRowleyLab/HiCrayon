@@ -1,5 +1,5 @@
 chiponeOptionsUI <- div(
-        checkboxInput("chip1", "Include ChIP"),
+        checkboxInput("chip1", "Include Features"),
         #shinyBS::bsTooltip(id = "chip1", title ="Include ChIP features in the visualization panel. If unchecked, data won't be lost. Simply recheck the box to include the ChIP features again."),
           tippy_this(
               elementId = "chip1", 
