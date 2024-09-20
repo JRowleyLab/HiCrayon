@@ -127,7 +127,7 @@ selectHiCoptionsUI <- div(fluidRow(
                             ),
                             column(6,
                                 shinyWidgets::autonumericInput("stop", "Stop:",
-                                    value = 69000000, 
+                                    value = 42000000, 
                                     minimumValue = 0, 
                                     maximumValue = 1000000000,
                                     allowDecimalPadding = FALSE),

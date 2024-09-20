@@ -9,6 +9,8 @@ bwlist_ChIP1 <- reactive({
     # Create nested lists
     logs <- lapply(1:length(bw1v$features), function(i) lapply(1:2, function(j) "NULL" ))
     raws <- lapply(1:length(bw1v$features), function(i) lapply(1:2, function(j) "NULL" ))
+    iseigen <- list()
+    print(iseigen)
     
     lapply(seq_along(bw1v$features), function(x){
 
@@ -40,18 +42,28 @@ bwlist_ChIP1 <- reactive({
                 )
             logs[[x]][[i]] <<- tuple(bwlist, convert=T)[0]
             raws[[x]][[i]] <<- tuple(bwlist, convert=T)[1]
+            # iseigen[[x]] <<- tuple(bwlist, convert=T)[2]
+            # print(iseigen[[x]])
         }
     }
     })
 
     return(list(
         logs = logs,
-        raws = raws
+        raws = raws#,
+        #iseigen = iseigen
         ))
 })
 
 
+# reactive({
+#     print("is eigen??")
+#     print(bwlist_ChIP1()$iseigen)
+# })
+
 chipalpha <- reactive({
+
+    print('starting this thing')
 
     req(input$chip1)
 
@@ -64,7 +76,7 @@ chipalpha <- reactive({
         if(!is.null(bw1v$features[[x]][[1]])){
 
             # Norm Tracks
-            feature1 = bwlist_ChIP1()$logs[[x]][[1]]
+            feature1 = bwlist_ChIP1()$raws[[x]][[1]]
             feature2 = "NULL"
             # Minmax
             # Feature 1
@@ -76,7 +88,7 @@ chipalpha <- reactive({
             if(f2v[[as.character(x)]]){
                 req(!is.null(bw1v$features[[x]][[2]]))
                 # Norm Tracks
-                feature2 = bwlist_ChIP1()$logs[[x]][[2]]
+                feature2 = bwlist_ChIP1()$raws[[x]][[2]]
                 # Minmax
                 #min and max values chosen by user. No input is ""
                 # Feature 2

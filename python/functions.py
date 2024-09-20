@@ -202,8 +202,9 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
     
     if bigwig.endswith(('.bigwig', '.bw')):
         bwopen = pyBigWig.open(bigwig)  
-    elif bigwig.endswith(('.bedgraph', '.bed')):
+    elif bigwig.endswith(('.bedgraph')):
         # convert to bigwig
+        # TODO: delete when user closes the session.
         bigwigfile = "tmp.bw"
         #check that it's 4 column. If not trim to 4
         outbig = bedgraph_to_bigwig(bedgraph = bigwig, output_bigwig = bigwigfile, binsize=binsize)
@@ -220,6 +221,11 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
         except ValueError:
             bwraw.append(0)
 
+    iseigen = False
+    if bigwig.endswith('bedgraph') and min(bwraw) < 0:
+         print("eigen file")
+         iseigen = "TRUE"
+
     # Perform log operation on all values
     # 1e-5 added to avoid log(0)
     bwlog = []
@@ -228,7 +234,7 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
             i = 0
         bwlog.append(math.log(i+0.01))
         
-    return bwlog, bwraw
+    return bwlog, bwraw #, iseigen
 
 # Convert bigwig values to an RGBA array
 # with the A value scaled by bigwig value
@@ -254,16 +260,16 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
 
         if(n==0): #If we're doing feature 1
             minimum = np.min(chip_arr) if math.isnan(minmaxlist[0][0]) else minmaxlist[0][0]
-            minimum = round(minimum, 2)
+            minimum = round(minimum, 6)
             
             maximum = np.max(chip_arr) if math.isnan(minmaxlist[0][1]) else minmaxlist[0][1]
-            maximum = round(maximum, 2) 
+            maximum = round(maximum, 6) 
         else: # Or feature 2
             minimum = np.min(chip_arr) if math.isnan(minmaxlist[1][0]) else minmaxlist[1][0]
-            minimum = round(minimum, 2)
+            minimum = round(minimum, 6)
 
             maximum = np.max(chip_arr) if math.isnan(minmaxlist[1][1]) else minmaxlist[1][1]
-            maximum = round(maximum, 2)                  
+            maximum = round(maximum, 6)                  
 
         minmax = [minimum, maximum]
         minmaxs.append(minmax)

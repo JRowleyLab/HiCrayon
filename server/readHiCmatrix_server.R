@@ -5,7 +5,8 @@ hicv <- reactiveValues()
 observeEvent(input$hic, {
     inFile <- parseFilePaths(roots = c(wd = workingdir), input$hic)
     #file <- input$hic
-    hicv$y <- inFile$datapath
+    #UNCOMMENT BELOW
+    hicv$y <- "/Zulu/bnolan/HiC_data/GM12878/ultrares/full.hic"#inFile$datapath
 })
 
 observe({
