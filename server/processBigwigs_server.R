@@ -9,8 +9,7 @@ bwlist_ChIP1 <- reactive({
     # Create nested lists
     logs <- lapply(1:length(bw1v$features), function(i) lapply(1:2, function(j) "NULL" ))
     raws <- lapply(1:length(bw1v$features), function(i) lapply(1:2, function(j) "NULL" ))
-    iseigen <- list()
-    print(iseigen)
+    iseigen <- vector("list", length(bw1v$features))  # Initialize as a flat list
     
     lapply(seq_along(bw1v$features), function(x){
 
@@ -44,14 +43,25 @@ bwlist_ChIP1 <- reactive({
             raws[[x]][[i]] <<- tuple(bwlist, convert=T)[1]
             # iseigen[[x]] <<- tuple(bwlist, convert=T)[2]
             # print(iseigen[[x]])
+            # Check the length of the tuple before accessing the third element
+            result_tuple <- tuple(bwlist, convert=T)
+            # It's printing both 1 and 2 for some reason. That's the issue here.
+            if(length(result_tuple) > 2){
+                iseigen[[x]] <<- result_tuple[2]  # Flat list, one element per feature
+                print('1')
+                print(x)
+                print(result_tuple)
+                print(paste0(result_tuple[2]))
+                print("end1")
+            }
         }
     }
     })
 
     return(list(
         logs = logs,
-        raws = raws#,
-        #iseigen = iseigen
+        raws = raws,
+        iseigen = iseigen
         ))
 })
 
@@ -63,13 +73,12 @@ bwlist_ChIP1 <- reactive({
 
 chipalpha <- reactive({
 
-    print('starting this thing')
-
     req(input$chip1)
 
     chipalphas <- list()
     chipclipped <- list()
     minmaxclip <- list()
+    print(paste0("EIGEN: ", bwlist_ChIP1()$iseigen))
 
     lapply(seq_along(bw1v$features), function(x){
 

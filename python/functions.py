@@ -221,7 +221,7 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
         except ValueError:
             bwraw.append(0)
 
-    iseigen = False
+    iseigen = "FALSE"
     if bigwig.endswith('bedgraph') and min(bwraw) < 0:
          print("eigen file")
          iseigen = "TRUE"
@@ -233,8 +233,9 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
         if i == None:
             i = 0
         bwlog.append(math.log(i+0.01))
+    print("eigen", iseigen)
         
-    return bwlog, bwraw #, iseigen
+    return bwlog, bwraw, iseigen
 
 # Convert bigwig values to an RGBA array
 # with the A value scaled by bigwig value

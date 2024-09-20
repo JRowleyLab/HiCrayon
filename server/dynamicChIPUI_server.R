@@ -519,4 +519,9 @@ observeEvent(input[[paste0('cosignal', nr)]], {
           minmaxargs$nums[[nr]][[2]] <- minmaxlist
   })
 
+
+  observe({
+    print(bw1v$features)
+  })
+
 })
