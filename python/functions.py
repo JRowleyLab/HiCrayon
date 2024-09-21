@@ -200,9 +200,9 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
     if bigwig == "NULL":
         return("NULL", "NULL")
     
-    if bigwig.endswith(('.bigwig', '.bw')):
+    if bigwig.lower().endswith(('.bigwig', '.bw')):
         bwopen = pyBigWig.open(bigwig)  
-    elif bigwig.endswith(('.bedgraph')):
+    elif bigwig.lower().endswith(('.bedgraph')):
         # convert to bigwig
         # TODO: delete when user closes the session.
         bigwigfile = "tmp.bw"
@@ -222,7 +222,7 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
             bwraw.append(0)
 
     iseigen = "FALSE"
-    if bigwig.endswith('bedgraph') and min(bwraw) < 0:
+    if bigwig.lower().endswith('bedgraph') and min(bwraw) < 0:
          print("eigen file")
          iseigen = "TRUE"
 

@@ -45,14 +45,10 @@ bwlist_ChIP1 <- reactive({
             # print(iseigen[[x]])
             # Check the length of the tuple before accessing the third element
             result_tuple <- tuple(bwlist, convert=T)
-            # It's printing both 1 and 2 for some reason. That's the issue here.
+            # This needs to check if python is returning a 3 tuple (thruple i guess) 
+            # Not sure why. It should always be 3.
             if(length(result_tuple) > 2){
                 iseigen[[x]] <<- result_tuple[2]  # Flat list, one element per feature
-                print('1')
-                print(x)
-                print(result_tuple)
-                print(paste0(result_tuple[2]))
-                print("end1")
             }
         }
     }
@@ -116,22 +112,45 @@ chipalpha <- reactive({
             col <- input[[paste0("col", x)]]
             rgb <- col2rgb(col)
             
+            # If a compartment file (ie. bedgraph + values<0)
+            # Think about changing to an actual boolean not string
+            if(bwlist_ChIP1()$iseigen[x]=="TRUE"){
+                # wigs will always be feature1=eigen, feature2=NULL
+                print("EIGEN STUFF")
+                # split feature1 into: A, B
+                #
 
-            m1 <- calcAlphaMatrix(
-                chiplist=wigs,
-                minmaxlist = minmaxlist, #[1][[1]][[2]] [2][[1]][[2]]
-                f2=f2v[[as.character(x)]],
-                disthic=hic_distance(),
-                showhic=input$chipscale,
-                r=rgb[1],
-                g=rgb[2],
-                b=rgb[3]
-                )
+                # Amat <- calcAlphaMatrix()
+                # Bmat <- calcAlphaMatrix()
+                # ABmat <- calcAlphaMatrix()
 
-            # global variable to allow accessing of value 
-            # outside lapply function
-            chipalphas[[x]] <<- tuple(m1, convert=T)[0]
-            chipclipped[[x]] <<- tuple(m1, convert=T)[1]
+                # COMPmat <- LNERP(all3ofem)
+
+                # chipclipped. Find a way to clip raws and stitch them back together. 
+                # chipalphas[[x]] <<- COMPmat
+                # chipclipped[[x]] <<- stitched
+
+                # I think minmax is okay to leave as is. Return to here if not.
+            }else {
+                # Calculate the alpha matrix. Bread and Butter of HiCrayon.
+                # m[i,j] = s[i] * s[j]
+                m1 <- calcAlphaMatrix(
+                    chiplist=wigs,
+                    minmaxlist = minmaxlist, #[1][[1]][[2]] [2][[1]][[2]]
+                    f2=f2v[[as.character(x)]],
+                    disthic=hic_distance(),
+                    showhic=input$chipscale,
+                    r=rgb[1],
+                    g=rgb[2],
+                    b=rgb[3]
+                    )
+
+                # global variable to allow accessing of value 
+                # outside lapply function
+                chipalphas[[x]] <<- tuple(m1, convert=T)[0]
+                chipclipped[[x]] <<- tuple(m1, convert=T)[1]
+            }
+
             #minmaxclip[[x]] <<- as.list(tuple(m1, convert=T)[2])
             # Enter the minmax values for feature 1
             # [[window]][[feature]][[minORmax]]
@@ -141,7 +160,7 @@ chipalpha <- reactive({
                 minmaxclip[[x]][[2]] <<- as.list(tuple(m1, convert=T)[2][[2]])
             }
 
-
+            # UPDATING MIN MAX VALUES
             #FEATURE 1
             # Update chip-seq min values if nan
             updateNumericInput(
