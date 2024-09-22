@@ -188,7 +188,7 @@ def bedgraph_to_bigwig(bedgraph, output_bigwig, binsize):
 
 # Read in bigwig file and return a list of
 # bigwig peak values
-def processBigwigs(bigwig,binsize,chrom,start,stop):
+def processBigwigs(bigwig,binsize,chrom,start,stop,num):
     
     start=int(start)
     binsize=int(binsize)
@@ -205,8 +205,9 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
     elif bigwig.lower().endswith(('.bedgraph')):
         # convert to bigwig
         # TODO: delete when user closes the session.
-        bigwigfile = "tmp.bw"
+        bigwigfile = "tmp"+str(num)+".bw"
         #check that it's 4 column. If not trim to 4
+        # Actually let's just split
         outbig = bedgraph_to_bigwig(bedgraph = bigwig, output_bigwig = bigwigfile, binsize=binsize)
         bwopen = pyBigWig.open(outbig)
     
@@ -228,14 +229,47 @@ def processBigwigs(bigwig,binsize,chrom,start,stop):
 
     # Perform log operation on all values
     # 1e-5 added to avoid log(0)
+    # THis operation cannot be performed on eigen values (negative)
     bwlog = []
     for i in bwraw:
-        if i == None:
+        if i == None or i < 0:
             i = 0
         bwlog.append(math.log(i+0.01))
     print("eigen", iseigen)
         
     return bwlog, bwraw, iseigen
+
+
+def splitListintoTwo(bedg, chrom, start, stop, binsize):
+    # Split a list containing both positive + negative
+    # values into two separate lists, one for each.
+    # Useful for compartment visualization.
+    nochr = chrom.strip('chr')
+    wchr = "chr" + str(nochr)
+
+    bwopen = pyBigWig.open(bedg)
+
+    pos = []
+    neg = []
+
+    # Store raw bigwig values
+    for walker in range(start, stop+binsize, binsize):
+        try:
+            value = bwopen.stats(nochr, walker, walker+binsize)[0]
+            if value > 0:
+                pos.append(value)
+            else:
+                neg.append(value)
+        except RuntimeError:
+            value = bwopen.stats(wchr, walker, walker+binsize)[0]
+            if value > 0:
+                pos.append(value)
+            else:
+                neg.append(value)
+        except ValueError:
+            pos.append(0)
+
+    return pos, neg
 
 # Convert bigwig values to an RGBA array
 # with the A value scaled by bigwig value
@@ -245,12 +279,16 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
     # go through chip1 and chip2, but if cosignal FALSE do s1xs1
 	# If cosignal is TRUE 
 	# perform each chip separately
+     
+    print("ONE")
     if f2==True:
         chips = [chiplist[0], chiplist[1]]
         print(chips)
+        print("HMM")
     else:
         chips = [chiplist[0]]
-
+        print("HOO")
+    print("TWO")
     # Initialize list for normalized chip tracks
     chipnorms = []
     minmaxs = []
@@ -258,6 +296,9 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
         matsize = len(chip)
         # Normalize chip list to between 0 and 1
         chip_arr = np.array(chip)
+        print("NEN")
+        # Replace None with 0
+        chip_arr = [0 if x is None else x for x in chip_arr]
 
         if(n==0): #If we're doing feature 1
             minimum = np.min(chip_arr) if math.isnan(minmaxlist[0][0]) else minmaxlist[0][0]
@@ -270,13 +311,16 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
             minimum = round(minimum, 6)
 
             maximum = np.max(chip_arr) if math.isnan(minmaxlist[1][1]) else minmaxlist[1][1]
-            maximum = round(maximum, 6)                  
+            maximum = round(maximum, 6)   
+
+        print("LEN")               
 
         minmax = [minimum, maximum]
         minmaxs.append(minmax)
         #raw values from bigwig, clipped data to specified values
         chip_clipped = np.clip(chip_arr, a_min = minimum, a_max = maximum)
 
+        print("KEN")    
         # normalized to between 0 and 1 after clipping. 0 and 1 being scaled
         # from user specified min and max
         if(n==0):   
@@ -286,7 +330,7 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
             chip_norm2 = (chip_clipped-minimum)/(maximum-minimum)
             chipnorms.append(chip_norm2)
 
-
+    print("KEN")    
     # True: scale ChIP by Hi-C
     # false: raw ChIP not weighted by Hi-C
     if(showhic==True):
@@ -351,7 +395,7 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
             #alpha value
             amat[x,y] = newscore
             #amat[x,y] = newscore
-
+    print("FEN")    
     mat = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
     # print("done calclpha")
     # print("Python:, ", minmaxs) #should be 1 list of two items

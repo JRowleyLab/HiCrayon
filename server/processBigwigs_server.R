@@ -37,7 +37,8 @@ bwlist_ChIP1 <- reactive({
                     binsize = as.integer(input$bin),
                     chrom = input$chr,
                     start = input$start,
-                    stop = input$stop
+                    stop = input$stop,
+                    num = paste0(x,i)
                 )
             logs[[x]][[i]] <<- tuple(bwlist, convert=T)[0]
             raws[[x]][[i]] <<- tuple(bwlist, convert=T)[1]
@@ -60,12 +61,6 @@ bwlist_ChIP1 <- reactive({
         iseigen = iseigen
         ))
 })
-
-
-# reactive({
-#     print("is eigen??")
-#     print(bwlist_ChIP1()$iseigen)
-# })
 
 chipalpha <- reactive({
 
@@ -112,23 +107,71 @@ chipalpha <- reactive({
             col <- input[[paste0("col", x)]]
             rgb <- col2rgb(col)
             
-            # If a compartment file (ie. bedgraph + values<0)
+            # If a compartment file (ie. bedgraph + values<0).
+            # Perform A, B and AB calculations automatically and 
+            # overlay all.
             # Think about changing to an actual boolean not string
             if(bwlist_ChIP1()$iseigen[x]=="TRUE"){
                 # wigs will always be feature1=eigen, feature2=NULL
                 print("EIGEN STUFF")
                 # split feature1 into: A, B
-                #
+                twolists = splitListintoTwo(
+                    bedg = paste0("tmp",x,"1.bw"),
+                    binsize = as.integer(input$bin),
+                    chrom = input$chr,
+                    start = input$start,
+                    stop = input$stop
+                    )
+                positive = tuple(twolists, convert=T)[0]
+                negative = tuple(twolists, convert=T)[1]
 
-                # Amat <- calcAlphaMatrix()
-                # Bmat <- calcAlphaMatrix()
-                # ABmat <- calcAlphaMatrix()
+                Amat <- calcAlphaMatrix(
+                    chiplist= list(positive, "NULL"),
+                    minmaxlist = minmaxlist, #[1][[1]][[2]] [2][[1]][[2]]
+                    f2=FALSE,
+                    disthic=hic_distance(),
+                    showhic=input$chipscale,
+                    r=255,
+                    g=0,
+                    b=0
+                    )
+                Bmat <- calcAlphaMatrix(
+                    chiplist= list(negative, "NULL"),
+                    minmaxlist = minmaxlist, #[1][[1]][[2]] [2][[1]][[2]]
+                    f2=FALSE,
+                    disthic=hic_distance(),
+                    showhic=input$chipscale,
+                    r=0,
+                    g=0,
+                    b=255
+                    )
 
-                # COMPmat <- LNERP(all3ofem)
+                # CURRENTLY FAILING HERE:
+                # specifically at the feature 2 minium and maximum based
+                # on minmax values. Something there.
+                ABmat <- calcAlphaMatrix(
+                    chiplist=list(positive, negative),
+                    minmaxlist = minmaxlist, #[1][[1]][[2]] [2][[1]][[2]]
+                    f2=TRUE,
+                    disthic=hic_distance(),
+                    showhic=input$chipscale,
+                    r=0,
+                    g=255,
+                    b=0
+                    )
 
-                # chipclipped. Find a way to clip raws and stitch them back together. 
-                # chipalphas[[x]] <<- COMPmat
-                # chipclipped[[x]] <<- stitched
+                mat1 = tuple(Amat, convert=T)[0]
+                mat2 = tuple(Bmat, convert=T)[0]
+                mat3 = tuple(ABmat, convert=T)[0]
+
+                COMPmat <- lnerp_matrices(mat1, mat2, mat3)
+
+                # chipclipped: Find a way to clip raws and stitch them back together. 
+                chipalphas[[x]] <<- COMPmat
+                # Both clipped and minmax need to be adjusted with stitched.
+                # CURRENTLY it's just taking the A compartment value.
+                chipclipped[[x]] <<- tuple(mat1, convert=T)[1]
+                minmaxclip[[x]][[1]] <<- as.list(tuple(mat1, convert=T)[2][[1]])
 
                 # I think minmax is okay to leave as is. Return to here if not.
             }else {
@@ -149,16 +192,17 @@ chipalpha <- reactive({
                 # outside lapply function
                 chipalphas[[x]] <<- tuple(m1, convert=T)[0]
                 chipclipped[[x]] <<- tuple(m1, convert=T)[1]
+
+                #minmaxclip[[x]] <<- as.list(tuple(m1, convert=T)[2])
+                # Enter the minmax values for feature 1
+                # [[window]][[feature]][[minORmax]]
+                minmaxclip[[x]] <<- list()
+                minmaxclip[[x]][[1]] <<- as.list(tuple(m1, convert=T)[2][[1]])
+                if(f2v[[as.character(x)]]){
+                    minmaxclip[[x]][[2]] <<- as.list(tuple(m1, convert=T)[2][[2]])
+                }
             }
 
-            #minmaxclip[[x]] <<- as.list(tuple(m1, convert=T)[2])
-            # Enter the minmax values for feature 1
-            # [[window]][[feature]][[minORmax]]
-            minmaxclip[[x]] <<- list()
-            minmaxclip[[x]][[1]] <<- as.list(tuple(m1, convert=T)[2][[1]])
-            if(f2v[[as.character(x)]]){
-                minmaxclip[[x]][[2]] <<- as.list(tuple(m1, convert=T)[2][[2]])
-            }
 
             # UPDATING MIN MAX VALUES
             #FEATURE 1

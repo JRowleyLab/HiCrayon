@@ -164,10 +164,10 @@ selectHiCoptionsUI <- div(fluidRow(
                                     # column(4,
                                     #     checkboxInput("log", "Log Scale", value=FALSE)
                                     # ),
-                                    # column(4,
-                                    #     checkboxInput("chipscale", "Scale ChIP w/ HiC", value=TRUE)
-                                    # ),
-                                    column(6,
+                                    column(3,
+                                        checkboxInput("chipscale", "Scale ChIP w/ HiC", value=TRUE)
+                                    ),
+                                    column(3,
                                         checkboxInput("disthic", "Distance normalize HiC", value=TRUE)
                                     ),
                                     #shinyBS::bsTooltip(id = "disthic", title ="Distance-Normalize interactions. (observed/expected)"),
@@ -177,7 +177,7 @@ selectHiCoptionsUI <- div(fluidRow(
                                         allowHTML = TRUE,
                                         placement = 'right'
                                     ),
-                                    column(6,
+                                    column(3,
                                         numericInput("thresh", "HiC Threshold", min=0, max=30, value=2)
                                     ),
                                     #shinyBS::bsTooltip(id = "thresh", title ="Color value range for interactions. Distance-Normalized: 2. Normal: Value depends on sequencing depth")
