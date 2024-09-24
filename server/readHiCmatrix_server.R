@@ -6,7 +6,7 @@ observeEvent(input$hic, {
     inFile <- parseFilePaths(roots = c(wd = workingdir), input$hic)
     #file <- input$hic
     #UNCOMMENT BELOW
-    hicv$y <- "/Zulu/bnolan/HiC_data/GM12878/ultrares/full.hic"#inFile$datapath
+    hicv$y <- inFile$datapath #"/Zulu/bnolan/HiC_data/GM12878/ultrares/full.hic"#
 })
 
 observe({

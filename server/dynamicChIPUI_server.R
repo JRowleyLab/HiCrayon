@@ -122,7 +122,7 @@ insertUI(
                 ),
                 tippy_this(
                         elementId = paste0('bedSelectDiv', nr), 
-                        tooltip = "<span style='font-size:15px;'>Select local .bedgraph/ .bed file<span>", 
+                        tooltip = "<span style='font-size:15px;'>Select local .bedgraph/ .bed file <span>", 
                         allowHTML = TRUE,
                         placement = 'right'
                     ),
@@ -207,7 +207,7 @@ insertUI(
         fluidRow(
           column(4,
                  checkboxInput(paste0("log", nr, 1),
-                               "Log")
+                               "Log", value = TRUE)
           )
         )
       ),
@@ -328,20 +328,25 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
       bw1v$features[[nr]][[2]] <- NULL
     })
 
-observeEvent(input[[paste0('cosignal', nr)]], {
-  key <- as.character(nr)
-  f2v[[key]] <- input[[paste0('cosignal', nr)]]
-})
+  observe({
+    key <- as.character(nr)
+    f2v[[key]] <- FALSE
+    updateCheckboxInput(session, input[[paste0('cosignal', nr)]], value = FALSE)
+  }) %>% bindEvent(bwlist_ChIP1()$iseigen[nr]=="TRUE")
 
-# Toggle the collapsible section when collapse button is clicked
+
+  observeEvent(input[[paste0('cosignal', nr)]], {
+    key <- as.character(nr)
+    f2v[[key]] <- input[[paste0('cosignal', nr)]]
+  })
+
+  # Toggle the collapsible section when collapse button is clicked
   observeEvent(input[[paste0('collapseBtn', nr)]], {
     shinyjs::toggle(paste0("collapseSection", nr))  # Toggle the collapsible section
   })
 
-
-
-# When bedgraph is toggled, hide bigwig local and url buttons and
-# show the bedgraph buttons
+  # When bedgraph is toggled, hide bigwig local and url buttons and
+  # show the bedgraph buttons
   observeEvent(input[[paste0("bedswitch", nr)]], {
     if (input[[paste0("bedswitch", nr)]] == FALSE) {
       shinyjs::show(paste0("bigwigdiv", nr, 1))    # Toggle the Add URL button
@@ -354,7 +359,7 @@ observeEvent(input[[paste0('cosignal', nr)]], {
     }
 })
 
-# Toggle the collapsible section 2 (for feature 2)
+  # Toggle the collapsible section 2 (for feature 2)
   observeEvent(input[[paste0('collapseBtn2', nr)]], {
     shinyjs::toggle(paste0("collapseSection2", nr))  # Toggle the collapsible section
   })

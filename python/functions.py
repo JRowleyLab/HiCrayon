@@ -127,9 +127,19 @@ def bedgraph_to_bigwig(bedgraph, output_bigwig, binsize):
             # Split the line into components
             components = line.strip().split()
             
-            # Check if the line has exactly 4 components (chrom, start, end, value)
-            if len(components) != 4:
-                continue
+            # If bed file, make it a bedgraph with 1 as the value in every case.
+            
+            if bedgraph.lower().endswith(('.bed')):
+                # make the fourth entry in components, value which is 1
+                # Check if the line has exactly 4 components (chrom, start, end, value)
+                components = components[:3]
+                components.append(1)
+
+            if bedgraph.lower().endswith(('.bedgraph')):
+                if len(components) < 4:
+                    continue
+                else:
+                    components = components[:4]
             
             chrom, start, end, value = components
             start = int(start)
@@ -149,6 +159,8 @@ def bedgraph_to_bigwig(bedgraph, output_bigwig, binsize):
     chrom_sizes_list = [(chrom, size) for chrom, size in chrom_sizes.items()]
     bw.addHeader(chrom_sizes_list)
     
+    previous_components = None
+
     # Step 3: Read the BEDGraph again and add entries to BigWig
     with open(bedgraph, 'r') as f:
         chroml = []
@@ -161,9 +173,22 @@ def bedgraph_to_bigwig(bedgraph, output_bigwig, binsize):
             
             components = line.strip().split()
             
-            # Check if the line has exactly 4 components
-            if len(components) != 4:
+            if bedgraph.lower().endswith(('.bed')):
+                # make the fourth entry in components, value which is 1
+                # Check if the line has exactly 4 components (chrom, start, end, value)
+                components = components[:3]
+                components.append(1)
+
+            if bedgraph.lower().endswith(('.bedgraph')):
+                if len(components) < 4:
+                    continue
+                else:
+                    components = components[:4]
+
+            if components == previous_components:
+                print('moveon')
                 continue
+            previous_components = components
             
             chrom, start, end, value = components
             start = int(start)
@@ -200,7 +225,7 @@ def processBigwigs(bigwig,binsize,chrom,start,stop,num):
     
     if bigwig.lower().endswith(('.bigwig', '.bw')):
         bwopen = pyBigWig.open(bigwig)  
-    elif bigwig.lower().endswith(('.bedgraph')):
+    elif bigwig.lower().endswith(('.bedgraph', '.bed')):
         # convert to bigwig
         # TODO: delete when user closes the session.
         bigwigfile = "tmp"+str(num)+".bw"
@@ -220,10 +245,13 @@ def processBigwigs(bigwig,binsize,chrom,start,stop,num):
         except ValueError:
             bwraw.append(0)
 
+    bwraw = [0 if x == None else x for x in bwraw]
     iseigen = "FALSE"
     if bigwig.lower().endswith('bedgraph') and min(bwraw) < 0:
          iseigen = "TRUE"
 
+    print(len(bwraw))
+    print(bwraw)
     # Perform log operation on all values
     # 1e-5 added to avoid log(0)
     # THis operation cannot be performed on eigen values (negative)

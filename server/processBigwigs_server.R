@@ -124,7 +124,6 @@ chipalpha <- reactive({
             # Think about changing to an actual boolean not string
             if(bwlist_ChIP1()$iseigen[x]=="TRUE"){
                 # wigs will always be feature1=eigen, feature2=NULL
-                print("EIGEN STUFF")
                 # split feature1 into: A, B
                 twolists = splitListintoTwo(
                     bedg = paste0("tmp",x,"1.bw"),
@@ -136,7 +135,6 @@ chipalpha <- reactive({
                 positive = tuple(twolists, convert=T)[0]
                 negative = tuple(twolists, convert=T)[1]
 
-                print("A")
                 Amat <- calcAlphaMatrix(
                     chiplist= list(positive, "NULL"),
                     minmaxlist = minmaxlist, #[1][[1]][[2]] [2][[1]][[2]]
@@ -147,7 +145,6 @@ chipalpha <- reactive({
                     g=0,
                     b=0
                     )
-                print("B")
                 Bmat <- calcAlphaMatrix(
                     chiplist= list(negative, "NULL"),
                     minmaxlist = minmaxlist, #[1][[1]][[2]] [2][[1]][[2]]
@@ -162,7 +159,6 @@ chipalpha <- reactive({
                 # CURRENTLY FAILING HERE:
                 # specifically at the feature 2 minium and maximum based
                 # on minmax values. Something there.
-                print("AB")
                 ABmat <- calcAlphaMatrix(
                     chiplist=list(positive, negative),
                     minmaxlist = minmaxlist, #[1][[1]][[2]] [2][[1]][[2]]
@@ -181,25 +177,18 @@ chipalpha <- reactive({
                 matrices = list(mat1, mat2, mat3)
 
                 COMPmat <- lnerp_matrices(matrices)
-                print("1111")
 
                 # chipclipped: Find a way to clip raws and stitch them back together. 
                 chipalphas[[x]] <<- COMPmat
-                print("XXXXXXXx")
-
 
                 # Both clipped and minmax need to be adjusted with stitched.
                 # CURRENTLY it's just taking the A compartment value.
-                print("sdf")
                 chipclipped[[x]] <<- tuple(Amat, convert=T)[1]
-                print("sdf")
                 minmaxclip[[x]] <<- as.list(tuple(Amat, convert=T)[2])
 
-                print("done")
 
             }else {
 
-                print("should not be executing")
                 # Calculate the alpha matrix. Bread and Butter of HiCrayon.
                 # m[i,j] = s[i] * s[j]
                 m1 <- calcAlphaMatrix(
@@ -228,8 +217,6 @@ chipalpha <- reactive({
                 }
             }
 
-            print("checkpoint")
-            print(minmaxclip[[x]])
             # UPDATING MIN MAX VALUES
             #FEATURE 1
             # Update chip-seq min values if nan
