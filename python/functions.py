@@ -129,7 +129,6 @@ def bedgraph_to_bigwig(bedgraph, output_bigwig, binsize):
             
             # Check if the line has exactly 4 components (chrom, start, end, value)
             if len(components) != 4:
-                print(f"Skipping invalid line: {line.strip()} (Expected 4 components)")
                 continue
             
             chrom, start, end, value = components
@@ -156,7 +155,6 @@ def bedgraph_to_bigwig(bedgraph, output_bigwig, binsize):
         startl = []
         endsl = []
         valuesl = []
-        print('starting')
         for line in f:
             if line.startswith("#") or line.strip() == "":
                 continue
@@ -224,7 +222,6 @@ def processBigwigs(bigwig,binsize,chrom,start,stop,num):
 
     iseigen = "FALSE"
     if bigwig.lower().endswith('bedgraph') and min(bwraw) < 0:
-         print("eigen file")
          iseigen = "TRUE"
 
     # Perform log operation on all values
@@ -235,7 +232,6 @@ def processBigwigs(bigwig,binsize,chrom,start,stop,num):
         if i == None or i < 0:
             i = 0
         bwlog.append(math.log(i+0.01))
-    print("eigen", iseigen)
         
     return bwlog, bwraw, iseigen
 
@@ -244,6 +240,11 @@ def splitListintoTwo(bedg, chrom, start, stop, binsize):
     # Split a list containing both positive + negative
     # values into two separate lists, one for each.
     # Useful for compartment visualization.
+    pos = []
+    neg = []
+
+    #bigw = bedgraph_to_bigwig(bedg, output_bigwig, binsize)
+
     nochr = chrom.strip('chr')
     wchr = "chr" + str(nochr)
 
@@ -251,23 +252,25 @@ def splitListintoTwo(bedg, chrom, start, stop, binsize):
 
     pos = []
     neg = []
+    values = []
 
     # Store raw bigwig values
+    # Make it 0, if theres a pos value in negative list or negative in positive list. 
+    # Just replace after the fact. What am i doing.
+    # for i in [pos, neg]:
+    #     print(i)
     for walker in range(start, stop+binsize, binsize):
         try:
             value = bwopen.stats(nochr, walker, walker+binsize)[0]
-            if value > 0:
-                pos.append(value)
-            else:
-                neg.append(value)
+            values.append(value)
         except RuntimeError:
             value = bwopen.stats(wchr, walker, walker+binsize)[0]
-            if value > 0:
-                pos.append(value)
-            else:
-                neg.append(value)
+            values.append(value)
         except ValueError:
             pos.append(0)
+    pos = [0 if x < 0 else x for x in values]
+    neg = [0 if x > 0 else x * -1 for x in values]
+    
 
     return pos, neg
 
@@ -280,15 +283,11 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
 	# If cosignal is TRUE 
 	# perform each chip separately
      
-    print("ONE")
     if f2==True:
         chips = [chiplist[0], chiplist[1]]
-        print(chips)
-        print("HMM")
+        #print(chips)
     else:
         chips = [chiplist[0]]
-        print("HOO")
-    print("TWO")
     # Initialize list for normalized chip tracks
     chipnorms = []
     minmaxs = []
@@ -296,31 +295,29 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
         matsize = len(chip)
         # Normalize chip list to between 0 and 1
         chip_arr = np.array(chip)
-        print("NEN")
         # Replace None with 0
         chip_arr = [0 if x is None else x for x in chip_arr]
 
+        
+
         if(n==0): #If we're doing feature 1
-            minimum = np.min(chip_arr) if math.isnan(minmaxlist[0][0]) else minmaxlist[0][0]
+            minimum = np.min(chip_arr) if math.isnan(float(minmaxlist[0][0])) else minmaxlist[0][0]
             minimum = round(minimum, 6)
             
-            maximum = np.max(chip_arr) if math.isnan(minmaxlist[0][1]) else minmaxlist[0][1]
+            maximum = np.max(chip_arr) if math.isnan(float(minmaxlist[0][1])) else minmaxlist[0][1]
             maximum = round(maximum, 6) 
         else: # Or feature 2
-            minimum = np.min(chip_arr) if math.isnan(minmaxlist[1][0]) else minmaxlist[1][0]
+            minimum = np.min(chip_arr) if math.isnan(float(minmaxlist[1][0])) else minmaxlist[1][0]
             minimum = round(minimum, 6)
 
-            maximum = np.max(chip_arr) if math.isnan(minmaxlist[1][1]) else minmaxlist[1][1]
-            maximum = round(maximum, 6)   
-
-        print("LEN")               
+            maximum = np.max(chip_arr) if math.isnan(float(minmaxlist[1][1])) else minmaxlist[1][1]
+            maximum = round(maximum, 6)          
 
         minmax = [minimum, maximum]
         minmaxs.append(minmax)
         #raw values from bigwig, clipped data to specified values
         chip_clipped = np.clip(chip_arr, a_min = minimum, a_max = maximum)
 
-        print("KEN")    
         # normalized to between 0 and 1 after clipping. 0 and 1 being scaled
         # from user specified min and max
         if(n==0):   
@@ -330,7 +327,6 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
             chip_norm2 = (chip_clipped-minimum)/(maximum-minimum)
             chipnorms.append(chip_norm2)
 
-    print("KEN")    
     # True: scale ChIP by Hi-C
     # false: raw ChIP not weighted by Hi-C
     if(showhic==True):
@@ -358,12 +354,6 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
 	
     for x in range(0,matsize):
             for y in range(x,matsize):
-				# To have a diagonal line, 
-				# uncomment the below:
-				# if x==y line
-                # if x==y:
-                #     newscore = 255
-                # else:
                 if(f2==True):
                       newscore = (chipnorms[0][x] * chipnorms[1][y])*255
                 else:
@@ -379,12 +369,6 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
                      
     for x in range(0,matsize):
         for y in range(x,matsize):
-            # To have a diagonal line, 
-            # uncomment the below:
-            # if x==y line
-            # if x==y:
-            #     newscore = 255
-            # else:
             if(f2==True):
                     newscore = (chipnorms[0][y] * chipnorms[1][x])*255
             else:
@@ -395,13 +379,9 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
             #alpha value
             amat[x,y] = newscore
             #amat[x,y] = newscore
-    print("FEN")    
-    mat = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
-    # print("done calclpha")
-    # print("Python:, ", minmaxs) #should be 1 list of two items
 
-    # print(chipnorms)
-    # print(minmaxs)
+    amat = np.maximum(amat, amat.T)
+    mat = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
 
     return mat, chipnorms, minmaxs
 
@@ -495,8 +475,7 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepa
             f2 = True
         else:
             f2 = False
-        print("F2:")
-        print(f2)
+
 
 		# x-axis track
         ax2 = ax1.twinx()
@@ -511,7 +490,6 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepa
             ychip = chip[i][1]
         else:
             ychip = chip[i][0]   
-        print("point")     
 
         ax4 = ax3.twiny()
         a = [x for x in range(len(ychip))]
