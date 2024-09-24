@@ -75,8 +75,14 @@ chipalpha <- reactive({
 
         if(!is.null(bw1v$features[[x]][[1]])){
 
+            if(logv[[paste0(x, 1)]]){
+                feature1 = bwlist_ChIP1()$logs[[x]][[1]]
+            }else{
+                feature1 = bwlist_ChIP1()$raws[[x]][[1]]
+            }
+
             # Norm Tracks
-            feature1 = bwlist_ChIP1()$raws[[x]][[1]]
+            #feature1 = bwlist_ChIP1()$raws[[x]][[1]]
             feature2 = "NULL"
             # Minmax
             # Feature 1
@@ -89,6 +95,11 @@ chipalpha <- reactive({
                 req(!is.null(bw1v$features[[x]][[2]]))
                 # Norm Tracks
                 feature2 = bwlist_ChIP1()$raws[[x]][[2]]
+                if(logv[[paste0(x, 2)]]){
+                    feature2 = bwlist_ChIP1()$logs[[x]][[2]]
+                }else{
+                    feature2 = bwlist_ChIP1()$raws[[x]][[2]]
+                }
                 # Minmax
                 #min and max values chosen by user. No input is ""
                 # Feature 2

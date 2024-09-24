@@ -7,6 +7,9 @@ bw1v <- reactiveValues(features=list(list(NULL, NULL)))
 # Include feature 2 list
 f2v <- reactiveValues()
 
+# Log reactive values
+logv <- reactiveValues()
+
 # Initialize list of lists
 minmaxargs <- reactiveValues(nums=list(list(list())))
 
@@ -200,6 +203,12 @@ insertUI(
           column(6,
                  numericInput(paste0("maxargs", nr, 1), "Max", value = NULL)
           )
+        ),
+        fluidRow(
+          column(4,
+                 checkboxInput(paste0("log", nr, 1),
+                               "Log")
+          )
         )
       ),
 
@@ -279,6 +288,12 @@ insertUI(
           column(6,
                  numericInput(paste0("maxargs", nr, 2), "Max", value = NULL)
           )
+        ),
+        fluidRow(
+          column(4,
+                 checkboxInput(paste0("log", nr, 2),
+                               "Log")
+          )
         )
       ),
       #
@@ -324,12 +339,6 @@ observeEvent(input[[paste0('cosignal', nr)]], {
   })
 
 
-  # When bedgraph is toggled, hide bigwig local and url buttons
-  observe(
-    # is compartment?
-    print(input[[paste0("bedswitch", nr)]])
-    # then hide cosignal button and erase paths for any previously selected.
-  )
 
 # When bedgraph is toggled, hide bigwig local and url buttons and
 # show the bedgraph buttons
@@ -409,8 +418,6 @@ observeEvent(input[[paste0('cosignal', nr)]], {
       }
   })
 
-
-
   #BEGRAPH file hanlding
   #assign to same list as the bigwigs. Handle the difference in python function.
   # Set up file handling for local files for FEATURE 1
@@ -453,6 +460,20 @@ observeEvent(input[[paste0('cosignal', nr)]], {
             )
       }
     })
+
+  observeEvent(input[[paste0("log", nr, 1)]], {
+    # print log
+    key <- paste0(nr, 1)
+    #print(paste0("LOGV:", logv))
+    logv[[key]] <- input[[paste0("log", nr, 1)]]
+  })
+
+  observeEvent(input[[paste0("log", nr, 2)]], {
+    # print log
+    key <- paste0(nr, 2)
+    #print(paste0("LOGV:", logv))
+    logv[[key]] <- input[[paste0("log", nr, 2)]]
+  })
 
 
   # Check URL when user tries to input bigwig URL for FEATURE 1

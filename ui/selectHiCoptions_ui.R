@@ -161,9 +161,6 @@ selectHiCoptionsUI <- div(fluidRow(
                         conditionalPanel(
                             condition = "input.hicoptions == true",
                                 fluidRow(
-                                    # column(4,
-                                    #     checkboxInput("log", "Log Scale", value=FALSE)
-                                    # ),
                                     column(3,
                                         checkboxInput("chipscale", "Scale ChIP w/ HiC", value=TRUE)
                                     ),
