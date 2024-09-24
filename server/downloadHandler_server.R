@@ -21,36 +21,27 @@ zipfolder <- reactive({
     # Control inclusion through checkbox
     if(input$chip1){
         # Dynamically add chip data
-        for(i in seq_along(reactiveValuesToList(bw1v))){
-
-          if(!is.null(bw1v[[paste0("bw",i)]])){
-            files = append(
-              files, chipplot()[[i]]$svg
-              )
-            files = append(
-              files, chipplot()[[i]]$png
-              )
-          }
-        }
-        if(length(combinedchips$chips) > 1){
-            combname <- "" 
-              files = append(
-                files, chipcombinedplot()$svg
-              )
-              files = append(
-                files, chipcombinedplot()$png
-              )
+    for (i in seq_along(bw1v$features)) {  # Do not use reactiveValuesToList
+        if (!is.null(bw1v$features[[i]][[1]])) {  # Correct indexing of features
+            files = append(files, chipplot()[[i]]$svg)
+            files = append(files, chipplot()[[i]]$png)
         }
     }
-
-    if(input$bedgraph){
-      files = append(
-                files, comp_plot()$svg
-              )
-      files = append(
-                files, comp_plot()$png
-              )
+        if (length(combinedchips$chips) > 1) {
+          combname <- ""
+          files = append(files, chipcombinedplot()$svg)
+          files = append(files, chipcombinedplot()$png)
+      }
     }
+
+    # if(input$bedgraph){
+    #   files = append(
+    #             files, comp_plot()$svg
+    #           )
+    #   files = append(
+    #             files, comp_plot()$png
+    #           )
+    # }
 
     zip(zipfile = zipfile, files = files, mode = "cherry-pick")
 
