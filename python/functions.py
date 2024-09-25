@@ -472,7 +472,7 @@ def hic_plot(cmap, distnormmat, filepathpng, filepathsvg):
 	return filepathpng, filepathsvg
 
 
-def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepathpng, filepathsvg):
+def ChIP_plot(chip, mat, col1, trackcol, disthic, disthic_cmap, hicalpha, bedalpha, filepathpng, filepathsvg):
     mat = mat.astype(np.uint8)
     fig = plt.figure()
     ax = fig.add_subplot()
@@ -491,11 +491,19 @@ def ChIP_plot(chip, mat, col1, disthic, disthic_cmap, hicalpha, bedalpha, filepa
 	# bigwigs and colors, do whatever
 	# length.
 	#############################
-	# x-axis plot setup
+	# Convert hex to rgb 0-1 for facecolor
+    tc = trackcol[0]
+    h = tc.lstrip('#')
+    t = tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+    tcol = [x/255 for x in t]
+    
+    # x-axis plot setup
     ax1 = fig.add_subplot()
+    ax1.set_facecolor(tcol)
 
 	# y-axis plot setup
     ax3 = fig.add_subplot()
+    ax3.set_facecolor(tcol)
       
 	# Dynamically add subplots
     for i in range(len(chip)):

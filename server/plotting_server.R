@@ -37,6 +37,7 @@ chipplot <- reactive({
     images <- c()
     tracks <- list(list())
     col <- list()
+    trackcol <- list()
 
     lapply(seq_along(bw1v$features), function(x){
 
@@ -44,6 +45,8 @@ chipplot <- reactive({
         
             # Overwrite the colour and track for single chips
             col[1] <- input[[paste0("col", x)]]
+            #track color
+            trackcol[1] <- input[[paste0("trackcol", x)]]
             
             # Value clipped bigwig track with raw values
             # Feature 1
@@ -76,6 +79,7 @@ chipplot <- reactive({
             p1_plot <- ChIP_plot(
                 disthic = hic_distance(),
                 col1 = col,
+                trackcol = trackcol,
                 mat = chipalpha()$chipalphas[[x]],
                 chip = tracks,
                 #f2 = f2v[[as.character(x)]],

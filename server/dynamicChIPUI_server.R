@@ -188,13 +188,18 @@ insertUI(
                  colourInput(paste0("col", nr), 
                              "Select colour", 
                              "blue")
-          ),
-          column(4,
+          )),
+          fluidRow(
+            column(4,
                  checkboxInput(paste0("comb", nr),
                                "Combination")
+          ),
+          column(4,
+                 colourInput(paste0("trackcol", nr), 
+                             "Select colour", 
+                             "white")
           )
-        ),
-        
+          ),
         # Numeric inputs for Min and Max
         fluidRow(
           column(6,
