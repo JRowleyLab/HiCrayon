@@ -154,6 +154,7 @@ chipcombinedplot <- reactive({
     # bigwig tracks
     tracks <- list()
     cols <- c()
+    trackcols <- c()
     names <- list()
     # List of min/max values [[1,2]].
     #minmaxlist_list <- list()
@@ -174,6 +175,7 @@ chipcombinedplot <- reactive({
         }
         
         cols <- append(cols, input[[paste0("col", chipstocombine[x])]])
+        trackcols <- append(trackcols, input[[paste0("trackcol", chipstocombine[x])]])
         names <- append(names, input[[paste0("n", chipstocombine[x])]])
         # List of min/max values [[1,2]].
         #minmaxlist_list <- append(minmaxlist_list, list(minmaxargs$nums[[x]][[1]]) )
@@ -200,14 +202,14 @@ chipcombinedplot <- reactive({
             disthic = hic_distance(),
             #f2 = FALSE, #f2v[[as.character(x)]],
             col1 = cols,
+            trackcol = trackcols, # just takes the last one
             mat = m3,
             chip = tracks,
             disthic_cmap = hic_color(),
             hicalpha = input$hicalpha,
             bedalpha = input$bedalpha,
             filepathpng = pngpath,
-            filepathsvg = svgpath#,
-            #minmaxs = minmaxlist_list
+            filepathsvg = svgpath
             )
 
     print("point 4")
