@@ -57,6 +57,8 @@ chipplot <- reactive({
                 req(!is.null(bw1v$features[[x]][[2]]))
                 tracks[[1]][[2]] <- chipalpha()$chipclipped[[x]][[2]]
             }
+
+            print("plotting")
                 
             # List of min/max values [[1,2]].
             minmaxlist <- list(minmaxargs$nums[[x]][[1]], minmaxargs$nums[[x]][[2]])

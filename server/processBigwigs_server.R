@@ -109,11 +109,11 @@ chipalpha <- reactive({
             }
             # minmax Lists
             minmaxlist = list(minmaxs1, minmaxs2)
-            #print(minmaxlist)
+            print(minmaxlist)
 
             # Feature lists
             wigs = list(feature1, feature2)
-            #print(wigs)
+            print(paste0("R: wigs: ",  wigs))
 
             col <- input[[paste0("col", x)]]
             rgb <- col2rgb(col)
@@ -156,9 +156,6 @@ chipalpha <- reactive({
                     b=255
                     )
 
-                # CURRENTLY FAILING HERE:
-                # specifically at the feature 2 minium and maximum based
-                # on minmax values. Something there.
                 ABmat <- calcAlphaMatrix(
                     chiplist=list(positive, negative),
                     minmaxlist = minmaxlist, #[1][[1]][[2]] [2][[1]][[2]]

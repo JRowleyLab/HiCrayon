@@ -25,7 +25,13 @@ insertUI(
     ui = div(
       style = "border:1px solid black; margin:10px; padding:10px; border-radius: 5px;",
       id = paste0("newInput", nr),
-      
+      fluidRow(
+        column(12,
+                 textInput(paste0("n", nr), 
+                           label = "Label", 
+                           value = paste0("Panel ", nr))
+          )
+      ),
       # Title with a toggle button to collapse/expand the section
       fluidRow(
         column(8,
@@ -125,45 +131,7 @@ insertUI(
                         tooltip = "<span style='font-size:15px;'>Select local .bedgraph/ .bed file <span>", 
                         allowHTML = TRUE,
                         placement = 'right'
-                    ),
-                
-                # Wrapper div that will hold the URL input and Add URL button (initially hidden)
-                # tags$div(
-                #   fluidRow(
-                #     column(9,
-                #             tags$div(
-                #               textInput(
-                #                 paste0('urlbed', nr, 1),
-                #                 label = NULL,
-                #                 placeholder = "https://<file.bedgraph/bed>"
-                #               ),
-                #               style = "width: 100%; display:none;",
-                #               id = paste0('bedtextInputDiv', nr, 1)
-                #             )
-                #     ),
-                #     column(3,
-                #             actionButton(paste0('loadurlbed', nr, 1), label = "", icon = icon("check"), style = "width: 100%;"),
-                #             id = paste0('urlInputDivbed', nr, 1),
-                #             style = "display:none;"  # Initially hidden
-                #     ),                   
-                # tippy_this(
-                #         elementId = paste0('loadurlbed', nr, 1), 
-                #         tooltip = "<span style='font-size:15px;'>Upload URL for .bedgraph/ .bed file<span>", 
-                #         allowHTML = TRUE,
-                #         placement = 'right'
-                #     ),
-                #   )
-                # ),
-                # # Checkbox for co-signaling with a different feature
-                # checkboxInput(paste0('cosignal', nr), "Separate signals?", value = FALSE),
-                # #shinyBS::bsTooltip(id = paste0('cosignal', nr), title ="Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1."),
-              
-                # tippy_this(
-                #         elementId = paste0('cosignal', nr), 
-                #         tooltip = "<span style='font-size:15px;'>Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1.<span>", 
-                #         allowHTML = TRUE,
-                #         placement = 'right'
-                #     ),
+                    )
           )
         ),
         column(3,
@@ -179,11 +147,6 @@ insertUI(
         
         # Label, Colour, and Checkbox Inputs
         fluidRow(
-          column(4,
-                 textInput(paste0("n", nr), 
-                           label = "Label", 
-                           value = "bigwig")
-          ),
           column(4,
                  colourInput(paste0("col", nr), 
                              "Select colour", 
@@ -333,11 +296,11 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
       bw1v$features[[nr]][[2]] <- NULL
     })
 
-  observe({
-    key <- as.character(nr)
-    f2v[[key]] <- FALSE
-    updateCheckboxInput(session, input[[paste0('cosignal', nr)]], value = FALSE)
-  }) %>% bindEvent(bwlist_ChIP1()$iseigen[nr]=="TRUE")
+  # observe({
+  #   key <- as.character(nr)
+  #   f2v[[key]] <- FALSE
+  #   updateCheckboxInput(session, input[[paste0('cosignal', nr)]], value = FALSE)
+  # }) %>% bindEvent(bwlist_ChIP1()$iseigen[nr]=="TRUE")
 
 
   observeEvent(input[[paste0('cosignal', nr)]], {
@@ -466,7 +429,11 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
           updateTextInput(
             session,
             inputId = paste0("n", nr),
-            value = tools::file_path_sans_ext(basename(bw1v$features[[nr]][[2]]))
+            value = paste0(
+              tools::file_path_sans_ext(basename(bw1v$features[[nr]][[1]])),
+              " x ",
+              tools::file_path_sans_ext(basename(bw1v$features[[nr]][[2]])) 
+                  )
             )
       }
     })
