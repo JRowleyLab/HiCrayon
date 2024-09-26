@@ -158,9 +158,18 @@ insertUI(
                                "Combination")
           ),
           column(4,
-                 colourInput(paste0("trackcol", nr), 
+            colourInput(paste0("trackcol", nr), 
                              "Select colour", 
                              "white")
+          ),
+          column(4,
+             sliderInput(paste0("linewidth", nr),
+             label = "Track Line width",
+             min = 0,
+             max = 7,
+             value = 1.5,
+             step = 0.5
+             ) 
           )
           ),
         # Numeric inputs for Min and Max

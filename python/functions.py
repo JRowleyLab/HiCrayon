@@ -472,7 +472,7 @@ def hic_plot(cmap, distnormmat, filepathpng, filepathsvg):
 	return filepathpng, filepathsvg
 
 
-def ChIP_plot(chip, mat, col1, trackcol, disthic, disthic_cmap, hicalpha, bedalpha, filepathpng, filepathsvg):
+def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic, disthic_cmap, hicalpha, bedalpha, filepathpng, filepathsvg):
     mat = mat.astype(np.uint8)
     fig = plt.figure()
     ax = fig.add_subplot()
@@ -515,7 +515,7 @@ def ChIP_plot(chip, mat, col1, trackcol, disthic, disthic_cmap, hicalpha, bedalp
 
 		# x-axis track
         ax2 = ax1.twinx()
-        ax2.plot(chip[i][0], color=col1[i], linewidth = 1)
+        ax2.plot(chip[i][0], color=col1[i], linewidth = linewidth[0])
 		#set y-axis to custom range #NOT USED #y-axis is baked into the data range itself.
 		# blim = min(chip[i]) if math.isnan(minmaxs[i][0]) else minmaxs[i][0]
 		# tlim = max(chip[i]) if math.isnan(minmaxs[i][1]) else minmaxs[i][1]
@@ -529,7 +529,7 @@ def ChIP_plot(chip, mat, col1, trackcol, disthic, disthic_cmap, hicalpha, bedalp
 
         ax4 = ax3.twiny()
         a = [x for x in range(len(ychip))]
-        ax4.plot(ychip[::-1], a, color=col1[i], linewidth = 1)
+        ax4.plot(ychip[::-1], a, color=col1[i], linewidth = linewidth[0])
         ax4.set_xlim(lims)
 
 		# x-axis Remove ticks
