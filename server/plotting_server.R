@@ -162,7 +162,7 @@ chipcombinedplot <- reactive({
     tracks <- list()
     cols <- c()
     trackcols <- c()
-    linewidths <- c()
+    linewidth <- list()
     names <- list()
     # List of min/max values [[1,2]].
     #minmaxlist_list <- list()
@@ -184,7 +184,7 @@ chipcombinedplot <- reactive({
         
         cols <- append(cols, input[[paste0("col", chipstocombine[x])]])
         trackcols <- append(trackcols, input[[paste0("trackcol", chipstocombine[x])]])
-        linewidths <- append(linewidths, input[[paste0("trackwidth", chipstocombine[x])]])
+        linewidth[1] <- input[[paste0("linewidth", x)]]
     
         names <- append(names, input[[paste0("n", chipstocombine[x])]])
         # List of min/max values [[1,2]].
@@ -207,13 +207,14 @@ chipcombinedplot <- reactive({
         tmpdir = userinfo)
 
     print("point 4")
+    print(linewidth)
 
     chipcomb <- ChIP_plot(
             disthic = hic_distance(),
             #f2 = FALSE, #f2v[[as.character(x)]],
             col1 = cols,
             trackcol = trackcols, # just takes the last one
-            linewidths = linewidths,
+            linewidth = linewidth,
             mat = m3,
             chip = tracks,
             disthic_cmap = hic_color(),
