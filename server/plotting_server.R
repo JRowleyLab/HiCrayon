@@ -108,7 +108,7 @@ chipplot <- reactive({
 
 
 combinedchips <- reactiveValues()
-observeEvent(input$generate_hic, {
+observeEvent(confirmed(), {
     req(input$chip1)
     
     chipstocombine <- c()

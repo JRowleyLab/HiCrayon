@@ -32,11 +32,6 @@ observe({
 
 #shinyCatch({message(paste(encodehic[selected, "Experiment"], "Hi-C Loading"))}, prefix = '') put in somewehere here
 
-observeEvent(input$generate_hic, {
-    matsize <- (as.integer(input$stop) - as.integer(input$start)) / as.integer(input$bin)
-    shinyCatch({message(paste0("Loading Hi-C with matrix size: ", matsize))}, prefix = '')
-})
-
 # Set maximum value for coordinates based on chromosome
 idx <- reactive({
     which(input$chr==HiCmetadata()$chrs)

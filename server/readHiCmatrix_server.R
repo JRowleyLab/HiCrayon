@@ -50,9 +50,10 @@ HiCMatrixZoom <- reactive({
         chrom = input$chr,
         norm = input$norm,
         binsize = as.integer(input$bin))
-
+    # reset generate hic button
+    confirmed(FALSE)
     return(hicobject)
-})
+}) %>% bindEvent(confirmed())
 
 
 ##################

@@ -50,4 +50,4 @@ output$gallery <- renderUI({
         style = "height: 100vh;"
         )
     
-}) %>% shiny::bindEvent(input$generate_hic)
+}) %>% shiny::bindEvent(confirmed())
