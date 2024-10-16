@@ -529,7 +529,7 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
     input$chr,
     input$start, input$stop, input$bin,
     bw1v[[paste0("bw", nr, 1)]],
-    hicv$y
+    hicv$y, input[[paste0("log", nr, 1)]]
   )
 
 
@@ -540,7 +540,7 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
     input$chr,
     input$start, input$stop, input$bin,
     bw1v[[paste0("bw", nr, 2)]],
-    hicv$y
+    hicv$y, input[[paste0("log", nr, 2)]]
   )
 
 })
