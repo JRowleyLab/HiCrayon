@@ -155,7 +155,7 @@ insertUI(
           fluidRow(
             column(4,
                  checkboxInput(paste0("comb", nr),
-                               "Combination")
+                               "Combination", value = TRUE)
           ),
           column(4,
             colourInput(paste0("trackcol", nr), 
@@ -433,7 +433,6 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
         # Update list by index for feature 2
         if(!rlang::is_empty(inFile$datapath)){
           bw1v$features[[nr]][[2]] <- inFile$datapath
-          # print(bw1v$features)
           # Update text with file name
           updateTextInput(
             session,
@@ -448,16 +447,12 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
     })
 
   observeEvent(input[[paste0("log", nr, 1)]], {
-    # print log
     key <- paste0(nr, 1)
-    #print(paste0("LOGV:", logv))
     logv[[key]] <- input[[paste0("log", nr, 1)]]
   })
 
   observeEvent(input[[paste0("log", nr, 2)]], {
-    # print log
     key <- paste0(nr, 2)
-    #print(paste0("LOGV:", logv))
     logv[[key]] <- input[[paste0("log", nr, 2)]]
   })
 
@@ -476,7 +471,6 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
           )
     }else{
         # TODO: make this an actual error message
-        print("URL not valid: ERROR MESSAGE")
     }
   }) %>% bindEvent(input[[paste0('loadurlchip',nr, 1)]])
 
@@ -495,7 +489,6 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
           )
     }else{
         # TODO: make this an actual error message
-        print("URL not valid: ERROR MESSAGE")
     }
   }) %>% bindEvent(input[[paste0('loadurlchip', nr, 2)]])
 
@@ -525,10 +518,4 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
             )
           minmaxargs$nums[[nr]][[2]] <- minmaxlist
   })
-
-
-  observe({
-    print(bw1v$features)
-  })
-
 })

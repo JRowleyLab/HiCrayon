@@ -7,26 +7,41 @@ outputLegend <- function(colors, labels){
     # rgb linear interpolation color intersects
     #list of colour combination
     generate_color_combinations <- function(colors) {
-    combinations <- c()
-    colcomb <- c()
-    for (i in 1:length(colors)) {
-        if(i==1){
-            combinations <- c(combinations, unlist(combn(colors, i, simplify = FALSE)))
-        }else {
-        combination <- combn(colors, i, simplify = FALSE)
-        for(num in 1:length(combination)) {
-            #print(combination[num])
-            combinations <- c(combinations, paste(unlist(combination[num]), collapse = "&"))
+        combinations <- c()
+        for (i in 1:length(colors)) {
+            if(i==1){
+                combinations <- c(combinations, unlist(combn(colors, i, simplify = FALSE)))
+            }else {
+            combination <- combn(colors, i, simplify = FALSE)
+            for(num in 1:length(combination)) {
+                combinations <- c(combinations, paste(unlist(combination[num]), collapse = "&"))
+            }
+            }
         }
-        }
+        return(combinations)
     }
-    return(combinations)
+
+    generate_label_combinations <- function(colors) {
+        combinations <- c()
+        colnums = seq(length(colors))
+        for (i in 1:length(colnums)) {
+            if(i==1){
+                combinations <- c(combinations, unlist(combn(colnums, i, simplify = FALSE)))
+            }else {
+            combination <- combn(colnums, i, simplify = FALSE)
+            for(num in 1:length(combination)) {
+                combinations <- c(combinations, paste(unlist(combination[num]), collapse = "&"))
+            }
+            }
+        }
+        return(combinations)
     }
 
     # calculate hex from rgb
     rgb2hex <- function(rgb) rgb(rgb[1], rgb[2], rgb[3], maxColorValue = 255)
 
     combinations <- generate_color_combinations(colors)
+    valnames <- generate_label_combinations(colors)
 
     fills <- c()
     for(i in 1:length(combinations)){
@@ -38,9 +53,9 @@ outputLegend <- function(colors, labels){
         }
     }
 
-
     vals <- rep(1, length(combinations))
-    names(vals) <- combinations
+    names(vals) <- valnames
+    
     plot(euler(vals), fill = fills, labels = labels)
 }
 

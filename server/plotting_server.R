@@ -49,9 +49,7 @@ chipplot <- reactive({
             #track color
             trackcol[1] <- input[[paste0("trackcol", x)]]
             linewidth[1] <- input[[paste0("linewidth", x)]]
-            
-            print(paste0("LINEWIDTH:", linewidth))
-            
+                        
             # Value clipped bigwig track with raw values
             # Feature 1
             tracks[[1]][[1]] <- chipalpha()$chipclipped[[x]][[1]]
@@ -62,11 +60,9 @@ chipplot <- reactive({
                 tracks[[1]][[2]] <- chipalpha()$chipclipped[[x]][[2]]
             }
 
-            print("plotting")
                 
             # List of min/max values [[1,2]].
             minmaxlist <- list(minmaxargs$nums[[x]][[1]], minmaxargs$nums[[x]][[2]])
-            print(minmaxlist)
 
             patt <- str_glue(
             "ChIP_{input[[paste0('n',x)]]}_{input$chr}_{input$start}_{input$stop}_{input$bin}_norm-{input$norm}_"
@@ -128,8 +124,6 @@ observeEvent(input$generate_hic, {
         }
         combinedchips$chips <- chipstocombine
     }
-    print("Combined")
-    print(combinedchips$chips)
 })
 
 
@@ -147,17 +141,13 @@ chipcombinedplot <- reactive({
 
     #this doesn't seem to work when you skip a chip for
     # combination
-    #print(1)
     allchips <- list()
     counter = 1
     for(x in seq_along(chipstocombine)){
-        print('counter')
         allchips[[counter]] <- chipalpha()$chipalphas[[chipstocombine[x]]]
         counter = counter + 1
     }
-    #print(2)
     m3 <- lnerp_matrices(allchips)
-    #print(3)
     # bigwig tracks
     tracks <- list()
     cols <- c()
@@ -206,9 +196,6 @@ chipcombinedplot <- reactive({
         fileext = ".svg",
         tmpdir = userinfo)
 
-    print("point 4")
-    print(linewidth)
-
     chipcomb <- ChIP_plot(
             disthic = hic_distance(),
             #f2 = FALSE, #f2v[[as.character(x)]],
@@ -223,8 +210,6 @@ chipcombinedplot <- reactive({
             filepathpng = pngpath,
             filepathsvg = svgpath
             )
-
-    print("point 4")
 
     chippng <- tuple(chipcomb, convert = T)[0]
     chipsvg <- tuple(chipcomb, convert = T)[1]

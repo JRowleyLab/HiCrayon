@@ -1,7 +1,6 @@
   
   if (Sys.info()[['user']] == 'shiny'){
     shiny::observe({
-      print(reticulate::py_config())
     })
   }
 

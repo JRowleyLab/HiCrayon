@@ -28,7 +28,6 @@ bwlist_ChIP1 <- reactive({
             }
 
             wigs = list(feature1, feature2)
-            #print(paste0("wigs: :", wigs))
 
             for(i in seq_along(wigs)){
 
@@ -43,7 +42,6 @@ bwlist_ChIP1 <- reactive({
             logs[[x]][[i]] <<- tuple(bwlist, convert=T)[0]
             raws[[x]][[i]] <<- tuple(bwlist, convert=T)[1]
             # iseigen[[x]] <<- tuple(bwlist, convert=T)[2]
-            # print(iseigen[[x]])
             # Check the length of the tuple before accessing the third element
             result_tuple <- tuple(bwlist, convert=T)
             # This needs to check if python is returning a 3 tuple (thruple i guess) 
@@ -69,7 +67,6 @@ chipalpha <- reactive({
     chipalphas <- list()
     chipclipped <- list()
     minmaxclip <- list()
-    print(paste0("EIGEN: ", bwlist_ChIP1()$iseigen))
 
     lapply(seq_along(bw1v$features), function(x){
 
@@ -109,11 +106,9 @@ chipalpha <- reactive({
             }
             # minmax Lists
             minmaxlist = list(minmaxs1, minmaxs2)
-            print(minmaxlist)
 
             # Feature lists
             wigs = list(feature1, feature2)
-            print(paste0("R: wigs: ",  wigs))
 
             col <- input[[paste0("col", x)]]
             rgb <- col2rgb(col)

@@ -186,7 +186,6 @@ def bedgraph_to_bigwig(bedgraph, output_bigwig, binsize):
                     components = components[:4]
 
             if components == previous_components:
-                print('moveon')
                 continue
             previous_components = components
             
@@ -199,7 +198,6 @@ def bedgraph_to_bigwig(bedgraph, output_bigwig, binsize):
             endsl.append(end)
             valuesl.append(value)
 
-        #print(chroml)
             
         # Add the entries to BigWig
         bw.addEntries(chroml, startl, ends=endsl, values=valuesl)
@@ -250,8 +248,6 @@ def processBigwigs(bigwig,binsize,chrom,start,stop,num):
     if bigwig.lower().endswith('bedgraph') and min(bwraw) < 0:
          iseigen = "TRUE"
 
-    print(len(bwraw))
-    print(bwraw)
     # Perform log operation on all values
     # 1e-5 added to avoid log(0)
     # THis operation cannot be performed on eigen values (negative)
@@ -286,7 +282,6 @@ def splitListintoTwo(bedg, chrom, start, stop, binsize):
     # Make it 0, if theres a pos value in negative list or negative in positive list. 
     # Just replace after the fact. What am i doing.
     # for i in [pos, neg]:
-    #     print(i)
     for walker in range(start, stop+binsize, binsize):
         try:
             value = bwopen.stats(nochr, walker, walker+binsize)[0]
@@ -313,7 +308,6 @@ def calcAlphaMatrix(chiplist, minmaxlist, f2, disthic,showhic, r,g,b):
      
     if f2==True:
         chips = [chiplist[0], chiplist[1]]
-        #print(chips)
     else:
         chips = [chiplist[0]]
     # Initialize list for normalized chip tracks
