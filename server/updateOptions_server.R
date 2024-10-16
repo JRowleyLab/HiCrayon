@@ -12,9 +12,13 @@ hic_color <- reactive({
 observe({
     updateSelectizeInput(session, "chr",
         choices = HiCmetadata()$chrs)
+
+    # get middle resolution
+    middle_index <- floor(length(HiCmetadata()$res) / 2) + 1
+
     updateSelectizeInput(session, "bin",
         choices = HiCmetadata()$res,
-        selected = HiCmetadata()$res[1])
+        selected = HiCmetadata()$res[middle_index])
     shinyCatch({message("Hi-C Loaded")}, prefix = '')
 
 
