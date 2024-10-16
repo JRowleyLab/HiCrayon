@@ -15,7 +15,6 @@ output$encodehicoutput = DT::renderDataTable(
   )
 )
 
-
 observeEvent(input$encodehictable, {
     showModal(
         modalDialog(
