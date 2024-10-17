@@ -23,7 +23,8 @@ observeEvent(input$addBtn, {
 insertUI(
     selector = '#inputList',
     ui = div(
-      style = "border:1px solid black; margin:10px; padding:10px; border-radius: 5px;",
+      #style = "border:1px solid black; margin:10px; padding:10px; border-radius: 5px;",
+      class = "new-div",
       id = paste0("newInput", nr),
       fluidRow(
         column(12,
@@ -40,16 +41,6 @@ insertUI(
         column(2,
           materialSwitch(inputId = paste0('bedswitch', nr), label = "Bedgraph", value = FALSE)
         ),
-        column(2,
-               actionButton(paste0('collapseBtn', nr), label = "", icon = icon("angle-double-down"), style = "width: 100%;")
-        ),
-        #shinyBS::bsTooltip(id = paste0('collapseBtn', nr), title ="Open options for color, label and data range"),
-        tippy_this(
-            elementId = paste0('collapseBtn', nr),
-            tooltip = "<span style='font-size:15px;'>Open options for color, label and data range<span>", 
-            allowHTML = TRUE,
-            placement = 'right'
-        )
       ),
       
       # File selection button and toggle button
@@ -101,16 +92,35 @@ insertUI(
                     ),
                   )
                 ),
-                # Checkbox for co-signaling with a different feature
-                checkboxInput(paste0('cosignal', nr), "Separate signals?", value = FALSE),
-                #shinyBS::bsTooltip(id = paste0('cosignal', nr), title ="Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1."),
-              
-                tippy_this(
-                        elementId = paste0('cosignal', nr), 
-                        tooltip = "<span style='font-size:15px;'>Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1.<span>", 
+                fluidRow(
+                  column(6,
+                    # Checkbox for co-signaling with a different feature
+                    checkboxInput(paste0('cosignal', nr), "Separate signals?", value = FALSE),
+                    #shinyBS::bsTooltip(id = paste0('cosignal', nr), title ="Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1."),
+                  
+                    tippy_this(
+                            elementId = paste0('cosignal', nr), 
+                            tooltip = "<span style='font-size:15px;'>Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1.<span>", 
+                            allowHTML = TRUE,
+                            placement = 'right'
+                        ),
+                  ),
+                  column(3,
+                    actionButton(paste0('collapseBtn', nr), label = "", icon = icon("angle-double-down"), style = "width: 100%;"),
+                    #shinyBS::bsTooltip(id = paste0('collapseBtn', nr), title ="Open options for color, label and data range"),
+                    tippy_this(
+                        elementId = paste0('collapseBtn', nr),
+                        tooltip = "<span style='font-size:15px;'>Open options for color, label and data range<span>", 
                         allowHTML = TRUE,
                         placement = 'right'
-                    ),
+                    )
+                  ),
+                  column(2,
+                    #actionButton(paste0("comb", nr), label = HTML('<span class="icon">+</span>'), class = "toggle-btn")
+                    checkboxInput(paste0("comb", nr),
+                                  "Combination", value = FALSE)
+                              )
+              ),
           )
         ),
         div(id = paste0("bedgraphdiv", nr, 1),
@@ -144,47 +154,48 @@ insertUI(
       tags$div(
         id = paste0("collapseSection", nr),
         style = "display: none;",  # Initially hidden
-        
-        # Label, Colour, and Checkbox Inputs
+
+        # Track Background section
+        h5("Track Background"),
         fluidRow(
           column(4,
-                 colourInput(paste0("col", nr), 
-                             "Select colour", 
-                             "blue")
-          )),
-          fluidRow(
-            column(4,
-                 checkboxInput(paste0("comb", nr),
-                               "Combination", value = TRUE)
-          ),
-          column(4,
-            colourInput(paste0("trackcol", nr), 
-                             "Select colour", 
-                             "white")
-          ),
-          column(4,
-             sliderInput(paste0("linewidth", nr),
-             label = "Track Line width",
-             min = 0,
-             max = 7,
-             value = 1.5,
-             step = 0.5
-             ) 
-          )
-          ),
-        # Numeric inputs for Min and Max
-        fluidRow(
-          column(6,
-                 numericInput(paste0("minargs", nr, 1), "Min", value = NULL)
-          ),
-          column(6,
-                 numericInput(paste0("maxargs", nr, 1), "Max", value = NULL)
+                colourInput(paste0("trackcol", nr), 
+                            "", 
+                            "white")
           )
         ),
+
+        # Track Line section
+        h5("Track Line"),
+        fluidRow(
+          column(6,
+                colourInput(paste0("col", nr), 
+                            "", 
+                            "blue")
+          ),
+          column(6,
+                sliderInput(paste0("linewidth", nr),
+                            label = "Width",
+                            min = 0,
+                            max = 7,
+                            value = 1.5,
+                            step = 0.5
+                )
+          )
+        ),
+
+        # Data Range section
+        h5("Data range"),
         fluidRow(
           column(4,
-                 checkboxInput(paste0("log", nr, 1),
-                               "Log", value = TRUE)
+                numericInput(paste0("minargs", nr, 1), "Min", step = .2, value = NULL)
+          ),
+          column(4,
+                numericInput(paste0("maxargs", nr, 1), "Max", step = .2, value = NULL)
+          ),
+          column(4,
+                checkboxInput(paste0("log", nr, 1),
+                              "Log", value = FALSE)
           )
         )
       ),
@@ -203,10 +214,7 @@ insertUI(
         fluidRow(
           column(10,
                 h4("Feature 2", style = "margin-bottom: 15px;")
-          ),
-          column(2,
-               actionButton(paste0('collapseBtn2', nr), label = "", icon = icon("angle-double-down"), style = "width: 100%;")
-        )
+          )
         ),
         
         # File selection button and toggle button
@@ -252,8 +260,22 @@ insertUI(
           )
         ),
 
-      ),
+      
       #
+      fluidRow(
+        column(3,
+        offset = 6,
+            actionButton(paste0('collapseBtn2', nr), label = "", icon = icon("angle-double-down"), style = "width: 100%;"),
+            #shinyBS::bsTooltip(id = paste0('collapseBtn', nr), title ="Open options for color, label and data range"),
+            tippy_this(
+                elementId = paste0('collapseBtn2', nr),
+                tooltip = "<span style='font-size:15px;'>Open options for color, label and data range<span>", 
+                allowHTML = TRUE,
+                placement = 'right'
+            )
+          )
+        )
+      ),
       tags$div(
         id = paste0("collapseSection2", nr),
         style = "display: none;",  # Initially hidden
@@ -269,7 +291,7 @@ insertUI(
         fluidRow(
           column(4,
                  checkboxInput(paste0("log", nr, 2),
-                               "Log")
+                               "Log", value = FALSE)
           )
         )
       ),
@@ -320,6 +342,11 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
   # Toggle the collapsible section when collapse button is clicked
   observeEvent(input[[paste0('collapseBtn', nr)]], {
     shinyjs::toggle(paste0("collapseSection", nr))  # Toggle the collapsible section
+  })
+
+  # Toggle the collapsible section with animation
+  observeEvent(input[[paste0('collapseBtn', nr)]], {
+    shinyjs::toggleClass(id = paste0("collapseSection", nr), class = "expanded")
   })
 
   # When bedgraph is toggled, hide bigwig local and url buttons and
