@@ -92,35 +92,6 @@ insertUI(
                     ),
                   )
                 ),
-                fluidRow(
-                  column(6,
-                    # Checkbox for co-signaling with a different feature
-                    checkboxInput(paste0('cosignal', nr), "Separate signals?", value = FALSE),
-                    #shinyBS::bsTooltip(id = paste0('cosignal', nr), title ="Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1."),
-                  
-                    tippy_this(
-                            elementId = paste0('cosignal', nr), 
-                            tooltip = "<span style='font-size:15px;'>Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1.<span>", 
-                            allowHTML = TRUE,
-                            placement = 'right'
-                        ),
-                  ),
-                  column(3,
-                    actionButton(paste0('collapseBtn', nr), label = "", icon = icon("angle-double-down"), style = "width: 100%;"),
-                    #shinyBS::bsTooltip(id = paste0('collapseBtn', nr), title ="Open options for color, label and data range"),
-                    tippy_this(
-                        elementId = paste0('collapseBtn', nr),
-                        tooltip = "<span style='font-size:15px;'>Open options for color, label and data range<span>", 
-                        allowHTML = TRUE,
-                        placement = 'right'
-                    )
-                  ),
-                  column(2,
-                    #actionButton(paste0("comb", nr), label = HTML('<span class="icon">+</span>'), class = "toggle-btn")
-                    checkboxInput(paste0("comb", nr),
-                                  "Combination", value = FALSE)
-                              )
-              ),
           )
         ),
         div(id = paste0("bedgraphdiv", nr, 1),
@@ -149,6 +120,36 @@ insertUI(
                actionButton(paste0('toggleBtn', nr, 1), label = "", style = "width:100%;", icon = icon("exchange-alt"))
         )
       ),
+
+      fluidRow(
+        column(6,
+          # Checkbox for co-signaling with a different feature
+          checkboxInput(paste0('cosignal', nr), "Separate signals?", value = FALSE),
+          #shinyBS::bsTooltip(id = paste0('cosignal', nr), title ="Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1."),
+        
+          tippy_this(
+                  elementId = paste0('cosignal', nr), 
+                  tooltip = "<span style='font-size:15px;'>Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1.<span>", 
+                  allowHTML = TRUE,
+                  placement = 'right'
+              ),
+        ),
+        column(3,
+          actionButton(paste0('collapseBtn', nr), label = "", icon = icon("angle-double-down"), style = "width: 100%;"),
+          #shinyBS::bsTooltip(id = paste0('collapseBtn', nr), title ="Open options for color, label and data range"),
+          tippy_this(
+              elementId = paste0('collapseBtn', nr),
+              tooltip = "<span style='font-size:15px;'>Open options for color, label and data range<span>", 
+              allowHTML = TRUE,
+              placement = 'right'
+          )
+        ),
+        column(2,
+          #actionButton(paste0("comb", nr), label = HTML('<span class="icon">+</span>'), class = "toggle-btn")
+          checkboxInput(paste0("comb", nr),
+                        "Combination", value = FALSE)
+                    )
+              ),
       
       # Collapsible Section
       tags$div(
