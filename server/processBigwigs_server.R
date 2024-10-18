@@ -123,8 +123,7 @@ chipalpha <- reactive({
             # If a compartment file (ie. bedgraph + values<0).
             # Perform A, B and AB calculations automatically and 
             # overlay all.
-            # Think about changing to an actual boolean not string
-            if(bwlist_ChIP1()$iseigen[x]=="TRUE"){
+            if(bwlist_ChIP1()$iseigen[x]==TRUE){
                 # wigs will always be feature1=eigen, feature2=NULL
                 # split feature1 into: A, B
                 twolists = splitListintoTwo(
@@ -182,9 +181,12 @@ chipalpha <- reactive({
 
                 # Both clipped and minmax need to be adjusted with stitched.
                 # CURRENTLY it's just taking the A compartment value.
-                chipclipped[[x]] <<- tuple(Amat, convert=T)[1]
+                Atrack = tuple(Amat, convert=T)[1]
+                Btrack = tuple(Bmat, convert=T)[1]
+                print(paste0("ATRACK: ", Atrack))
+                print(paste0("BTRACK: ", Btrack))
+                chipclipped[[x]] <<- list(Atrack, Btrack)
                 minmaxclip[[x]] <<- as.list(tuple(Amat, convert=T)[2])
-
 
             }else {
 

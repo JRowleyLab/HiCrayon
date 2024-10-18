@@ -60,6 +60,12 @@ chipplot <- reactive({
                 tracks[[1]][[2]] <- chipalpha()$chipclipped[[x]][[2]]
             }
 
+            #Boolean value of if the bigwig is an eigentrack
+            eigenbool = bwlist_ChIP1()$iseigen[x]
+
+            if(eigenbool==TRUE){
+                tracks[[1]][[1]] <- chipalpha()$chipclipped[[x]]
+            }
                 
             # List of min/max values [[1,2]].
             minmaxlist <- list(minmaxargs$nums[[x]][[1]], minmaxargs$nums[[x]][[2]])
@@ -90,7 +96,8 @@ chipplot <- reactive({
                 hicalpha = input$hicalpha,
                 bedalpha = input$bedalpha,
                 filepathpng = pngpath,
-                filepathsvg = svgpath
+                filepathsvg = svgpath,
+                iseigen = eigenbool
                 #minmaxs = minmaxlist #[[1,2]] #not used.
                 )
 

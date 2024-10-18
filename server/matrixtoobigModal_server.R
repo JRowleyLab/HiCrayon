@@ -55,7 +55,3 @@ big_matrix_modal <- reactive({
     removeModal()
     shinyCatch({message(paste0("Loading Hi-C with matrix side length: ", side_length()))}, prefix = '')
   })
-
-  observe({
-    print(confirmed())
-  })

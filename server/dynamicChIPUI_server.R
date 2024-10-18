@@ -550,7 +550,6 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
   # Reset minmax arguments if any locus values change
   # chr, res, start, stop, or any input files
   observe({
-    print("check")
     updateNumericInput(session, paste0("minargs", nr, 1), "Min", value = NA)
     updateNumericInput(session, paste0("maxargs", nr, 1), "Max", value = NA)
   }) %>% bindEvent(

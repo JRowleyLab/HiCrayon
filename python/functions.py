@@ -253,9 +253,9 @@ def processBigwigs(bigwig,binsize,chrom,start,stop,num,userinfo):
             bwraw.append(0)
 
     bwraw = [0 if x == None else x for x in bwraw]
-    iseigen = "FALSE"
+    iseigen = False
     if bigwig.lower().endswith('bedgraph') and min(bwraw) < 0:
-         iseigen = "TRUE"
+         iseigen = True
 
     # Perform log operation on all values
     # 1e-5 added to avoid log(0)
@@ -475,14 +475,16 @@ def hic_plot(cmap, distnormmat, filepathpng, filepathsvg):
 	return filepathpng, filepathsvg
 
 
-def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic, disthic_cmap, hicalpha, bedalpha, filepathpng, filepathsvg):
+def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic, 
+              disthic_cmap, hicalpha, bedalpha, filepathpng, 
+              filepathsvg, iseigen):
     mat = mat.astype(np.uint8)
     fig = plt.figure()
     ax = fig.add_subplot()
 
     # Show distance normalized HiC
     ax.imshow(disthic, disthic_cmap, interpolation='none', alpha = hicalpha)
-	# Show ChIP-seq matrix
+	# Show 1D feature matrix
     ax.imshow(mat, interpolation='none', alpha = bedalpha)
 
     ax.xaxis.set_visible(False)
@@ -500,6 +502,10 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic, disthic_cmap, hical
     t = tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
     tcol = [x/255 for x in t]
     
+    # If an eigen compartment track is uploaded,
+    # have a line at 0 and plot A and B tracks above and below
+    # print(iseigen)
+    # print(iseigen[0])
     # x-axis plot setup
     ax1 = fig.add_subplot()
     ax1.set_facecolor(tcol)
@@ -515,37 +521,94 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic, disthic_cmap, hical
         else:
             f2 = False
 
+        if iseigen[0] == True:
+            print("eigentrack")
+            #  print(chip)
+            B = chip[0][0][0][0]
+            A = chip[0][0][1][0]
+            ax2 = ax1.twinx()
+            Ar = np.array(A)
+            A_scaled = 0.5 + Ar * 0.5
+            Br = np.array(B)
+            B_scaled = 0.5 - Br * 0.5
 
-		# x-axis track
-        ax2 = ax1.twinx()
-        ax2.plot(chip[i][0], color=col1[i], linewidth = linewidth[0])
-		#set y-axis to custom range #NOT USED #y-axis is baked into the data range itself.
-		# blim = min(chip[i]) if math.isnan(minmaxs[i][0]) else minmaxs[i][0]
-		# tlim = max(chip[i]) if math.isnan(minmaxs[i][1]) else minmaxs[i][1]
-        lims = [0, 1]
-        ax2.set_ylim(lims)
-		# y-axis track
-        if f2:
-            ychip = chip[i][1]
+            # Add fill between the lines and y=0.5
+            ax2.fill_between(range(len(A_scaled)), A_scaled, 0.5, color='blue', alpha=0.5)
+            ax2.fill_between(range(len(B_scaled)), B_scaled, 0.5, color='red', alpha=0.5)
+            #set y-axis to custom range #NOT USED #y-axis is baked into the data range itself.
+            # blim = min(chip[i]) if math.isnan(minmaxs[i][0]) else minmaxs[i][0]
+            # tlim = max(chip[i]) if math.isnan(minmaxs[i][1]) else minmaxs[i][1]
+            lims = [0, 1]
+            ax2.set_ylim(lims)
+            # y-axis track
+            if f2:
+                ychip = chip[i][0]
+            else:
+                ychip1 = A_scaled
+                ychip2 = B_scaled
+
+            ax4 = ax3.twiny()
+            a = [x for x in range(len(ychip1))]
+            b = [x for x in range(len(ychip2))]
+            #Plot the reversed ychip values
+            ax4.plot(ychip1[::-1], a, color='blue', linewidth=linewidth[0])
+            ax4.plot(ychip2[::-1], b, color='red', linewidth=linewidth[0])
+            
+            # Set x-axis limits
+            ax4.set_xlim(lims)
+
+            # Fill between the y-axis values and 0.5
+            ax4.fill_betweenx(a, ychip1[::-1], 0.5, where=(ychip1[::-1] > 0.5), 
+                            facecolor='blue', alpha=0.5)
+            ax4.fill_betweenx(a, ychip2[::-1], 0.5, where=(ychip2[::-1] < 0.5), 
+                            facecolor='red', alpha=0.5)
+            # ax4.fill_between(range(len(A_scaled)), A_scaled, 0.5, color='blue')
+            # ax4.fill_between(range(len(B_scaled)), B_scaled, 0.5, color='red')
+
+            # x-axis Remove ticks
+            ax1.set_xticks([])
+            ax1.set_yticks([])
+            ax2.set_xticks([])
+            ax2.set_yticks([])
+
+            # y-axis Remove ticks
+            ax3.set_xticks([])
+            ax3.set_yticks([])
+            ax4.set_xticks([])
+            ax4.set_yticks([])
+
         else:
-            ychip = chip[i][0]   
+            print("not eigentrack")
+            # x-axis track
+            ax2 = ax1.twinx()
+            ax2.plot(chip[i][0], color=col1[i], linewidth = linewidth[0])
+            #set y-axis to custom range #NOT USED #y-axis is baked into the data range itself.
+            # blim = min(chip[i]) if math.isnan(minmaxs[i][0]) else minmaxs[i][0]
+            # tlim = max(chip[i]) if math.isnan(minmaxs[i][1]) else minmaxs[i][1]
+            lims = [0, 1]
+            ax2.set_ylim(lims)
+            # y-axis track
+            if f2:
+                ychip = chip[i][1]
+            else:
+                ychip = chip[i][0]   
 
-        ax4 = ax3.twiny()
-        a = [x for x in range(len(ychip))]
-        ax4.plot(ychip[::-1], a, color=col1[i], linewidth = linewidth[0])
-        ax4.set_xlim(lims)
+            ax4 = ax3.twiny()
+            a = [x for x in range(len(ychip))]
+            ax4.plot(ychip[::-1], a, color=col1[i], linewidth = linewidth[0])
+            ax4.set_xlim(lims)
 
-		# x-axis Remove ticks
-        ax1.set_xticks([])
-        ax1.set_yticks([])
-        ax2.set_xticks([])
-        ax2.set_yticks([])
+            # x-axis Remove ticks
+            ax1.set_xticks([])
+            ax1.set_yticks([])
+            ax2.set_xticks([])
+            ax2.set_yticks([])
 
-		# y-axis Remove ticks
-        ax3.set_xticks([])
-        ax3.set_yticks([])
-        ax4.set_xticks([])
-        ax4.set_yticks([])
+            # y-axis Remove ticks
+            ax3.set_xticks([])
+            ax3.set_yticks([])
+            ax4.set_xticks([])
+            ax4.set_yticks([])
 
 
 	# Format plots
@@ -565,143 +628,6 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic, disthic_cmap, hical
     plt.close()
 
     return filepathpng, filepathsvg
-
-# check that the bedgraph binsize matches that
-# of the chosen binsize of Hi-C
-def checkBedBinsize(df, binsize):
-    bedbinsize = df['stop'].iloc[2] - df['start'].iloc[2]
-    return bedbinsize == binsize
-
-# Add missing bins and store as 0
-def addEmptyBins(df, chrom, start, stop, binsize):
-	# Setup model dataframe
-    starts = [x for x in range(start, stop, binsize)]
-    stops = [x for x in range(start+binsize, stop+binsize, binsize)]
-    chr = [chrom] * len(starts)
-    value = [0] * len(starts)
-    emptyval = list(zip(chr,starts,stops,value))
-    dfnew = pd.DataFrame(emptyval, columns=['chrom','start', 'stop', 'value'])
-
-    # Merge on old dataframe and take new rows as 0
-    df['chrom'] = chrom
-    dfmerged = df.merge(dfnew, how='right', on=['chrom', 'start', 'stop'], )
-    dfmerged['value_x'][dfmerged['value_x'].apply(math.isnan)] = 0
-    dfmerged.drop(['value_y'], axis=1, inplace=True)
-    dfmerged.sort_values(['chrom', 'start'], inplace=True)
-    dfmerged.rename({'value_x': 'value'}, axis=1, inplace=True)
-
-    return dfmerged
-
-def filterCompartments(comp, chrom, start, stop):
-    # Filter compartments bedGraph by selected region
-    comp = pd.read_csv(comp, sep="\t", header=None, dtype={0: 'string'}, on_bad_lines='skip')
-    comp.columns = ['chrom', 'start', 'stop', 'value']
-
-    nochr = chrom.strip('chr')
-    wchr = "chr" + str(nochr)
-
-    comp_filt = comp.loc[(comp['chrom'] == nochr) & (comp['start'] >= start) & (comp['stop'] <= stop)]
-    
-    if(len(comp_filt)==0):
-        comp_filt = comp.loc[(comp['chrom'] == wchr) & (comp['start'] >= start) & (comp['stop'] <= stop)]
-
-    return comp_filt
-
-
-def scaleCompartments(disthic, comp_df, Acol, Bcol, ABcol):
-    #distance normalized hic matrix
-    distscaled = (disthic-np.min(disthic))/(np.max(disthic)-np.min(disthic))
-
-    comp_arr = comp_df['value']
-    Acomp = np.where(comp_arr<0, 0, comp_arr)
-    Bcomp = np.where(comp_arr>0, 0, comp_arr)
-    # #Normalize on IQR
-    # q3, q1 = np.percentile(comp_arr, [75,25])
-    # iqr = q3 - q1
-    # comp_arr_IQR_norm = comp_arr / iqr
-    # Normalize data to between -1 and 1
-    # Scale A compartment to 0 and 1
-    min = 0
-    max = 1
-    Anormd = (((Acomp-np.min(Acomp)) * ( (max) - (min))) / (np.max(Acomp) - np.min(Acomp))) + min
-    # SCale B compartment to 0 and -1
-    min = 0
-    max = -1
-    Bnormd = (((Bcomp-np.min(Bcomp)) * ( (min) - (max))) / (np.max(Bcomp) - np.min(Bcomp))) + max
-
-    for i, comp in enumerate([Anormd, Bnormd]):
-
-        matsize = len(comp)
-        # RGBA
-        rmat = np.zeros((matsize,matsize))
-        gmat = np.zeros((matsize,matsize))
-        bmat = np.zeros((matsize,matsize))
-        amat = np.zeros((matsize,matsize))
-
-        if(i==0):
-            # Alter r,g,b for desired color
-            rmat.fill(Acol[0])
-            gmat.fill(Acol[1])
-            bmat.fill(Acol[2])
-        else:
-            rmat.fill(Bcol[0])
-            gmat.fill(Bcol[1])
-            bmat.fill(Bcol[2])
-
-        # Calculate the alpha value for each 
-        for x in range(0,matsize):
-            for y in range(x,matsize):
-
-                newscore = (comp[x] * comp[y])*255
-                # Multiply by HiC distance-normalized and 0-1 scaled
-                newscore = newscore * distscaled[x,y]
-                #alpha value
-                amat[x,y] = newscore
-                amat[y,x] = newscore
-
-        if(i==0):
-            Amatrix = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
-        else:
-            Bmatrix = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
-
-    # Create A-B compartment matrix
-    matsize = len(comp)
-    # RGBA
-    rmat = np.zeros((matsize,matsize))
-    gmat = np.zeros((matsize,matsize))
-    bmat = np.zeros((matsize,matsize))
-    amat = np.zeros((matsize,matsize))
-
-    rmat.fill(ABcol[0])
-    gmat.fill(ABcol[1])
-    bmat.fill(ABcol[2])
-
-    # Calculate the alpha value for each 
-    for x in range(0,matsize):
-        for y in range(x,matsize):
-
-            newscore = (Acomp[x] * Bcomp[y])*255
-            # Multiply by HiC distance-normalized and 0-1 scaled
-            newscore = newscore * distscaled[x,y]
-            #alpha value
-            #amat[x,y] = newscore
-            amat[y,x] = newscore
-
-    for x in range(0,matsize):
-        for y in range(x,matsize):
-
-            newscore = (Acomp[y] * Bcomp[x])*255
-            # Multiply by HiC distance-normalized and 0-1 scaled
-            newscore = newscore * distscaled[x,y]
-            #alpha value
-            amat[x,y] = newscore
-            #amat[y,x] = newscore
-
-    
-    ABmatrix = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
-
-    return Amatrix, Bmatrix, ABmatrix
-
 
 def plotCompartments(disthic, comp, ABmat, colA, colB, filepathpng, filepathsvg):
     
@@ -751,3 +677,143 @@ def plotCompartments(disthic, comp, ABmat, colA, colB, filepathpng, filepathsvg)
     
     plt.close()
     return filepathpng, filepathsvg
+
+
+
+# # check that the bedgraph binsize matches that
+# # of the chosen binsize of Hi-C
+# def checkBedBinsize(df, binsize):
+#     bedbinsize = df['stop'].iloc[2] - df['start'].iloc[2]
+#     return bedbinsize == binsize
+
+# # Add missing bins and store as 0
+# def addEmptyBins(df, chrom, start, stop, binsize):
+# 	# Setup model dataframe
+#     starts = [x for x in range(start, stop, binsize)]
+#     stops = [x for x in range(start+binsize, stop+binsize, binsize)]
+#     chr = [chrom] * len(starts)
+#     value = [0] * len(starts)
+#     emptyval = list(zip(chr,starts,stops,value))
+#     dfnew = pd.DataFrame(emptyval, columns=['chrom','start', 'stop', 'value'])
+
+#     # Merge on old dataframe and take new rows as 0
+#     df['chrom'] = chrom
+#     dfmerged = df.merge(dfnew, how='right', on=['chrom', 'start', 'stop'], )
+#     dfmerged['value_x'][dfmerged['value_x'].apply(math.isnan)] = 0
+#     dfmerged.drop(['value_y'], axis=1, inplace=True)
+#     dfmerged.sort_values(['chrom', 'start'], inplace=True)
+#     dfmerged.rename({'value_x': 'value'}, axis=1, inplace=True)
+
+#     return dfmerged
+
+# def filterCompartments(comp, chrom, start, stop):
+#     # Filter compartments bedGraph by selected region
+#     comp = pd.read_csv(comp, sep="\t", header=None, dtype={0: 'string'}, on_bad_lines='skip')
+#     comp.columns = ['chrom', 'start', 'stop', 'value']
+
+#     nochr = chrom.strip('chr')
+#     wchr = "chr" + str(nochr)
+
+#     comp_filt = comp.loc[(comp['chrom'] == nochr) & (comp['start'] >= start) & (comp['stop'] <= stop)]
+    
+#     if(len(comp_filt)==0):
+#         comp_filt = comp.loc[(comp['chrom'] == wchr) & (comp['start'] >= start) & (comp['stop'] <= stop)]
+
+#     return comp_filt
+
+
+# def scaleCompartments(disthic, comp_df, Acol, Bcol, ABcol):
+#     #distance normalized hic matrix
+#     distscaled = (disthic-np.min(disthic))/(np.max(disthic)-np.min(disthic))
+
+#     comp_arr = comp_df['value']
+#     Acomp = np.where(comp_arr<0, 0, comp_arr)
+#     Bcomp = np.where(comp_arr>0, 0, comp_arr)
+#     # #Normalize on IQR
+#     # q3, q1 = np.percentile(comp_arr, [75,25])
+#     # iqr = q3 - q1
+#     # comp_arr_IQR_norm = comp_arr / iqr
+#     # Normalize data to between -1 and 1
+#     # Scale A compartment to 0 and 1
+#     min = 0
+#     max = 1
+#     Anormd = (((Acomp-np.min(Acomp)) * ( (max) - (min))) / (np.max(Acomp) - np.min(Acomp))) + min
+#     # SCale B compartment to 0 and -1
+#     min = 0
+#     max = -1
+#     Bnormd = (((Bcomp-np.min(Bcomp)) * ( (min) - (max))) / (np.max(Bcomp) - np.min(Bcomp))) + max
+
+#     for i, comp in enumerate([Anormd, Bnormd]):
+
+#         matsize = len(comp)
+#         # RGBA
+#         rmat = np.zeros((matsize,matsize))
+#         gmat = np.zeros((matsize,matsize))
+#         bmat = np.zeros((matsize,matsize))
+#         amat = np.zeros((matsize,matsize))
+
+#         if(i==0):
+#             # Alter r,g,b for desired color
+#             rmat.fill(Acol[0])
+#             gmat.fill(Acol[1])
+#             bmat.fill(Acol[2])
+#         else:
+#             rmat.fill(Bcol[0])
+#             gmat.fill(Bcol[1])
+#             bmat.fill(Bcol[2])
+
+#         # Calculate the alpha value for each 
+#         for x in range(0,matsize):
+#             for y in range(x,matsize):
+
+#                 newscore = (comp[x] * comp[y])*255
+#                 # Multiply by HiC distance-normalized and 0-1 scaled
+#                 newscore = newscore * distscaled[x,y]
+#                 #alpha value
+#                 amat[x,y] = newscore
+#                 amat[y,x] = newscore
+
+#         if(i==0):
+#             Amatrix = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
+#         else:
+#             Bmatrix = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
+
+    # # Create A-B compartment matrix
+    # matsize = len(comp)
+    # # RGBA
+    # rmat = np.zeros((matsize,matsize))
+    # gmat = np.zeros((matsize,matsize))
+    # bmat = np.zeros((matsize,matsize))
+    # amat = np.zeros((matsize,matsize))
+
+    # rmat.fill(ABcol[0])
+    # gmat.fill(ABcol[1])
+    # bmat.fill(ABcol[2])
+
+    # # Calculate the alpha value for each 
+    # for x in range(0,matsize):
+    #     for y in range(x,matsize):
+
+    #         newscore = (Acomp[x] * Bcomp[y])*255
+    #         # Multiply by HiC distance-normalized and 0-1 scaled
+    #         newscore = newscore * distscaled[x,y]
+    #         #alpha value
+    #         #amat[x,y] = newscore
+    #         amat[y,x] = newscore
+
+    # for x in range(0,matsize):
+    #     for y in range(x,matsize):
+
+    #         newscore = (Acomp[y] * Bcomp[x])*255
+    #         # Multiply by HiC distance-normalized and 0-1 scaled
+    #         newscore = newscore * distscaled[x,y]
+    #         #alpha value
+    #         amat[x,y] = newscore
+    #         #amat[y,x] = newscore
+
+    
+    # ABmatrix = (np.dstack((rmat,gmat,bmat,amat))).astype(np.uint8)
+
+    # return Amatrix, Bmatrix, ABmatrix
+
+
