@@ -128,7 +128,7 @@ chipalpha <- reactive({
                 # wigs will always be feature1=eigen, feature2=NULL
                 # split feature1 into: A, B
                 twolists = splitListintoTwo(
-                    bedg = paste0("tmp",x,"1.bw"),
+                    bedg = paste0(userinfo,"/bed",x,"1.bw"),
                     binsize = as.integer(input$bin),
                     chrom = input$chr,
                     start = input$start,
