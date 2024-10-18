@@ -37,8 +37,15 @@ bwlist_ChIP1 <- reactive({
                     chrom = input$chr,
                     start = input$start,
                     stop = input$stop,
-                    num = paste0(x,i)
+                    num = paste0(x,i),
+                    userinfo = userinfo
                 )
+                if(tuple(bwlist, convert=T)[0]=="OOO"){
+                    "Error: The entries are out of order or have illegal values. Please check and try again."
+                    shinyCatch({stop(paste0("Error: The entries in ", wigs[[i]] ," are out of order or have illegal values. Please check and try again."))}, 
+                        prefix = '',
+                        blocking_level = "error")
+                }
             logs[[x]][[i]] <<- tuple(bwlist, convert=T)[0]
             raws[[x]][[i]] <<- tuple(bwlist, convert=T)[1]
             # iseigen[[x]] <<- tuple(bwlist, convert=T)[2]

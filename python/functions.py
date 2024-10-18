@@ -193,15 +193,23 @@ def bedgraph_to_bigwig(bedgraph, output_bigwig, binsize):
             start = int(start)
             end = int(end)
             value = float(value)
+            # lists 
             chroml.append(chrom)
             startl.append(start)
             endsl.append(end)
             valuesl.append(value)
 
-            
-        # Add the entries to BigWig
-        bw.addEntries(chroml, startl, ends=endsl, values=valuesl)
-
+        try:
+            # Your code where the RuntimeError might occur
+            # For example, some function that adds entries
+            bw.addEntries(chroml, startl, ends=endsl, values=valuesl)
+        except RuntimeError as e:
+            # Check if the error message matches the specific error
+            if "The entries you tried to add are out of order" in str(e):
+                output_bigwig = "Error: The entries are out of order or have illegal values. Please check and try again."
+            else:
+                # If it's a different RuntimeError, raise it again
+                raise
     # Step 4: Close the BigWig file
     bw.close()
     return(output_bigwig)
@@ -209,7 +217,7 @@ def bedgraph_to_bigwig(bedgraph, output_bigwig, binsize):
 
 # Read in bigwig file and return a list of
 # bigwig peak values
-def processBigwigs(bigwig,binsize,chrom,start,stop,num):
+def processBigwigs(bigwig,binsize,chrom,start,stop,num,userinfo):
     
     start=int(start)
     binsize=int(binsize)
@@ -225,11 +233,12 @@ def processBigwigs(bigwig,binsize,chrom,start,stop,num):
         bwopen = pyBigWig.open(bigwig)  
     elif bigwig.lower().endswith(('.bedgraph', '.bed')):
         # convert to bigwig
-        # TODO: delete when user closes the session.
-        bigwigfile = "tmp"+str(num)+".bw"
+        bigwigfile = userinfo+"/bed"+str(num)+".bw"
         #check that it's 4 column. If not trim to 4
         # Actually let's just split
         outbig = bedgraph_to_bigwig(bedgraph = bigwig, output_bigwig = bigwigfile, binsize=binsize)
+        if(outbig=="Error: The entries are out of order or have illegal values. Please check and try again."):
+            return("OOO")
         bwopen = pyBigWig.open(outbig)
     
     bwraw = []
