@@ -3,6 +3,7 @@
 # binsize across selected genomic
 # region
 bwlist_ChIP1 <- reactive({
+    req(hicv$y)
     # Need at least one chip uploaded.
     # validate(need(hicv$y!="NULL", "Please upload a HiC file"))
 
@@ -65,10 +66,11 @@ bwlist_ChIP1 <- reactive({
         raws = raws,
         iseigen = iseigen
         ))
-})
+}) %>% shiny::bindEvent(confirmed())
 
 chipalpha <- reactive({
-
+    
+    req(hicv$y)
     req(input$chip1)
 
     chipalphas <- list()
@@ -183,15 +185,11 @@ chipalpha <- reactive({
                 # CURRENTLY it's just taking the A compartment value.
                 Atrack = tuple(Amat, convert=T)[1]
                 Btrack = tuple(Bmat, convert=T)[1]
-                print(paste0("ATRACK: ", Atrack))
-                print(paste0("BTRACK: ", Btrack))
                 chipclipped[[x]] <<- list(Atrack, Btrack)
                 minmaxclip[[x]] <<- as.list(tuple(Amat, convert=T)[2])
 
             }else {
 
-                # Calculate the alpha matrix. Bread and Butter of HiCrayon.
-                # m[i,j] = s[i] * s[j]
                 m1 <- calcAlphaMatrix(
                     chiplist=wigs,
                     minmaxlist = minmaxlist, #[1][[1]][[2]] [2][[1]][[2]]
