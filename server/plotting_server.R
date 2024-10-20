@@ -39,6 +39,7 @@ chipplot <- reactive({
     col <- list()
     trackcol <- list()
     linewidth <- list()
+    eigenbools <- list()
 
     lapply(seq_along(bw1v$features), function(x){
 
@@ -62,10 +63,15 @@ chipplot <- reactive({
 
             #Boolean value of if the bigwig is an eigentrack
             eigenbool = bwlist_ChIP1()$iseigen[x]
+            eigenbools <- append(eigenbools, eigenbool)
 
             if(eigenbool==TRUE){
                 tracks[[1]][[1]] <- chipalpha()$chipclipped[[x]]
+                print("SINGLE")
+                print(tracks[[1]][[1]])
             }
+
+            print(eigenbools)
                 
             # List of min/max values [[1,2]].
             minmaxlist <- list(minmaxargs$nums[[x]][[1]], minmaxargs$nums[[x]][[2]])
@@ -97,7 +103,7 @@ chipplot <- reactive({
                 bedalpha = input$bedalpha,
                 filepathpng = pngpath,
                 filepathsvg = svgpath,
-                iseigen = eigenbool
+                iseigen = eigenbools
                 #minmaxs = minmaxlist #[[1,2]] #not used.
                 )
 
@@ -161,6 +167,7 @@ chipcombinedplot <- reactive({
     trackcols <- c()
     linewidth <- list()
     names <- list()
+    eigenbools <- list()
     # List of min/max values [[1,2]].
     #minmaxlist_list <- list()
 
@@ -186,8 +193,26 @@ chipcombinedplot <- reactive({
         names <- append(names, input[[paste0("n", chipstocombine[x])]])
         # List of min/max values [[1,2]].
         #minmaxlist_list <- append(minmaxlist_list, list(minmaxargs$nums[[x]][[1]]) )
+        
+        #Boolean value of if the bigwig is an eigentrack
+        eigenbool = bwlist_ChIP1()$iseigen[x]
+        eigenbools <- append(eigenbools, eigenbool)
+
+        # if it's an eigen track, overwrite track with eigen track
+        if(eigenbool==TRUE){
+            #tracks[[1]][[1]] <- chipalpha()$chipclipped[[x]]
+            tracks[[counter]][[1]] <- chipalpha()$chipclipped[[chipstocombine[x]]]
+            print("COMBINED")
+            print(tracks[[counter]][[1]])
+        }
+
+
+
+
         counter = counter + 1
     }
+
+    print(eigenbools)
 
     patt <- str_glue(
     "ChIP_{paste0(names, collapse = '_')}_{input$chr}_{input$start}_{input$stop}_{input$bin}_norm-{input$norm}_"
@@ -215,7 +240,8 @@ chipcombinedplot <- reactive({
             hicalpha = input$hicalpha,
             bedalpha = input$bedalpha,
             filepathpng = pngpath,
-            filepathsvg = svgpath
+            filepathsvg = svgpath,
+            iseigen = eigenbools
             )
 
     chippng <- tuple(chipcomb, convert = T)[0]

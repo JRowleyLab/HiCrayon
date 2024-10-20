@@ -1,5 +1,5 @@
 # variable for starting root directory
-# When used by others: TODO: change to root
+# When used by others
 workingdir = '/'
 
 ## Server side file-selection

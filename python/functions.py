@@ -521,17 +521,21 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
         else:
             f2 = False
 
-        if iseigen[0] == True:
-            print("eigentrack")
-            #  print(chip)
+        if iseigen[i] == True:
+            print("PYEIGEN: " + str(iseigen[i]))
+            
+            print("check1")
+
             B = chip[0][0][0][0]
             A = chip[0][0][1][0]
+
+            print("cehck1.1")
             ax2 = ax1.twinx()
             Ar = np.array(A)
             A_scaled = 0.5 + Ar * 0.5
             Br = np.array(B)
             B_scaled = 0.5 - Br * 0.5
-
+            print("check2")
             # Add fill between the lines and y=0.5
             ax2.fill_between(range(len(A_scaled)), A_scaled, 0.5, color='blue', alpha=0.5)
             ax2.fill_between(range(len(B_scaled)), B_scaled, 0.5, color='red', alpha=0.5)
@@ -546,7 +550,7 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
             else:
                 ychip1 = A_scaled
                 ychip2 = B_scaled
-
+            print("check3")
             ax4 = ax3.twiny()
             a = [x for x in range(len(ychip1))]
             b = [x for x in range(len(ychip2))]
@@ -559,9 +563,9 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
 
             # Fill between the y-axis values and 0.5
             ax4.fill_betweenx(a, ychip1[::-1], 0.5, where=(ychip1[::-1] > 0.5), 
-                            facecolor='blue', alpha=0.5)
+                            color='blue', alpha=0.5)
             ax4.fill_betweenx(a, ychip2[::-1], 0.5, where=(ychip2[::-1] < 0.5), 
-                            facecolor='red', alpha=0.5)
+                            color='red', alpha=0.5)
             # ax4.fill_between(range(len(A_scaled)), A_scaled, 0.5, color='blue')
             # ax4.fill_between(range(len(B_scaled)), B_scaled, 0.5, color='red')
 
@@ -577,6 +581,7 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
             ax4.set_xticks([])
             ax4.set_yticks([])
 
+            print("check4")
         else:
             print("not eigentrack")
             # x-axis track
@@ -610,7 +615,7 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
             ax4.set_xticks([])
             ax4.set_yticks([])
 
-
+    print("check5")
 	# Format plots
     l1, b1, w1, h1 = ax.get_position().bounds
 	#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
@@ -629,54 +634,54 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
 
     return filepathpng, filepathsvg
 
-def plotCompartments(disthic, comp, ABmat, colA, colB, filepathpng, filepathsvg):
+# def plotCompartments(disthic, comp, ABmat, colA, colB, filepathpng, filepathsvg):
     
-    # Plot HiC map and compartment tracks
-    mat = disthic.astype(np.uint8)
+#     # Plot HiC map and compartment tracks
+#     mat = disthic.astype(np.uint8)
 
-    #img = Image.fromarray(mat)
+#     #img = Image.fromarray(mat)
                 
-    fig, (ax2) = plt.subplots(ncols=1)
+#     fig, (ax2) = plt.subplots(ncols=1)
     
-    compartments = comp['value']
+#     compartments = comp['value']
 
-	# Show compartments
-    ax2.imshow(ABmat, interpolation='none', alpha = 1)
+# 	# Show compartments
+#     ax2.imshow(ABmat, interpolation='none', alpha = 1)
 
-    ax2.xaxis.set_visible(False)
-    ax2.yaxis.set_visible(False)
+#     ax2.xaxis.set_visible(False)
+#     ax2.yaxis.set_visible(False)
 
-    ax3 = fig.add_subplot()
-    ax3.plot(compartments, color='black', linewidth = 1)
-    #ax3.axis('off')
-    l1, b1, w1, h1 = ax2.get_position().bounds
-    #ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
-    ax3.set_position((l1*(1),0.02, w1*1, .075))
-    ax3.margins(x=0)
-    ax3.axhline(y=0, color='black', linestyle='-')
-    ax3.fill_between(compartments.index, list(compartments), where=(compartments > 0), facecolor = colA, edgecolor='none', alpha=.5, interpolate=False, hatch = None)
-    ax3.fill_between(compartments.index, list(compartments), where=(compartments < 0), facecolor = colB, edgecolor='none', alpha=.5, interpolate=False, hatch = None)
-    ax3.xaxis.set_visible(False)
-    ax3.yaxis.set_visible(False)
+#     ax3 = fig.add_subplot()
+#     ax3.plot(compartments, color='black', linewidth = 1)
+#     #ax3.axis('off')
+#     l1, b1, w1, h1 = ax2.get_position().bounds
+#     #ax3.set_position((l1*(.97),0.18, w1*1.1, .075))
+#     ax3.set_position((l1*(1),0.02, w1*1, .075))
+#     ax3.margins(x=0)
+#     ax3.axhline(y=0, color='black', linestyle='-')
+#     ax3.fill_between(compartments.index, list(compartments), where=(compartments > 0), facecolor = colA, edgecolor='none', alpha=.5, interpolate=False, hatch = None)
+#     ax3.fill_between(compartments.index, list(compartments), where=(compartments < 0), facecolor = colB, edgecolor='none', alpha=.5, interpolate=False, hatch = None)
+#     ax3.xaxis.set_visible(False)
+#     ax3.yaxis.set_visible(False)
 
-    ax4 = fig.add_subplot()
-    a = [x for x in range(len(compartments))]
-    ax4.plot(compartments[::-1], a, color='black', linewidth = 1)
+#     ax4 = fig.add_subplot()
+#     a = [x for x in range(len(compartments))]
+#     ax4.plot(compartments[::-1], a, color='black', linewidth = 1)
 
-    l2, b2, w2, h2 = ax2.get_position().bounds
-    ax4.set_position((l2*(.7),b2, w2*.1, h2*(1)))
-    ax4.margins(y=0)
-    ax4.axvline(x=0, color='black', linestyle='-')
-    ax4.fill_betweenx(a, list(compartments[::-1]), where=(compartments[::-1] > 0), facecolor = colA, edgecolor='none', alpha=.5, interpolate=False, hatch = None)
-    ax4.fill_betweenx(a, list(compartments[::-1]), where=(compartments[::-1] < 0), facecolor = colB, edgecolor='none', alpha=.5, interpolate=False, hatch = None)
-    ax4.xaxis.set_visible(False)
-    ax4.yaxis.set_visible(False)
+#     l2, b2, w2, h2 = ax2.get_position().bounds
+#     ax4.set_position((l2*(.7),b2, w2*.1, h2*(1)))
+#     ax4.margins(y=0)
+#     ax4.axvline(x=0, color='black', linestyle='-')
+#     ax4.fill_betweenx(a, list(compartments[::-1]), where=(compartments[::-1] > 0), facecolor = colA, edgecolor='none', alpha=.5, interpolate=False, hatch = None)
+#     ax4.fill_betweenx(a, list(compartments[::-1]), where=(compartments[::-1] < 0), facecolor = colB, edgecolor='none', alpha=.5, interpolate=False, hatch = None)
+#     ax4.xaxis.set_visible(False)
+#     ax4.yaxis.set_visible(False)
     
-    plt.savefig(filepathsvg, bbox_inches='tight')
-    plt.savefig(filepathpng, bbox_inches='tight', dpi=300)
+#     plt.savefig(filepathsvg, bbox_inches='tight')
+#     plt.savefig(filepathpng, bbox_inches='tight', dpi=300)
     
-    plt.close()
-    return filepathpng, filepathsvg
+#     plt.close()
+#     return filepathpng, filepathsvg
 
 
 
