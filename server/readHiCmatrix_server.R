@@ -1,5 +1,3 @@
-options(shiny.maxRequestSize=10000*1024^2)
-
 # hic file handling
 hicv <- reactiveValues()
 observeEvent(input$hic, {

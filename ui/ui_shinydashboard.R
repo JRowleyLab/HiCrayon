@@ -1,7 +1,27 @@
 ## app.R ##
-dashboardPage(title = "HiCrayon",
-                    dashboardHeader(title = tags$a(span(img(src="logo/HiCrayon_logo2.png",height=60,align="left")),href="https://github.com/JRowleyLab/HiCrayon"),titleWidth = 600),
-dashboardSidebar(
+dashboardPage(
+  title = "HiCrayon",
+  
+  dashboardHeader(
+    title = tagList(
+      tags$a(
+        span(
+          img(src = "logo/HiCrayon_logo2.png", height = 60, align = "left")
+        ),
+        href = "https://github.com/JRowleyLab/HiCrayon"
+      ),
+      
+      # Conditionally display "Lite Mode - Restricted upload capacity" if light mode is enabled
+      if (is_lite_mode) {
+        div(
+          style = "color: red; font-weight: bold; padding-left: 20px;", 
+          "Lite Mode - Restricted upload capacity"
+        )
+      }
+    ),
+    titleWidth = 600
+  ),
+  dashboardSidebar(
     sidebarMenu(id="sidebartabs",
                 menuItem("Visualize", tabName = "Visualize", icon = icon("eye"))
     ),

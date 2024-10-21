@@ -2,15 +2,14 @@
 args <- commandArgs(trailingOnly = TRUE)
 
 # Default values
-light_mode_arg <- FALSE
+lite_mode_arg <- FALSE
 port <- 3838  # Default Shiny port
 
 # Check if 'light-mode' argument is passed
-print(args)
-if ("--light-mode" %in% args) {
-  light_mode_arg <- TRUE
+if ("--lite-mode" %in% args) {
+  lite_mode_arg <- TRUE
 } else {
-  light_mode_arg <- FALSE
+  lite_mode_arg <- FALSE
 }
 
 # Look for the --port argument
