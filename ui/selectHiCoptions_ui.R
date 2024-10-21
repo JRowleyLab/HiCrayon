@@ -1,10 +1,19 @@
-selectHiCoptionsUI <- div(fluidRow(
+selectHiCoptionsUI <- div(fluidRow(id="hicdiv",
                             column(12,
                             #shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
-                            shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
+                            #shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
+                            if (is_lite_mode) {
+                                # Replace shinyFilesButton with fileInput
+                                fileInput(paste0('hic_clientside'), 
+                                label = 'Select Hi-C',
+                                multiple = FALSE,
+                                accept = '.hic')
+                            } else {
+                                shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE)
+                            },
                             tippy_this(
-                                elementId = "hic", 
-                                tooltip = "<span style='font-size:15px;'>Local .hic file (juicer)<span>", 
+                                elementId = "hicdiv", 
+                                tooltip = "<span style='font-size:15px;'>Upload .hic file (juicer)<span>", 
                                 allowHTML = TRUE,
                                 placement = 'right'
                             ),

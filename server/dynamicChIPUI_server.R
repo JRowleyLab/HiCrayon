@@ -48,22 +48,29 @@ insertUI(
       
       # File selection button and toggle button
       fluidRow(
-        div(id = paste0("bigwigdiv", nr, 1),
+        tags$div(id = paste0("bigwigdiv", nr, 1),
           column(9,
                 # Wrapper div that will hold the "Select Bigwig" button
-                tags$div(
-                  shinyFilesButton(
-                    paste0('bw', nr, 1),
-                    label = 'Select bigwig',
-                    title = 'Please select a .bigwig/.bw file',
-                    multiple = FALSE,
-                    style = "width: 100%;"
-                  ),
-                  id = paste0('fileSelectDiv', nr, 1)
+                tags$div(id = paste0('fileSelectDiv', nr, 1),
+                  if (is_lite_mode) {
+                    # Replace shinyFilesButton with fileInput
+                    fileInput(paste0('bw', nr, 1, '_clientside'), 
+                      label = 'Select Bigwig',
+                      multiple = FALSE,
+                      accept = c('.bw', '.bigwig', '.bigWig'))
+                  } else {
+                    shinyFilesButton(
+                      paste0('bw', nr, 1),
+                      label = 'Select bigwig',
+                      title = 'Please select a .bigwig/.bw file',
+                      multiple = FALSE,
+                      style = "width: 100%;"
+                    )
+                  }
                 ),
                 tippy_this(
                         elementId = paste0('fileSelectDiv', nr), 
-                        tooltip = "<span style='font-size:15px;'>Select local .bigwig/ .bw file<span>", 
+                        tooltip = "<span style='font-size:15px;'>Select .bigwig/ .bw file<span>", 
                         allowHTML = TRUE,
                         placement = 'right'
                     ),
@@ -97,18 +104,26 @@ insertUI(
                 ),
           )
         ),
-        div(id = paste0("bedgraphdiv", nr, 1),
+        tags$div(id = paste0("bedgraphdiv", nr, 1),
           column(9,
                 # Wrapper div that will hold the "Select Bigwig" button
-                tags$div(
-                  shinyFilesButton(
-                    paste0('bed', nr, 1),
-                    label = 'Select bedgraph',
-                    title = 'Please select a .bedgraph/.bed file',
-                    multiple = FALSE,
-                    style = "width: 100%;"
-                  ),
-                  id = paste0('bedSelectDiv', nr, 1)
+                tags$div(id = paste0('bedSelectDiv', nr, 1),
+
+                  if (is_lite_mode) {
+                      # Replace shinyFilesButton with fileInput
+                      fileInput(paste0('bed', nr, 1, '_clientside'), 
+                      label = 'Select bedgraph',
+                      multiple = FALSE,
+                      accept = c('bed', 'bedgraph'))
+                  } else {
+                      shinyFilesButton(
+                        paste0('bed', nr, 1),
+                        label = 'Select bedgraph',
+                        title = 'Please select a .bedgraph/.bed file',
+                        multiple = FALSE,
+                        style = "width: 100%;"
+                      )
+                  },
                 ),
                 tippy_this(
                         elementId = paste0('bedSelectDiv', nr), 
@@ -128,8 +143,6 @@ insertUI(
         column(6,
           # Checkbox for co-signaling with a different feature
           checkboxInput(paste0('cosignal', nr), "Separate signals?", value = FALSE),
-          #shinyBS::bsTooltip(id = paste0('cosignal', nr), title ="Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1."),
-        
           tippy_this(
                   elementId = paste0('cosignal', nr), 
                   tooltip = "<span style='font-size:15px;'>Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1.<span>", 
@@ -148,7 +161,6 @@ insertUI(
           )
         ),
         column(2,
-          #actionButton(paste0("comb", nr), label = HTML('<span class="icon">+</span>'), class = "toggle-btn")
           checkboxInput(paste0("comb", nr),
                         "Combination", value = FALSE)
                     )
@@ -227,15 +239,14 @@ insertUI(
         fluidRow(
               column(9,
                     # Wrapper div that will hold the "Select Bigwig" button
-                    tags$div(
+                    tags$div(id = paste0('fileSelectDiv', nr, 2),
                       shinyFilesButton(
                         paste0('bw', nr, 2),
                         label = 'Select bigwig',
                         title = 'Please select a .bigwig/.bw file',
                         multiple = FALSE,
                         style = "width: 100%;"
-                      ),
-                      id = paste0('fileSelectDiv', nr, 2)
+                      )
                     ),
                     
                     # Wrapper div that will hold the URL input and Add URL button (initially hidden)
@@ -402,17 +413,6 @@ observeEvent({
   })
 
 
-# observeEvent({
-#     bwlist_ChIP1()$iseigen[nr][[1]]  # The reactive expression
-#   }, {
-#     # Check if the value is TRUE and not NULL
-#     if (!is.null(bwlist_ChIP1()$iseigen[nr][[1]]) && bwlist_ChIP1()$iseigen[nr][[1]] == TRUE) {
-#       shinyCatch({message(paste("File: ", bw1v$features[[nr]], " looks like an Eigen track (bedgraph with positive and negative values), plotting in Eigen format + changing UI in Panel ", nr))}, prefix = '')
-#       shinyjs::hide(paste0("datarange", nr))  # Hide the element
-#       updateMaterialSwitch(session, paste0("eigenswitch", nr), value = TRUE)  # Update the switch
-#     }
-#   }, ignoreNULL = TRUE)
-
 observeEvent({
     bwlist_ChIP1()$iseigen[nr][[1]]  # Reactive expression that triggers the event
   }, {
@@ -550,13 +550,17 @@ observeEvent({
           value = tools::file_path_sans_ext(basename(bw1v[[paste0("bw",nr, 1)]]))
           )
     }else{
-        # TODO: make this an actual error message
+        shinyCatch({stop(paste0("URL uploaded: ", 
+        input[[paste0('urlchip', nr, 1)]],
+        " is not valid."
+        ))}, prefix = '')
     }
   }) %>% bindEvent(input[[paste0('loadurlchip',nr, 1)]])
 
 
   # Check URL when user tries to input bigwig URL for FEATURE 2
   observe({
+    print(tools::file_path_sans_ext(basename(bw1v[[paste0("bw", nr, 2)]])))
     isvalid = checkURL(input[[paste0('urlchip', nr, 2)]], list('bigWig', 'bigwig', 'bw'))
 
     if(isvalid=="Valid"){
@@ -568,7 +572,10 @@ observeEvent({
           value = tools::file_path_sans_ext(basename(bw1v[[paste0("bw", nr, 2)]]))
           )
     }else{
-        # TODO: make this an actual error message
+        shinyCatch({stop(paste0("URL uploaded: ", 
+        input[[paste0('urlchip', nr, 2)]],
+        " is not valid."
+        ))}, prefix = '')
     }
   }) %>% bindEvent(input[[paste0('loadurlchip', nr, 2)]])
 
