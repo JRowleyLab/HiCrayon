@@ -66,12 +66,10 @@ chipplot <- reactive({
             eigenbools <- append(eigenbools, eigenbool)
 
             if(eigenbool==TRUE){
-                tracks[[1]][[1]] <- chipalpha()$chipclipped[[x]]
+                tracks[[1]][[1]][[1]] <- chipalpha()$chipclipped[[x]]
                 print("SINGLE")
-                print(tracks[[1]][[1]])
+                print(tracks[[1]][[1]][[1]])
             }
-
-            print(eigenbools)
                 
             # List of min/max values [[1,2]].
             minmaxlist <- list(minmaxargs$nums[[x]][[1]], minmaxargs$nums[[x]][[2]])
@@ -202,17 +200,10 @@ chipcombinedplot <- reactive({
         if(eigenbool==TRUE){
             #tracks[[1]][[1]] <- chipalpha()$chipclipped[[x]]
             tracks[[counter]][[1]] <- chipalpha()$chipclipped[[chipstocombine[x]]]
-            print("COMBINED")
-            print(tracks[[counter]][[1]])
         }
-
-
-
 
         counter = counter + 1
     }
-
-    print(eigenbools)
 
     patt <- str_glue(
     "ChIP_{paste0(names, collapse = '_')}_{input$chr}_{input$start}_{input$stop}_{input$bin}_norm-{input$norm}_"

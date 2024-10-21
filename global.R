@@ -19,3 +19,10 @@ library(tippy)
 
 # load encode hic data
 encodehic <- read.table("hic.txt", header=T, sep="\t")
+
+# light_mode
+is_light_mode <- FALSE  # Default
+
+if (exists("light_mode_arg") && light_mode_arg == TRUE) {
+  is_light_mode <- TRUE
+}

@@ -522,12 +522,9 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
             f2 = False
 
         if iseigen[i] == True:
-            print("PYEIGEN: " + str(iseigen[i]))
-            
-            print("check1")
 
-            B = chip[0][0][0][0]
-            A = chip[0][0][1][0]
+            B = chip[i][0][0][0][0]
+            A = chip[i][0][0][1][0]
 
             print("cehck1.1")
             ax2 = ax1.twinx()
@@ -545,11 +542,8 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
             lims = [0, 1]
             ax2.set_ylim(lims)
             # y-axis track
-            if f2:
-                ychip = chip[i][0]
-            else:
-                ychip1 = A_scaled
-                ychip2 = B_scaled
+            ychip1 = A_scaled
+            ychip2 = B_scaled
             print("check3")
             ax4 = ax3.twiny()
             a = [x for x in range(len(ychip1))]

@@ -1,6 +1,14 @@
+if (is_light_mode) {
+    # Light mode specific logic
+    print("Light mode logic here")
+} else {
+    # Normal mode logic
+    print("Normal mode logic here")
+}
+
 # variable for starting root directory
 # When used by others
-workingdir = '/'
+workingdir = '/Zulu/bnolan/HiC_data/HCT116/'
 
 ## Server side file-selection
 shinyFileChoose(input, 'hic', root = c(wd = workingdir), filetypes=c('hic'))
