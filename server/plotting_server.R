@@ -67,8 +67,6 @@ chipplot <- reactive({
 
             if(eigenbool==TRUE){
                 tracks[[1]][[1]][[1]] <- chipalpha()$chipclipped[[x]]
-                print("SINGLE")
-                print(tracks[[1]][[1]][[1]])
             }
                 
             # List of min/max values [[1,2]].

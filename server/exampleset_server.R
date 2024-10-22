@@ -77,7 +77,6 @@ observe({
 
 # Make dynamic ChIP a function to allow
 addInputSection <- function(nr, preselectedParams = list()) {
-    print('checkwsss')
     bw1v$features[[nr]] <- list(NULL, NULL)
     id <- paste0("input", nr)
     ####### Dynamic UI update START #####################
@@ -481,7 +480,6 @@ observeEvent({
   }, {
     # Check if bwlist_ChIP1()$iseigen[nr][[1]] is TRUE and bw1v$features[[nr]] is not NULL
     if (!is.null(bwlist_ChIP1()$iseigen[nr][[1]]) && bwlist_ChIP1()$iseigen[nr][[1]] == TRUE && !is.null(bw1v$features[[nr]])) {
-      print(bwlist_ChIP1()$iseigen[nr][[1]])
       shinyCatch({
         message(paste("File: ", bw1v$features[[nr]], " looks like an Eigen track (bedgraph with positive and negative values), plotting in Eigen format + changing UI in Panel ", nr))
       }, prefix = '')
@@ -656,7 +654,6 @@ observeEvent({
 
   # Check URL when user tries to input bigwig URL for FEATURE 2
   observe({
-    print(tools::file_path_sans_ext(basename(bw1v[[paste0("bw", nr, 2)]])))
     isvalid = checkURL(input[[paste0('urlchip', nr, 2)]], list('bigWig', 'bigwig', 'bw'))
 
     if(isvalid=="Valid"){
@@ -728,12 +725,10 @@ observeEvent({
   observe({
      if(examBtn()){
         if(preselectedParams$bedgraph){
-            bw1v$features[[nr]][[1]] <- input[[paste0('bed', nr, 1)]]
+            bw1v$features[[nr]][[1]] <- eigen #input[[paste0('bed', nr, 1)]]
         } else {
             bw1v$features[[nr]][[1]] <- input[[paste0('urlchip',nr, 1)]]
-        }
-        print(bw1v$features)
-        
+        }        
 
         updateTextInput(
             session,
@@ -748,8 +743,6 @@ observeEvent({
 
 observe({
     if(examBtn()) {
-        print("example button")
-
       updateCheckboxInput(session, "chip1", value = TRUE)
 
     # remove all input divs prior to exampleset
@@ -759,9 +752,9 @@ observe({
     )
     }
 
-        # addInputSection(1, list(path = NULL, url = h3k27ac, label = "H3K27ac", color = "green", bedgraph = FALSE, combination = TRUE))
-        # addInputSection(2, list(path = NULL, url = h3k9me3, label = "H3K9me3", color = "purple", bedgraph = FALSE, combination = TRUE))
-        # addInputSection(3, list(path = NULL, url = h3k27me3, label = "H3K27me3", color = "orange", bedgraph = FALSE, combination = TRUE))
-        addInputSection(1, list(path = eigen, url = NULL, label = "Eigen Track", bedgraph = TRUE, combination = FALSE))
+        addInputSection(1, list(path = NULL, url = h3k27ac, label = "H3K27ac", color = "green", bedgraph = FALSE, combination = TRUE))
+        addInputSection(2, list(path = NULL, url = h3k9me3, label = "H3K9me3", color = "purple", bedgraph = FALSE, combination = TRUE))
+        addInputSection(3, list(path = NULL, url = h3k27me3, label = "H3K27me3", color = "orange", bedgraph = FALSE, combination = TRUE))
+        addInputSection(4, list(path = eigen, url = NULL, label = "Eigen Track", bedgraph = TRUE, combination = FALSE))
     }
 }) %>% bindEvent(input$exampleset)

@@ -526,13 +526,11 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
             B = chip[i][0][0][0][0]
             A = chip[i][0][0][1][0]
 
-            print("cehck1.1")
             ax2 = ax1.twinx()
             Ar = np.array(A)
             A_scaled = 0.5 + Ar * 0.5
             Br = np.array(B)
             B_scaled = 0.5 - Br * 0.5
-            print("check2")
             # Add fill between the lines and y=0.5
             ax2.fill_between(range(len(A_scaled)), A_scaled, 0.5, color='blue', alpha=0.5)
             ax2.fill_between(range(len(B_scaled)), B_scaled, 0.5, color='red', alpha=0.5)
@@ -544,7 +542,6 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
             # y-axis track
             ychip1 = A_scaled
             ychip2 = B_scaled
-            print("check3")
             ax4 = ax3.twiny()
             a = [x for x in range(len(ychip1))]
             b = [x for x in range(len(ychip2))]
@@ -575,9 +572,7 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
             ax4.set_xticks([])
             ax4.set_yticks([])
 
-            print("check4")
         else:
-            print("not eigentrack")
             # x-axis track
             ax2 = ax1.twinx()
             ax2.plot(chip[i][0], color=col1[i], linewidth = linewidth[0])
@@ -609,7 +604,6 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
             ax4.set_xticks([])
             ax4.set_yticks([])
 
-    print("check5")
 	# Format plots
     l1, b1, w1, h1 = ax.get_position().bounds
 	#ax3.set_position((l1*(.97),0.18, w1*1.1, .075))

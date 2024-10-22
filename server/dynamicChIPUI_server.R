@@ -420,7 +420,6 @@ observeEvent({
   }, {
     # Check if bwlist_ChIP1()$iseigen[nr][[1]] is TRUE and bw1v$features[[nr]] is not NULL
     if (!is.null(bwlist_ChIP1()$iseigen[nr][[1]]) && bwlist_ChIP1()$iseigen[nr][[1]] == TRUE && !is.null(bw1v$features[[nr]])) {
-      print(bwlist_ChIP1()$iseigen[nr][[1]])
       shinyCatch({
         message(paste("File: ", bw1v$features[[nr]], " looks like an Eigen track (bedgraph with positive and negative values), plotting in Eigen format + changing UI in Panel ", nr))
       }, prefix = '')
@@ -595,7 +594,6 @@ observeEvent({
 
   # Check URL when user tries to input bigwig URL for FEATURE 2
   observe({
-    print(tools::file_path_sans_ext(basename(bw1v[[paste0("bw", nr, 2)]])))
     isvalid = checkURL(input[[paste0('urlchip', nr, 2)]], list('bigWig', 'bigwig', 'bw'))
 
     if(isvalid=="Valid"){
