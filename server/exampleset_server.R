@@ -77,6 +77,7 @@ observe({
 
 # Make dynamic ChIP a function to allow
 addInputSection <- function(nr, preselectedParams = list()) {
+    print('checkwsss')
     bw1v$features[[nr]] <- list(NULL, NULL)
     id <- paste0("input", nr)
     ####### Dynamic UI update START #####################
@@ -730,7 +731,7 @@ observeEvent({
 
         updateTextInput(
             session,
-            inputId = paste0("n", nr),
+            inputId = paste0("n", nr, 1),
             value = preselectedParams$label
         )
         
@@ -741,24 +742,20 @@ observeEvent({
 
 observe({
     if(examBtn()) {
+        print("example button")
 
       updateCheckboxInput(session, "chip1", value = TRUE)
 
     # remove all input divs prior to exampleset
-    # for (i in 1:100){
-    #       shiny::removeUI(
-    #   selector = paste0("div#newInput", i)
-    #   )
-    # }
-
-        
-        # NULL the filepath
-        #bw1v <- NULL # [[paste0("bw",nr)]]
-        #print(str(reactiveValuesToList(bw1v)))
+    for (i in 1:100){
+        shiny::removeUI(
+    selector = paste0("div#newInput", i)
+    )
+    }
 
         addInputSection(1, list(path = NULL, url = h3k27ac, label = "H3K27ac", color = "green", bedgraph = FALSE, combination = TRUE))
-        # addInputSection(2, list(path = NULL, url = h3k9me3, label = "H3K9me3", color = "purple", bedgraph = FALSE, combination = TRUE))
-        # addInputSection(3, list(path = NULL, url = h3k27me3, label = "H3K27me3", color = "orange", bedgraph = FALSE, combination = TRUE))
-        # addInputSection(4, list(path = eigen, url = NULL, label = "Eigen Track", bedgraph = TRUE, combination = FALSE))
+        addInputSection(2, list(path = NULL, url = h3k9me3, label = "H3K9me3", color = "purple", bedgraph = FALSE, combination = TRUE))
+        addInputSection(3, list(path = NULL, url = h3k27me3, label = "H3K27me3", color = "orange", bedgraph = FALSE, combination = TRUE))
+        #addInputSection(4, list(path = eigen, url = NULL, label = "Eigen Track", bedgraph = TRUE, combination = FALSE))
     }
-})
+}) %>% bindEvent(input$exampleset)
