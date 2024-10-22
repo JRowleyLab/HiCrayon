@@ -10,17 +10,18 @@ hic_color <- reactive({
 
 # Update chromsome and resolution list
 observe({
-    updateSelectizeInput(session, "chr",
-        choices = HiCmetadata()$chrs)
+    if(!examBtn()) {
+        updateSelectizeInput(session, "chr",
+            choices = HiCmetadata()$chrs)
 
-    # get middle resolution
-    middle_index <- floor(length(HiCmetadata()$res) / 2) + 1
+        # get middle resolution
+        middle_index <- floor(length(HiCmetadata()$res) / 2) + 1
 
-    updateSelectizeInput(session, "bin",
-        choices = HiCmetadata()$res,
-        selected = HiCmetadata()$res[middle_index])
-    shinyCatch({message("Hi-C Loaded")}, prefix = '')
-
+        updateSelectizeInput(session, "bin",
+            choices = HiCmetadata()$res,
+            selected = HiCmetadata()$res[middle_index])
+        shinyCatch({message("Hi-C Loaded")}, prefix = '')
+    }
 
     tippy_this(
         elementId = "chr", 

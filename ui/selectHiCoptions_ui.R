@@ -1,4 +1,17 @@
-selectHiCoptionsUI <- div(fluidRow(id="hicdiv",
+selectHiCoptionsUI <- div(
+                        fluidRow(id="hicdiv",
+                            column(12,
+                                actionButton("exampleset", "Load Example Setup")
+                            ),
+                            br(),
+                            tippy_this(
+                                elementId = "exampleset", 
+                                tooltip = "<span style='font-size:15px;'>Load an example showcase with this locus from the HiCrayon paper.
+                                Includes Hi-C with colored in histone marks, and eigen values to demonstrate distinct interaction compartments across
+                                an 80 megabase region in chromosome 14 in a human cell line. <span>", 
+                                allowHTML = TRUE,
+                                placement = 'right'
+                            ),
                             column(12,
                             #shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
                             #shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),

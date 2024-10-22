@@ -15,7 +15,7 @@ ui <- shinyUI({
 })
 
 server <- function(input, output, session) {
-  #source("server/reticulateenv_server.R", local = TRUE)
+  source("server/exampleset_server.R", local = TRUE)
   source("server/fileChoose_server.R", local = TRUE)
   source("server/matrixtoobigModal_server.R", local = TRUE)
   source("server/calcDistance_server.R", local = TRUE)
