@@ -3,7 +3,7 @@ args <- commandArgs(trailingOnly = TRUE)
 
 # Default values
 lite_mode_arg <- FALSE
-port <- 3838  # Default Shiny port
+host <- "127.0.0.1"
 
 # Check if 'light-mode' argument is passed
 if ("--lite-mode" %in% args) {
@@ -20,5 +20,14 @@ if ("--port" %in% args) {
   }
 }
 
+# Look for the --host argument
+if ("--host" %in% args) {
+  host_index <- match("--host", args) + 1
+  if (!is.na(host_index) && host_index <= length(args)) {
+    host <- args[host_index]
+  }
+}
+
+
 # Run the Shiny app
-shiny::runApp('app.R', launch.browser = F, port = port)
+shiny::runApp('app.R', launch.browser = F, port = port, host=host)

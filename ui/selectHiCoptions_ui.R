@@ -1,8 +1,5 @@
 selectHiCoptionsUI <- div(
                         fluidRow(id="hicdiv",
-                            column(12,
-                                actionButton("exampleset", "Load Example Setup")
-                            ),
                             br(),
                             tippy_this(
                                 elementId = "exampleset", 
@@ -179,6 +176,9 @@ selectHiCoptionsUI <- div(
                             tooltip = "<span style='font-size:15px;'>Advanced Hi-C visualization options<span>", 
                             allowHTML = TRUE,
                             placement = 'right'
+                        ),
+                        column(12,
+                            actionButton("exampleset", "Load Example Setup")
                         ),
                         conditionalPanel(
                             condition = "input.hicoptions == true",

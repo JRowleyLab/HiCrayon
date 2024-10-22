@@ -727,7 +727,13 @@ observeEvent({
 
   observe({
      if(examBtn()){
-        bw1v$features[[nr]][[1]] <- input[[paste0('urlchip',nr, 1)]]
+        if(preselectedParams$bedgraph){
+            bw1v$features[[nr]][[1]] <- input[[paste0('bed', nr, 1)]]
+        } else {
+            bw1v$features[[nr]][[1]] <- input[[paste0('urlchip',nr, 1)]]
+        }
+        print(bw1v$features)
+        
 
         updateTextInput(
             session,
@@ -753,9 +759,9 @@ observe({
     )
     }
 
-        addInputSection(1, list(path = NULL, url = h3k27ac, label = "H3K27ac", color = "green", bedgraph = FALSE, combination = TRUE))
-        addInputSection(2, list(path = NULL, url = h3k9me3, label = "H3K9me3", color = "purple", bedgraph = FALSE, combination = TRUE))
-        addInputSection(3, list(path = NULL, url = h3k27me3, label = "H3K27me3", color = "orange", bedgraph = FALSE, combination = TRUE))
-        #addInputSection(4, list(path = eigen, url = NULL, label = "Eigen Track", bedgraph = TRUE, combination = FALSE))
+        # addInputSection(1, list(path = NULL, url = h3k27ac, label = "H3K27ac", color = "green", bedgraph = FALSE, combination = TRUE))
+        # addInputSection(2, list(path = NULL, url = h3k9me3, label = "H3K9me3", color = "purple", bedgraph = FALSE, combination = TRUE))
+        # addInputSection(3, list(path = NULL, url = h3k27me3, label = "H3K27me3", color = "orange", bedgraph = FALSE, combination = TRUE))
+        addInputSection(1, list(path = eigen, url = NULL, label = "Eigen Track", bedgraph = TRUE, combination = FALSE))
     }
 }) %>% bindEvent(input$exampleset)
