@@ -54,7 +54,7 @@ insertUI(
                 tags$div(id = paste0('fileSelectDiv', nr, 1),
                   if (is_lite_mode) {
                     # Replace shinyFilesButton with fileInput
-                    fileInput(paste0('bw', nr, 1, '_clientside'), 
+                    fileInput(paste0('bw', nr, 1), 
                       label = 'Select Bigwig',
                       multiple = FALSE,
                       accept = c('.bw', '.bigwig', '.bigWig'))
@@ -111,7 +111,7 @@ insertUI(
 
                   if (is_lite_mode) {
                       # Replace shinyFilesButton with fileInput
-                      fileInput(paste0('bed', nr, 1, '_clientside'), 
+                      fileInput(paste0('bed', nr, 1), 
                       label = 'Select bedgraph',
                       multiple = FALSE,
                       accept = c('bed', 'bedgraph'))
@@ -240,13 +240,22 @@ insertUI(
               column(9,
                     # Wrapper div that will hold the "Select Bigwig" button
                     tags$div(id = paste0('fileSelectDiv', nr, 2),
-                      shinyFilesButton(
-                        paste0('bw', nr, 2),
-                        label = 'Select bigwig',
-                        title = 'Please select a .bigwig/.bw file',
-                        multiple = FALSE,
-                        style = "width: 100%;"
-                      )
+                    if (is_lite_mode) {
+                          # Replace shinyFilesButton with fileInput
+                          fileInput(paste0('bw', nr, 2), 
+                          label = 'Select bigwig',
+                          multiple = FALSE,
+                          accept = c('.bw', '.bigwig', '.bigWig'))
+                      } else {
+                          shinyFilesButton(
+                            paste0('bw', nr, 2),
+                            label = 'Select bigwig',
+                            title = 'Please select a .bigwig/.bw file',
+                            multiple = FALSE,
+                            style = "width: 100%;"
+                )
+                            },
+                      
                     ),
                     
                     # Wrapper div that will hold the URL input and Add URL button (initially hidden)
@@ -343,13 +352,6 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
       bw1v$features[[nr]][[1]] <- NULL
       bw1v$features[[nr]][[2]] <- NULL
     })
-
-  # observe({
-  #   key <- as.character(nr)
-  #   f2v[[key]] <- FALSE
-  #   updateCheckboxInput(session, input[[paste0('cosignal', nr)]], value = FALSE)
-  # }) %>% bindEvent(bwlist_ChIP1()$iseigen[nr]=="TRUE")
-
 
   observeEvent(input[[paste0('cosignal', nr)]], {
     key <- as.character(nr)
@@ -462,45 +464,67 @@ observeEvent({
 # BIGWIG FILE HANDLING
   # Set up file handling for local files for FEATURE 1
   shinyFileChoose(input, paste0("bw",nr, 1), root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
-  # Add file path to reactive variable
-  observeEvent(input[[paste0("bw",nr, 1)]], {
-      inFile <- parseFilePaths(roots = c(wd = workingdir), input[[paste0("bw",nr, 1)]])
-      #bw1v[[paste0("bw", nr, 1)]] <- inFile$datapath
 
-      # GOAL: bw1v -> [1,2,3,4,5] -> [1,2], [1,2], [1,2]...
-      # where each is the bigwig path or NULL
-      if(!rlang::is_empty(inFile$datapath)){
-        bw1v$features[[nr]][[1]] <- inFile$datapath
-        # Update text with file name
-        updateTextInput(
-          session,
-          inputId = paste0("n", nr),
-          value = tools::file_path_sans_ext(basename(bw1v$features[[nr]][[1]]))
-          )
+  # Add file path to reactive variable
+  observe({ #Event(input[[paste0("bw",nr, 1)]], 
+    if (is_lite_mode) {
+      # In 'lite_mode', retrieve filepath from client side
+      inFile <- input[[paste0("bw",nr, 1)]]
+    } else {
+      # Retrieve filepath from server side
+      inFile <- parseFilePaths(roots = c(wd = workingdir), input[[paste0("bw",nr, 1)]])
+    }
+    
+    if(!rlang::is_empty(inFile$datapath)){
+      if(is_lite_mode){
+        fname <- inFile$name
+      } else {
+        fname <- tools::file_path_sans_ext(basename(inFile$datapath))
       }
+      bw1v$features[[nr]][[1]] <- inFile$datapath
+      # Update text with file name
+      updateTextInput(
+        session,
+        inputId = paste0("n", nr),
+        value = fname
+        )
+    }
+
+
   })
 
   #BEGRAPH file hanlding
   #assign to same list as the bigwigs. Handle the difference in python function.
   # Set up file handling for local files for FEATURE 1
   shinyFileChoose(input, paste0("bed",nr, 1), root = c(wd = workingdir), filetypes=c('bed', 'bedgraph'))
+
   # Add file path to reactive variable
   observeEvent(input[[paste0("bed",nr, 1)]], {
+    if (is_lite_mode) {
+      # In 'lite_mode', retrieve filepath from client side
+      inFile <- input[[paste0("bed",nr, 1)]]
+    } else {
       inFile <- parseFilePaths(roots = c(wd = workingdir), input[[paste0("bed",nr, 1)]])
-      bw1v[[paste0("bw", nr, 1)]] <- inFile$datapath
+    }
 
       # GOAL: bw1v -> [1,2,3,4,5] -> [1,2], [1,2], [1,2]...
       # where each is the bigwig path or NULL
       if(!rlang::is_empty(inFile$datapath)){
-        #UNCOMMENT
+        if(is_lite_mode){
+          fname <- inFile$name
+        } else {
+          fname <- tools::file_path_sans_ext(basename(inFile$datapath))
+        }
+
         bw1v$features[[nr]][[1]] <- inFile$datapath
         # Update text with file name
         updateTextInput(
           session,
           inputId = paste0("n", nr),
-          value = tools::file_path_sans_ext(basename(bw1v$features[[nr]][[1]]))
+          value = fname
           )
       }
+
   })
 
 
@@ -508,22 +532,33 @@ observeEvent({
     shinyFileChoose(input, paste0("bw",nr, 2), root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
     # Add file path to reactive variable
     observeEvent(input[[paste0("bw",nr, 2)]], {
+      if (is_lite_mode) {
+        inFile <- input[[paste0("bw",nr, 2)]]
+      } else {
         inFile <- parseFilePaths(roots = c(wd = workingdir), input[[paste0("bw",nr, 2)]])
-        #bw1v[[paste0("bw",nr, 2)]] <- inFile$datapath
-        # Update list by index for feature 2
-        if(!rlang::is_empty(inFile$datapath)){
-          bw1v$features[[nr]][[2]] <- inFile$datapath
-          # Update text with file name
-          updateTextInput(
-            session,
-            inputId = paste0("n", nr),
-            value = paste0(
-              tools::file_path_sans_ext(basename(bw1v$features[[nr]][[1]])),
-              " x ",
-              tools::file_path_sans_ext(basename(bw1v$features[[nr]][[2]])) 
-                  )
-            )
       }
+
+      # Update list by index for feature 2
+      if(!rlang::is_empty(inFile$datapath)){
+        if(is_lite_mode){
+          fname <- inFile$name
+        } else {
+          fname <- tools::file_path_sans_ext(basename(inFile$datapath))
+        }
+        bw1v$features[[nr]][[2]] <- inFile$datapath
+        # Update text with file name
+        updateTextInput(
+          session,
+          inputId = paste0("n", nr),
+          value = paste0("X-axis: ",
+            tools::file_path_sans_ext(basename(bw1v$features[[nr]][[1]])),
+            " x ",
+            " Y-axis: ",
+            tools::file_path_sans_ext(basename(fname)) 
+                )
+          )
+    }
+        
     })
 
   observeEvent(input[[paste0("log", nr, 1)]], {

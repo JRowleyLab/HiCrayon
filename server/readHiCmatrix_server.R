@@ -1,10 +1,15 @@
 # hic file handling
 hicv <- reactiveValues()
 observeEvent(input$hic, {
-    inFile <- parseFilePaths(roots = c(wd = workingdir), input$hic)
-    #file <- input$hic
-    #UNCOMMENT BELOW
-    hicv$y <- inFile$datapath #"/Zulu/bnolan/HiC_data/GM12878/ultrares/full.hic"#
+    if (is_lite_mode) {
+        # In 'lite_mode', retrieve filepath from hic_clientside
+        inFile <- input[[paste0('hic')]]
+        hicv$y <- inFile$datapath  
+    } else {
+        # Normal mode, retrieve filepath from file input
+        inFile <- parseFilePaths(roots = c(wd = workingdir), input$hic)
+        hicv$y <- inFile$datapath 
+    }
 })
 
 observe({
@@ -13,7 +18,7 @@ observe({
     if(isvalid=="Valid"){
         hicv$y <- input$urlhic
     }else{
-        shinyCatch({message(paste(input$urlhic, " not valid"))}, prefix = '')
+        shinyCatch({stop(paste("Error: ", input$urlhic, " not valid"))}, prefix = '')
     }
     
 }) %>% bindEvent(input$loadurlhic)

@@ -4,7 +4,7 @@ selectHiCoptionsUI <- div(fluidRow(id="hicdiv",
                             #shinyFilesButton('hic', label='Select HiC', title='Please select a .hic file', multiple=FALSE),
                             if (is_lite_mode) {
                                 # Replace shinyFilesButton with fileInput
-                                fileInput(paste0('hic_clientside'), 
+                                fileInput('hic', 
                                 label = 'Select Hi-C',
                                 multiple = FALSE,
                                 accept = '.hic')

@@ -1,6 +1,6 @@
 # variable for starting root directory
 # When used by others
-workingdir = '/Zulu/bnolan/HiC_data/HCT116/'
+workingdir = '/'
 
 ## Server side file-selection
 shinyFileChoose(input, 'hic', root = c(wd = workingdir), filetypes=c('hic'))
@@ -11,7 +11,7 @@ shinyFileChoose(input, "bedg1", root = c(wd = workingdir), filetypes=c('bed', 'b
 output$encodehicoutput = DT::renderDataTable(
     DT::datatable(
         encodehic[, c("Assembly","Biosample","Description", "BioRep","TechRep","Experiment")], 
-        options = list(lengthChange = FALSE) 
+        options = list(lengthChange = FALSE), selection = "single"
   )
 )
 
