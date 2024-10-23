@@ -12,17 +12,24 @@ Use HiCrayon to visualize the complex layering of chromatin organization across 
 ---------------------------------------------
 ## Table of Contents
 
-- [Installation](./installation.md)
-- [Usage](./usage.md)
-- [Features](./features.md)
+- [Installation](/www/md_pages/installation.md)
+- [Usage](/www/md_pages/usage.md)
+- [Features](/www/md_pages/features.md)
 
 
 ---------------------------------------------
 # Web version
 
-A light version of HiCrayon that allows import of publically availble Hi-C maps, bigwigs through URL eg. from ENCODE (https://www.encodeproject.org/), and locally stored small bedGraph files.
+A *lite* version of HiCrayon is availble at:
 
-https://jrowleylab.com/HiCrayon/
+<span style="background-color: lightgreen; font-size: 18px; padding: 2px;">
+  <a href="https://jrowleylab.com/HiCrayon/" style="font-weight: bold;">jrowleylab.com/HiCrayon/</a>
+</span>
+</br></br>
 
-To fully avail of the utility of HiCrayon, please proceed with installation below
+**This version does not support uploading local data.**
+Instead, only published Hi-C maps and bigwigs from ENCODE (https://www.encodeproject.org/) are able to be visualized.
+<!-- and locally stored small bedGraph files. -->
+
+To fully avail of the utility of HiCrayon, please [Install](/www/md_pages/installation.md) a local version of the app.
 
