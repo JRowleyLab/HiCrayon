@@ -34,8 +34,8 @@ To fully avail of the utility of HiCrayon, please [Install](/www/md_pages/instal
 
 # Requirements for Installation
 To install HiCrayon, we use containerized Singularity that allows for a portable, reproducible environment.  
-* Singularity is our primary method has excellent [installation](https://docs.sylabs.io/guides/3.0/user-guide/installation.html) documentation.
-* Conda is also available but **NOT** recommended.
+* [Singularity](https://github.com/JRowleyLab/HiCrayon/wiki/installation) is our primary method has excellent [installation](https://docs.sylabs.io/guides/3.0/user-guide/installation.html) documentation.
+* [Conda](https://github.com/JRowleyLab/HiCrayon/wiki/installation) is also available but **NOT** recommended.
 
 At least 10 gigabytes of storage are recommended for hosting the application, singularity image, and  
 
