@@ -300,8 +300,9 @@ def splitListintoTwo(bedg, chrom, start, stop, binsize):
             values.append(value)
         except ValueError:
             pos.append(0)
-    pos = [0 if x < 0 else x for x in values]
-    neg = [0 if x > 0 else x * -1 for x in values]
+
+    pos = [0 if x is None or x < 0 else x for x in values]
+    neg = [0 if x is None or x > 0 else x * -1 for x in values]
     
 
     return pos, neg
@@ -523,8 +524,8 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
 
         if iseigen[i] == True:
 
-            B = chip[i][0][0][0][0]
-            A = chip[i][0][0][1][0]
+            A = chip[i][0][0][0][0]
+            B = chip[i][0][0][1][0]
 
             ax2 = ax1.twinx()
             Ar = np.array(A)
@@ -532,8 +533,8 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
             Br = np.array(B)
             B_scaled = 0.5 - Br * 0.5
             # Add fill between the lines and y=0.5
-            ax2.fill_between(range(len(A_scaled)), A_scaled, 0.5, color='blue', alpha=0.5)
-            ax2.fill_between(range(len(B_scaled)), B_scaled, 0.5, color='red', alpha=0.5)
+            ax2.fill_between(range(len(A_scaled)), A_scaled, 0.5, color='red', alpha=0.5)
+            ax2.fill_between(range(len(B_scaled)), B_scaled, 0.5, color='blue', alpha=0.5)
             #set y-axis to custom range #NOT USED #y-axis is baked into the data range itself.
             # blim = min(chip[i]) if math.isnan(minmaxs[i][0]) else minmaxs[i][0]
             # tlim = max(chip[i]) if math.isnan(minmaxs[i][1]) else minmaxs[i][1]
@@ -546,17 +547,17 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
             a = [x for x in range(len(ychip1))]
             b = [x for x in range(len(ychip2))]
             #Plot the reversed ychip values
-            ax4.plot(ychip1[::-1], a, color='blue', linewidth=linewidth[0])
-            ax4.plot(ychip2[::-1], b, color='red', linewidth=linewidth[0])
+            # ax4.plot(ychip1[::-1], a, color='red')
+            # ax4.plot(ychip2[::-1], b, color='blue')
             
             # Set x-axis limits
             ax4.set_xlim(lims)
 
             # Fill between the y-axis values and 0.5
             ax4.fill_betweenx(a, ychip1[::-1], 0.5, where=(ychip1[::-1] > 0.5), 
-                            color='blue', alpha=0.5)
-            ax4.fill_betweenx(a, ychip2[::-1], 0.5, where=(ychip2[::-1] < 0.5), 
                             color='red', alpha=0.5)
+            ax4.fill_betweenx(b, ychip2[::-1], 0.5, where=(ychip2[::-1] < 0.5), 
+                            color='blue', alpha=0.5)
             # ax4.fill_between(range(len(A_scaled)), A_scaled, 0.5, color='blue')
             # ax4.fill_between(range(len(B_scaled)), B_scaled, 0.5, color='red')
 
