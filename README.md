@@ -12,7 +12,7 @@ HiCrayon is a tool used to visualize the complex layering of chromatin organizat
 Use HiCrayon create beautiful images vizualizing 1D tracks on 2D matrices.
 
 <div style="text-align: center;">
-  <img src="/www/images/Magnum_Opus.png" alt="Magnum_Opus" width="1200" />
+  <img src="/www/logo/Magnum_Opus.png" alt="Magnum_Opus" width="1200" />
 </div>
 
 ------------------------------------------
