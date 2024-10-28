@@ -3,7 +3,6 @@
 # Local images are generated using
 # python functions.
 output$gallery <- renderUI({
-
     validate(need(hicv$y!="NULL", "Please upload a HiC file"))
     # Initialise with HiC data
     texts <- c("HiC")

@@ -6,7 +6,7 @@ dashboardPage(
     title = tagList(
       tags$a(
         span(
-          img(src = "logo/hiCrayon_logo.png", height = 60, align = "left")
+          img(src = "logo/hicrayon_logo.png", height = 60, align = "left")
         ),
         href = "https://github.com/JRowleyLab/HiCrayon"
       ),

@@ -68,33 +68,73 @@ big_matrix_modal <- reactive({
     }
 })
 
-  # Observe when the user clicks the "Generate" button
-  observeEvent(input$generate_hic, {
+observeEvent(input$generate_hic, {
     confirmed(FALSE)  # Reset the confirmation flag to ensure a clean start
+    
     if (is_lite_mode) {
         if (side_length() > 500) {
-            # Show the modal if the matrix size is too large
+            # Show the modal if the matrix size is too large in lite mode
             showModal(big_matrix_modal())
-            shinyCatch({stop(paste0("Error: Hi-C Matrix too large"))}, prefix = '')
-        } else {
-            # Directly proceed if the matrix size is acceptable
-            shinyCatch({message(paste0("Loading Hi-C with matrix size: ", side_length(), "*", side_length()))}, prefix = '')
-            # If the matrix is small enough, directly set confirmation and proceed
-            confirmed(TRUE)
+            shinyCatch({
+                stop("Error: Hi-C Matrix too large for lite mode.")
+            }, prefix = '')
+            return()
         }
     } else {
         if (side_length() > 1500) {
-            # Show the modal if the matrix size is too large
+            # Show the modal if the matrix size is too large in non-lite mode
             showModal(big_matrix_modal())
-        } else {
-            # Directly proceed if the matrix size is acceptable
-            shinyCatch({message(paste0("Loading Hi-C with matrix size: ", side_length(), "*", side_length()))}, prefix = '')
-            # If the matrix is small enough, directly set confirmation and proceed
-            confirmed(TRUE)
+            shinyCatch({
+                stop("Error: Hi-C Matrix too large for standard mode.")
+            }, prefix = '')
+            return()
         }
     }
     
-  })
+    # Coordinate validation checks
+    if (is.null(input$start) || is.null(input$stop)) {
+        shinyCatch({
+            stop("Locus coordinates contain empty value/s. Resetting to default.")
+        }, prefix = '')
+        return()
+    }
+    
+    if (input$start >= input$stop) {
+        shinyCatch({
+            stop("Start coordinate must be less than stop coordinate. Resetting to default.")
+        }, prefix = '')
+        updateNumericInput(session, "start", value = 40000000)
+        updateNumericInput(session, "stop", value = 42000000)
+        return()
+    }
+    
+    if ((input$stop - input$start) <= as.numeric(input$bin)) {
+        shinyCatch({
+            stop("Bin size is greater than or equal to the total distance. Resetting to default.")
+        }, prefix = '')
+        updateNumericInput(session, "start", value = 40000000)
+        updateNumericInput(session, "stop", value = 42000000)
+        return()
+    }
+    
+    # Adjust stop if not divisible by bin
+    remainder <- (input$stop - input$start) %% as.numeric(input$bin)
+    if (remainder != 0) {
+        new_stop <- input$stop - remainder
+        updateNumericInput(session, "stop", value = new_stop)
+        
+        shinyCatch({
+            stop(paste("Adjusted stop to nearest divisible value:", new_stop))
+        }, prefix = '')
+        return()
+    }
+
+    # If all checks pass, set confirmed to TRUE
+    shinyCatch({
+        message(paste0("Loading Hi-C with matrix size: ", side_length(), "*", side_length()))
+    }, prefix = '')
+    confirmed(TRUE)
+})
 
   # Observe when the user confirms by clicking the "GENERATE" button in the modal
   observeEvent(input$confirm_generate, {
