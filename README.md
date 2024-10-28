@@ -41,6 +41,8 @@ Attach a folder '/' and name as '/filesystem' container (visible from file uploa
 singularity exec -B /:/filesystem hicrayon_container.sif Rscript run.R
 ```
 
+**NOTE:** When running HiCrayon locally, disconnect local HiCrayon instance by closing the browser first. If CTRL+C on command line is used first, the app won't be able to clean up temporary directories located in www/user*. You will have to remove these manually.
+
 ---------------------------------------------
 # Documentation
 
