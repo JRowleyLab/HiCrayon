@@ -1,5 +1,5 @@
 <div style="text-align: center;">
-  <img src="www/logo/hiCrayon_logo.png" alt="HiCrayon Logo" width="750" />
+  <img src="www/logo/hicrayon_logo.png" alt="HiCrayon Logo" width="750" />
 </div>
 
 ------------------------------------------
