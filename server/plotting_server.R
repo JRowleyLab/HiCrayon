@@ -67,6 +67,10 @@ chipplot <- reactive({
 
             if(eigenbool==TRUE){
                 tracks[[1]][[1]][[1]] <- chipalpha()$chipclipped[[x]]
+                col <- list(list())
+                col[[1]][[1]] <- input[[paste0("compcolA", x)]]
+                col[[1]][[2]] <- input[[paste0("compcolB", x)]]
+                col[[1]][[3]] <- input[[paste0("compcolAB", x)]]
             }
                 
             # List of min/max values [[1,2]].

@@ -180,26 +180,32 @@ insertUI(
                             "white")
           )
         ),
-
-        # Track Line section
-        h5("Track Line"),
-        fluidRow(
-          column(6,
-                colourInput(paste0("col", nr), 
-                            "", 
-                            "blue")
-          ),
-          column(6,
-                sliderInput(paste0("linewidth", nr),
-                            label = "Width",
-                            min = 0,
-                            max = 7,
-                            value = 1.5,
-                            step = 0.5
-                )
+        tags$div(id=paste0("trackline", nr),
+          # Track Line section
+          h5("Track Line"),
+          fluidRow(
+            column(6,
+                  colourInput(paste0("col", nr), 
+                              "", 
+                              "blue")
+            ),
+            column(6,
+                  sliderInput(paste0("linewidth", nr),
+                              label = "Width",
+                              min = 0,
+                              max = 7,
+                              value = 1.5,
+                              step = 0.5
+                  )
+            )
           )
         ),
-
+        tags$div(id=paste0("compcolors", nr),
+          h5("Compartment Colors"),
+          fluidRow(column(12, colourInput(paste0("compcolA", nr), "A-A interactions", "red"))),
+          fluidRow(column(12, colourInput(paste0("compcolB", nr), "B-B interactions", "blue"))),
+          fluidRow(column(12, colourInput(paste0("compcolAB", nr), "A-B interactions", "green"))),
+        ),
         # Data Range section
         tags$div(id=paste0("datarange", nr),
           h5("Data range"),
@@ -425,9 +431,28 @@ observeEvent({
       }, prefix = '')
       shinyjs::hide(paste0("datarange", nr))  # Hide the element
       updateMaterialSwitch(session, paste0("eigenswitch", nr), value = TRUE)  # Update the switch
+      # Show color selection for A, B, AB
+      shinyjs::show(paste0("compcolors", nr))
     }
   }, ignoreNULL = TRUE)
 
+
+observeEvent({
+  input[[paste0('eigenswitch', nr)]]
+}, {
+  if(input[[paste0('eigenswitch', nr)]] == TRUE){
+    # Hide color selection for A, B, AB
+    shinyjs::show(paste0("compcolors", nr))
+    shinyjs::hide(paste0("trackline", nr))
+    shinyjs::hide(paste0("datarange", nr))
+  } else {
+    # Hide color selection for A, B, AB
+    shinyjs::hide(paste0("compcolors", nr))
+    shinyjs::show(paste0("trackline", nr))
+    shinyjs::show(paste0("datarange", nr))
+  }
+  
+})
     
   ### Toggle url and local BIGWIG upload
   # Toggle between "Select Bigwig" and URL input + Add URL button

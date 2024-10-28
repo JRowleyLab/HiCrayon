@@ -523,6 +523,11 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
             f2 = False
 
         if iseigen[i] == True:
+            print(col1)
+
+            Acol = col1[i][0]
+            Bcol = col1[i][1]
+            ABcol = col1[i][2]
 
             A = chip[i][0][0][0][0]
             B = chip[i][0][0][1][0]
@@ -533,8 +538,8 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
             Br = np.array(B)
             B_scaled = 0.5 - Br * 0.5
             # Add fill between the lines and y=0.5
-            ax2.fill_between(range(len(A_scaled)), A_scaled, 0.5, color='red', alpha=0.5)
-            ax2.fill_between(range(len(B_scaled)), B_scaled, 0.5, color='blue', alpha=0.5)
+            ax2.fill_between(range(len(A_scaled)), A_scaled, 0.5, color=Acol, alpha=1)
+            ax2.fill_between(range(len(B_scaled)), B_scaled, 0.5, color=Bcol, alpha=1)
             #set y-axis to custom range #NOT USED #y-axis is baked into the data range itself.
             # blim = min(chip[i]) if math.isnan(minmaxs[i][0]) else minmaxs[i][0]
             # tlim = max(chip[i]) if math.isnan(minmaxs[i][1]) else minmaxs[i][1]
@@ -555,9 +560,9 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
 
             # Fill between the y-axis values and 0.5
             ax4.fill_betweenx(a, ychip1[::-1], 0.5, where=(ychip1[::-1] > 0.5), 
-                            color='red', alpha=0.5)
+                            color=Acol, alpha=1)
             ax4.fill_betweenx(b, ychip2[::-1], 0.5, where=(ychip2[::-1] < 0.5), 
-                            color='blue', alpha=0.5)
+                            color=Bcol, alpha=1)
             # ax4.fill_between(range(len(A_scaled)), A_scaled, 0.5, color='blue')
             # ax4.fill_between(range(len(B_scaled)), B_scaled, 0.5, color='red')
 

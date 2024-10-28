@@ -126,6 +126,11 @@ chipalpha <- reactive({
             # Perform A, B and AB calculations automatically and 
             # overlay all.
             if(bwlist_ChIP1()$iseigen[x]==TRUE){
+
+                Acolrgb = col2rgb(input[[paste0("compcolA", x)]])
+                Bcolrgb = col2rgb(input[[paste0("compcolB", x)]])
+                ABcolrgb = col2rgb(input[[paste0("compcolAB", x)]])
+
                 # wigs will always be feature1=eigen, feature2=NULL
                 # split feature1 into: A, B
                 twolists = splitListintoTwo(
@@ -144,9 +149,9 @@ chipalpha <- reactive({
                     f2=FALSE,
                     disthic=hic_distance(),
                     showhic=input$chipscale,
-                    r=255,
-                    g=0,
-                    b=0
+                    r=Acolrgb[1],
+                    g=Acolrgb[2],
+                    b=Acolrgb[3]
                     )
                 Bmat <- calcAlphaMatrix(
                     chiplist= list(negative, "NULL"),
@@ -154,9 +159,9 @@ chipalpha <- reactive({
                     f2=FALSE,
                     disthic=hic_distance(),
                     showhic=input$chipscale,
-                    r=0,
-                    g=0,
-                    b=255
+                    r=Bcolrgb[1],
+                    g=Bcolrgb[2],
+                    b=Bcolrgb[3]
                     )
 
                 ABmat <- calcAlphaMatrix(
@@ -165,9 +170,9 @@ chipalpha <- reactive({
                     f2=TRUE,
                     disthic=hic_distance(),
                     showhic=input$chipscale,
-                    r=0,
-                    g=255,
-                    b=0
+                    r=ABcolrgb[1],
+                    g=ABcolrgb[2],
+                    b=ABcolrgb[3]
                     )
 
                 mat1 = tuple(Amat, convert=T)[0]
