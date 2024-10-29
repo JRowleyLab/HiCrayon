@@ -16,36 +16,47 @@ Use HiCrayon create beautiful images vizualizing 1D tracks on 2D matrices.
 </div>
 
 ------------------------------------------
-# Documentation
 
-Please visit [our wiki](https://github.com/JRowleyLab/HiCrayon/wiki) for a detailed explanation of installation, usage, and features of HiCrayon.
+<br>
+
+# Quick Links
+
+[Installation](/www/md_pages/installation.md) <p>
+[Usage](/www/md_pages/usage.md) <p>
+[Features](/www/md_pages/features.md) <p>
+
 
 # Quick Start
 
-Upon successful installation of HiCrayon, the user can move into the HiCrayon directory and run the following script:
-```Rscript run.R```
+## Install 
 
-Simply navigate to the specified address and port in a web browser to begin coloring.
+Build a singularity container from a docker image.
 
-Optional parameters include:
-```
---port <number> port number for server access Eg. 3838
---host <host_address> Bind server to IP address. Eg. 0.0.0.0
-Host and port combination example: 0.0.0.0:3838
---lite-mode Web-application version. Allows restricted client side file upload.
-```
+1. `singularity build hicrayon.sif docker://nolandocker/hicrayon:v2`
 
-For a more modular option, run with singularity:
-```
-singularity exec hicrayon_container.sif Rscript run.R
-singularity exec hicrayon_container.sif Rscript run.R --port 3838 --host 0.0.0.0
-```
-Attach a folder '/' and name as '/filesystem' container (visible from file upload)
-```
-singularity exec -B /:/filesystem hicrayon_container.sif Rscript run.R
-```
+Clone the hicrayon git repository.
 
-**NOTE:** When running HiCrayon locally, disconnect local HiCrayon instance by closing the browser first. If CTRL+C on command line is used first, the app won't be able to clean up temporary directories located in www/user*. You will have to remove these manually.
+2. `git clone https://github.com/JRowleyLab/HiCrayon.git`
+
+## Run
+
+`cd` into the HiCrayon directory and run the app inside the container
+
+3. `singularity exec hicrayon_container.sif Rscript run.R`
+
+## Visualize the example
+
+Under the sidebar option, **Hi-C**, at the bottom you'll see a button called 'Example Setup'. Click this and the application will automatically populate with the following data:
+
+  * **Hi-C** from a human colon cancer cell line.
+  * **Three histone marks** uploaded in bigwigs; H3K9me3, H3K27me3 and H3K27ac
+  * **Eigenvector** uploaded as a bedgraph.
+
+All you need to do now is click 'Generate' at the bottom of the sidebar and it will load in all the above data, do some HiCrayon stuff, and output the Hi-C map but now it's colored by histone occupancy and the eigenvector status! 
+
+### Try your own! <p>
+Upload a Hi-C file from a local directory, or by importing through a URL and start visualizing! Detailed instructions on usage can be found here: [Usage](/www/md_pages/usage.md) <p>
+
 
 ---------------------------------------------
 # Web version
