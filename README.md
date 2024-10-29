@@ -23,7 +23,6 @@ Use HiCrayon create beautiful images vizualizing 1D tracks on 2D matrices.
 
 [Installation](/www/md_pages/installation.md) <p>
 [Usage](/www/md_pages/usage.md) <p>
-[Features](/www/md_pages/features.md) <p>
 
 
 # Quick Start
