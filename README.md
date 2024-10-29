@@ -12,13 +12,17 @@ HiCrayon is a tool used to visualize the complex layering of chromatin organizat
 Use HiCrayon create beautiful images vizualizing 1D tracks on 2D matrices.
 
 <div style="text-align: center;">
-  <img src="/www/logo/Magnum_Opus.png" alt="Magnum_Opus" width="1200" />
+  <img src="www/logo/Magnum_Opus.png" alt="Magnum_Opus" width="1200" />
 </div>
 
 ------------------------------------------
+# Documentation
+
+Please visit [our wiki](https://github.com/JRowleyLab/HiCrayon/wiki) for a detailed explanation of installation, usage, and features of HiCrayon.
+
 # Quick Start
 
-Upon successful installation of HiCrayon, the user can move into the HiCrayon directory and run the provided wrapper script with minimal parameter specifications for a streamlined experience with this command:
+Upon successful installation of HiCrayon, the user can move into the HiCrayon directory and run the following script:
 ```Rscript run.R```
 
 Simply navigate to the specified address and port in a web browser to begin coloring.
@@ -34,7 +38,7 @@ Host and port combination example: 0.0.0.0:3838
 For a more modular option, run with singularity:
 ```
 singularity exec hicrayon_container.sif Rscript run.R
-singularity exec /Zulu/bnolan/Containers/hicrayon_v2.sif Rscript run.R --port 8887 --host 10.49.148.30
+singularity exec hicrayon_container.sif Rscript run.R --port 3838 --host 0.0.0.0
 ```
 Attach a folder '/' and name as '/filesystem' container (visible from file upload)
 ```
@@ -42,11 +46,6 @@ singularity exec -B /:/filesystem hicrayon_container.sif Rscript run.R
 ```
 
 **NOTE:** When running HiCrayon locally, disconnect local HiCrayon instance by closing the browser first. If CTRL+C on command line is used first, the app won't be able to clean up temporary directories located in www/user*. You will have to remove these manually.
-
----------------------------------------------
-# Documentation
-
-Please visit [our wiki](https://github.com/JRowleyLab/HiCrayon/wiki) for a detailed explanation of installation, usage, and features of HiCrayon.
 
 ---------------------------------------------
 # Web version

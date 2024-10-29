@@ -10,7 +10,7 @@ Singularity allows deployment of HiCrayon using a container so you don't need to
 
 Build a singularity container from a docker image.
 
-1. `singularity build hicrayon.sif docker://nolandocker/hicrayon`
+1. `singularity build hicrayon.sif docker://nolandocker/hicrayon:v2`
 
 Clone the hicrayon git repository.
 
@@ -18,11 +18,7 @@ Clone the hicrayon git repository.
 
 `cd` into the HiCrayon directory and run the app inside the container
 
-3. `singularity exec ~/Containers/hicrayon.sif R -e "shiny::runApp('app.R', launch.browser=F, port = 3838)" `
-
-Additional parameters:
-- if you'd like to attach a directory outside of your own: `-B /:/filesystem/`
-- host application to allow access on another device (beware security risks): `shiny::runApp(..., host="IPADDRESS")`
+3. `singularity exec hicrayon_container.sif Rscript run.R`
 
 ### **Conda** (Not recommended)
 
@@ -38,7 +34,7 @@ Clone the hicrayon git repo and `cd` into the repo
 
 Run HiCrayon
 
-4. `R -e 'shiny::runApp("app.R", launch.browser=F)'`
+4. `Rscript run.R`
 
 
-[Return to Main Page](/index.md)
+[Return to Main Page](/README.md)

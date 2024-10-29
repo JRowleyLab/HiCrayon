@@ -48,4 +48,4 @@ Choosing a locus of interest is very important when studying Hi-C data. For this
 Cool! Huh?
 
 
-[Return to Main Page](/index.md)
+[Return to Main Page](/README.md)
