@@ -145,13 +145,14 @@ addInputSection <- function(nr, preselectedParams = list()) {
                                 label = NULL,
                                 value = preselectedParams$url
                               ),
-                              style = "width: 100%;",
+                              style = "width: 100%; display:none;",
                               id = paste0('textInputDiv', nr, 1)
                             )
                     ),
                     column(3,
                             actionButton(paste0('loadurlchip', nr, 1), label = "", icon = icon("check"), style = "width: 100%;"),
-                            id = paste0('urlInputDiv', nr, 1)  # Initially hidden
+                            id = paste0('urlInputDiv', nr, 1),
+                            style = "display:none;"  # Initially hidden
                     ),                   
                 tippy_this(
                         elementId = paste0('loadurlchip', nr, 1), 
@@ -240,26 +241,32 @@ addInputSection <- function(nr, preselectedParams = list()) {
                             "white")
           )
         ),
-
-        # Track Line section
-        h5("Track Line"),
-        fluidRow(
-          column(6,
-                colourInput(paste0("col", nr), 
-                            "",
-                            preselectedParams$color)
-          ),
-          column(6,
-                sliderInput(paste0("linewidth", nr),
-                            label = "Width",
-                            min = 0,
-                            max = 7,
-                            value = 1.5,
-                            step = 0.5
-                )
+        tags$div(id=paste0("trackline", nr),
+          # Track Line section
+          h5("Track Line"),
+          fluidRow(
+            column(6,
+                  colourInput(paste0("col", nr), 
+                              "", 
+                              preselectedParams$color)
+            ),
+            column(6,
+                  sliderInput(paste0("linewidth", nr),
+                              label = "Width",
+                              min = 0,
+                              max = 7,
+                              value = 1.5,
+                              step = 0.5
+                  )
+            )
           )
         ),
-
+        tags$div(id=paste0("compcolors", nr),
+          h5("Compartment Colors"),
+          fluidRow(column(12, colourInput(paste0("compcolA", nr), "A-A interactions", "red"))),
+          fluidRow(column(12, colourInput(paste0("compcolB", nr), "B-B interactions", "blue"))),
+          fluidRow(column(12, colourInput(paste0("compcolAB", nr), "A-B interactions", "green"))),
+        ),
         # Data Range section
         tags$div(id=paste0("datarange", nr),
           h5("Data range"),
@@ -272,7 +279,7 @@ addInputSection <- function(nr, preselectedParams = list()) {
             ),
             column(4,
                   checkboxInput(paste0("log", nr, 1),
-                                "Log", value = TRUE)
+                                "Log", value = FALSE)
             )
           )
         )
@@ -758,3 +765,343 @@ observe({
         addInputSection(4, list(path = eigen, url = NULL, label = "Eigen Track", bedgraph = TRUE, combination = FALSE))
     }
 }) %>% bindEvent(input$exampleset)
+
+
+
+
+
+
+
+
+
+
+
+# # Make dynamic ChIP a function to allow
+# addInputSection <- function(nr, preselectedParams = list()) {
+#     bw1v$features[[nr]] <- list(NULL, NULL)
+#     id <- paste0("input", nr)
+#     ####### Dynamic UI update START #####################
+#     insertUI(
+#     selector = '#inputList',
+#     ui = div(
+#       #style = "border:1px solid black; margin:10px; padding:10px; border-radius: 5px;",
+#       class = "new-div",
+#       id = paste0("newInput", nr),
+#       fluidRow(
+#         column(12,
+#                  textInput(paste0("n", nr), 
+#                            label = "Label", 
+#                            value = preselectedParams$label)
+#           )
+#       ),
+#       # Title with a toggle button to collapse/expand the section
+#       fluidRow(
+#         column(8,
+#                h4("Feature 1", style = "margin-bottom: 15px;")
+#         ),
+#         column(2,
+#           materialSwitch(inputId = paste0('bedswitch', nr), label = "Bedgraph", value = preselectedParams$bedgraph)
+#         ),
+#         column(2,
+#           materialSwitch(inputId = paste0('eigenswitch', nr), label = "Eigen", value = FALSE)
+#         )
+#       ),
+      
+#       # File selection button and toggle button
+#       fluidRow(
+#         tags$div(id = paste0("bigwigdiv", nr, 1),
+#           column(9,
+#                 # Wrapper div that will hold the "Select Bigwig" button
+#                 tags$div(id = paste0('fileSelectDiv', nr, 1),
+#                   if (is_lite_mode) {
+#                     # Replace shinyFilesButton with fileInput
+#                     fileInput(paste0('bw', nr, 1), 
+#                       label = 'Select Bigwig',
+#                       multiple = FALSE,
+#                       accept = c('.bw', '.bigwig', '.bigWig'))
+#                   } else {
+#                     shinyFilesButton(
+#                       paste0('bw', nr, 1),
+#                       label = 'Select bigwig',
+#                       title = 'Please select a .bigwig/.bw file',
+#                       multiple = FALSE,
+#                       style = "width: 100%;"
+#                     )
+#                   }
+#                 ),
+#                 tippy_this(
+#                         elementId = paste0('fileSelectDiv', nr), 
+#                         tooltip = "<span style='font-size:15px;'>Select .bigwig/ .bw file<span>", 
+#                         allowHTML = TRUE,
+#                         placement = 'right'
+#                     ),
+                
+#                 # Wrapper div that will hold the URL input and Add URL button (initially hidden)
+#                 tags$div(
+#                   fluidRow(
+#                     column(9,
+#                             tags$div(
+#                               textInput(
+#                                 paste0('urlchip', nr, 1),
+#                                 label = NULL,
+#                                 value = preselectedParams$url
+#                               ),
+#                               style = "width: 100%; display:none;",
+#                               id = paste0('textInputDiv', nr, 1)
+#                             )
+#                     ),
+#                     column(3,
+#                             actionButton(paste0('loadurlchip', nr, 1), label = "", icon = icon("check"), style = "width: 100%;"),
+#                             id = paste0('urlInputDiv', nr, 1),
+#                             style = "display:none;"  # Initially hidden
+#                     ),                   
+#                 tippy_this(
+#                         elementId = paste0('loadurlchip', nr, 1), 
+#                         tooltip = "<span style='font-size:15px;'>Upload URL for .bigwig/ .bw file<span>", 
+#                         allowHTML = TRUE,
+#                         placement = 'right'
+#                     ),
+#                   )
+#                 ),
+#           )
+#         ),
+#         tags$div(id = paste0("bedgraphdiv", nr, 1),
+#           column(9,
+#                 # Wrapper div that will hold the "Select Bigwig" button
+#                 tags$div(id = paste0('bedSelectDiv', nr, 1),
+
+#                   if (is_lite_mode) {
+#                       # Replace shinyFilesButton with fileInput
+#                       fileInput(paste0('bed', nr, 1), 
+#                       label = 'Select bedgraph',
+#                       multiple = FALSE,
+#                       accept = c('bed', 'bedgraph'))
+#                   } else {
+#                       shinyFilesButton(
+#                         paste0('bed', nr, 1),
+#                         label = 'Select bedgraph',
+#                         title = 'Please select a .bedgraph/.bed file',
+#                         multiple = FALSE,
+#                         style = "width: 100%;",
+#                         value = preselectedParams$path
+#                       )
+#                   },
+#                 ),
+#                 tippy_this(
+#                         elementId = paste0('bedSelectDiv', nr), 
+#                         tooltip = "<span style='font-size:15px;'>Select local .bedgraph/ .bed file <span>", 
+#                         allowHTML = TRUE,
+#                         placement = 'right'
+#                     )
+#           )
+#         ),
+#         column(3,
+#                # The toggle button always stays visible, so it's outside the toggleable divs
+#                actionButton(paste0('toggleBtn', nr, 1), label = "", style = "width:100%;", icon = icon("exchange-alt"))
+#         )
+#       ),
+
+#       fluidRow(
+#         column(6,
+#           # Checkbox for co-signaling with a different feature
+#           checkboxInput(paste0('cosignal', nr), "Separate signals?", value = FALSE),
+#           tippy_this(
+#                   elementId = paste0('cosignal', nr), 
+#                   tooltip = "<span style='font-size:15px;'>Visualize interactions between two different chromatin signals (feature 1 vs feature 2). Default behavour is feature 1 vs feature 1.<span>", 
+#                   allowHTML = TRUE,
+#                   placement = 'right'
+#               ),
+#         ),
+#         column(3,
+#           actionButton(paste0('collapseBtn', nr), label = "", icon = icon("angle-double-down"), style = "width: 100%;"),
+#           #shinyBS::bsTooltip(id = paste0('collapseBtn', nr), title ="Open options for color, label and data range"),
+#           tippy_this(
+#               elementId = paste0('collapseBtn', nr),
+#               tooltip = "<span style='font-size:15px;'>Open options for color, label and data range<span>", 
+#               allowHTML = TRUE,
+#               placement = 'right'
+#           )
+#         ),
+#         column(2,
+#           checkboxInput(paste0("comb", nr),
+#                         "Combination", value = preselectedParams$combination)
+#                     )
+#               ),
+      
+#       # Collapsible Section
+#       tags$div(
+#         id = paste0("collapseSection", nr),
+#         style = "display: none;",  # Initially hidden
+
+#         # Track Background section
+#         h5("Track Background"),
+#         fluidRow(
+#           column(4,
+#                 colourInput(paste0("trackcol", nr), 
+#                             "", 
+#                             "white")
+#           )
+#         ),
+#         tags$div(id=paste0("trackline", nr),
+#           # Track Line section
+#           h5("Track Line"),
+#           fluidRow(
+#             column(6,
+#                   colourInput(paste0("col", nr), 
+#                               "", 
+#                               preselectedParams$color)
+#             ),
+#             column(6,
+#                   sliderInput(paste0("linewidth", nr),
+#                               label = "Width",
+#                               min = 0,
+#                               max = 7,
+#                               value = 1.5,
+#                               step = 0.5
+#                   )
+#             )
+#           )
+#         ),
+#         tags$div(id=paste0("compcolors", nr),
+#           h5("Compartment Colors"),
+#           fluidRow(column(12, colourInput(paste0("compcolA", nr), "A-A interactions", "red"))),
+#           fluidRow(column(12, colourInput(paste0("compcolB", nr), "B-B interactions", "blue"))),
+#           fluidRow(column(12, colourInput(paste0("compcolAB", nr), "A-B interactions", "green"))),
+#         ),
+#         # Data Range section
+#         tags$div(id=paste0("datarange", nr),
+#           h5("Data range"),
+#           fluidRow(
+#             column(4,
+#                   numericInput(paste0("minargs", nr, 1), "Min", step = .2, value = NULL)
+#             ),
+#             column(4,
+#                   numericInput(paste0("maxargs", nr, 1), "Max", step = .2, value = NULL)
+#             ),
+#             column(4,
+#                   checkboxInput(paste0("log", nr, 1),
+#                                 "Log", value = FALSE)
+#             )
+#           )
+#         )
+#       ),
+
+#       ########################
+#       # CO-SIGNAL
+#       # Need to do the nr with 1 and 2 for the features selected. If unchecked, both are feature 1
+#       # And toggle based on cosignal()
+#       # If checkbox unchecked, then use feature 1 vs feature 1
+#       # else feature 1 vs feature 2 (and expand window)
+#       tags$div(
+#         id = paste0("toggleFeature2", nr),
+        
+#         #UI
+#         # Title with a toggle button to collapse/expand the section
+#         fluidRow(
+#           column(10,
+#                 h4("Feature 2", style = "margin-bottom: 15px;")
+#           )
+#         ),
+        
+#         # File selection button and toggle button
+#         fluidRow(
+#               column(9,
+#                     # Wrapper div that will hold the "Select Bigwig" button
+#                     tags$div(id = paste0('fileSelectDiv', nr, 2),
+#                     if (is_lite_mode) {
+#                           # Replace shinyFilesButton with fileInput
+#                           fileInput(paste0('bw', nr, 2), 
+#                           label = 'Select bigwig',
+#                           multiple = FALSE,
+#                           accept = c('.bw', '.bigwig', '.bigWig'))
+#                       } else {
+#                           shinyFilesButton(
+#                             paste0('bw', nr, 2),
+#                             label = 'Select bigwig',
+#                             title = 'Please select a .bigwig/.bw file',
+#                             multiple = FALSE,
+#                             style = "width: 100%;"
+#                 )
+#                             },
+                      
+#                     ),
+                    
+#                     # Wrapper div that will hold the URL input and Add URL button (initially hidden)
+#                     tags$div(
+#                       fluidRow(
+#                         column(9,
+#                                 tags$div(
+#                                   textInput(
+#                                     paste0('urlchip', nr, 2),
+#                                     label = NULL,
+#                                     placeholder = "https://<file.bigwig>"
+#                                   ),
+#                                   style = "width: 100%; display:none;",
+#                                   id = paste0('textInputDiv', nr, 2)
+#                                 )
+#                         ),
+#                         column(3,
+#                                 actionButton(paste0('loadurlchip', nr, 2), label = "", icon = icon("check"), style = "width: 100%;"),
+#                                 id = paste0('urlInputDiv', nr, 2),
+#                                 style = "display:none;"  # Initially hidden
+#                         )
+#                     )
+#               )
+#           ),
+#           column(3,
+#                 # The toggle button always stays visible, so it's outside the toggleable divs
+#                 actionButton(paste0('toggleBtn', nr, 2), label = "", style = "width:100%;", icon = icon("exchange-alt"))
+#           )
+#         ),
+
+      
+#       #
+#       fluidRow(
+#         column(3,
+#         offset = 6,
+#             actionButton(paste0('collapseBtn2', nr), label = "", icon = icon("angle-double-down"), style = "width: 100%;"),
+#             #shinyBS::bsTooltip(id = paste0('collapseBtn', nr), title ="Open options for color, label and data range"),
+#             tippy_this(
+#                 elementId = paste0('collapseBtn2', nr),
+#                 tooltip = "<span style='font-size:15px;'>Open options for color, label and data range<span>", 
+#                 allowHTML = TRUE,
+#                 placement = 'right'
+#             )
+#           )
+#         )
+#       ),
+#       tags$div(
+#         id = paste0("collapseSection2", nr),
+#         style = "display: none;",  # Initially hidden
+#         # Numeric inputs for Min and Max
+#         fluidRow(
+#           column(6,
+#                  numericInput(paste0("minargs", nr, 2), "Min", value = NULL)
+#           ),
+#           column(6,
+#                  numericInput(paste0("maxargs", nr, 2), "Max", value = NULL)
+#           )
+#         ),
+#         fluidRow(
+#           column(4,
+#                  checkboxInput(paste0("log", nr, 2),
+#                                "Log", value = FALSE)
+#           )
+#         )
+#       ),
+#       #
+
+#       # Break
+#       br(),
+
+#       ########################
+      
+#       # Remove Button (remains visible outside the collapsible section)
+#       fluidRow(
+#         column(12,
+#                actionButton(paste0('removeBtn', nr), 'Remove', style = "width:100%;")
+#         )
+#       )
+#     )
+#   )
+# }

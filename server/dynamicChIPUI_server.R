@@ -16,6 +16,9 @@ minmaxargs <- reactiveValues(nums=list(list(list())))
 
 observeEvent(input$addBtn, {
     nr <- input$addBtn
+    if(examBtn()) {
+      nr <- nr + 4
+    }
     # Initialize bigwig path list for features 1,2
     bw1v$features[[nr]] <- list(NULL, NULL)
     id <- paste0("input",input$addBtn)
