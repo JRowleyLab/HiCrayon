@@ -94,21 +94,132 @@ Here's an example of some of the things you can do:
 
 We'll go into more detail on each of these features down below.
 
+### Add a feature
+
+Click Add to add an extra panel:
+
+<div style="display: inline-block;">
+  <img src="../logo/usage_images/features/features_Add.png" alt="enc_upld" width="300" style="vertical-align: top;" />
+  <img src="../logo/usage_images/features/panel1.png" alt="enc2_upld" width="300" style="vertical-align: top;" />
+</div>
+
+Now you can upload a 1D feature file (Bigwig, bedgraph, bed) and choose some options before you integrate with the Hi-C map.
+
 ### Bigwig
 
-A standard output format for many genomic methods. 
+Extension: `.bw, .bigwig` <p> A standard output format for many genomic methods. The process of uploading a local file is the same as what you did for the Hi-C above. You can also use a URL if you'd like. 
 
 ### Bedgraph
 
+Extension: `.bedgraph` <p> HiCrayon can take a bedgraph and plot it just the same as the bigwig. <p> **Required:** Must contain sorted, non-overlapping regions.
+
+**Eigenvector:** A common datatype generated from Hi-C maps is an eigenvector, which is a bedgraph that contains both positive and negative values that represent active and inactive chromatin states. When you upload a bedgraph, if there are positive and negative values, it will automatically engage an 'Eigen' switch that plots both A and B compartments together, along with interactions between A and B! Also, the UI will update to allow the user to choose colors for all 3 states (A-A, B-B, A-B)
 
 ### Bed
 
+Extension: `.bed` <p> HiCrayon can take a bed and plot it by assuming a maximum value for all regions in the file. <p> **Required:** Must contain sorted, non-overlapping regions.
 
-### Advanced Options
+### Generate!
+After you've selected the file, click `Generate` and the bigwig will run with the default options. For example, let's load a CTCF bigwig track, based on a local file we have. We can see in the below image, that the increased interactions overlap perfectly with our CTCF ChIP-seq data! 
 
-1. Log <p>
-You can log transform (Log2) your data for visualization. This can be helpful for when you have a large range in 
+<div style="display: inline-block;">
+  <img src="../logo/usage_images/features/CTCF_loop_loaded.png" alt="enc_upld" width="300" style="vertical-align: top;" />
+</div>
+
+### Feature Options
+
+To open up the 'Options' section, click the highlighted dropdown button. This will reveal a few buttons that allow you to tweak your HiCrayon image.
+
+<div style="display: inline-block;">
+  <img src="../logo/usage_images/features/panel_options.png" alt="enc_upld" width="300" style="vertical-align: top;" />
+  <img src="../logo/usage_images/features/panel_options_open.png" alt="enc_upld" width="300" style="vertical-align: top;" />
+</div>
+
+**Track Background**
+Choose the color of the background of the track on the X and Y-axes.
+
+**Track Line**
+Choose the color of your feature. This option not only changes the color of the line on the X and Y-axes, but also the color of the feature on the Hi-C itself. <p>
+
+Change the width of the track line too with the slider!
+
+**Data Range**
+Choose a minimum and maximum value for your feature. This acts as the floor and ceiling that all data values will be normalized to. Analogous to 'Data Range' in the tool Integrative Genomics Viewer (IGV). Automatically updates when the data is generated the first time. Will reset to empty if locus is changed.
+
+**Log**
+A box that allows the logarithmic transformation of the data. Consider if data has large variance in peaks and background. 
+
+**NOTE:** HiCrayon works by calculating transparency as a function of the 1D signal (weighted by Hi-C too, usually). If you'd to reduce variance in your data, and thus minimize the discrepancy between transparency across peaks, consider altering the `Data Range` or `Log` transforming your data.
+
+### Advanced Parameters
+
+**Feature Alpha**: Adjust the total transparency of the 1D feature.
+
+**Hi-C Alpha**: Adjust the total transparency of the Hi-C matrix.
+
+`0:` 100% Transparent
+`1:` 0% Transparent
+
+### Color Recommendation
+
+Consider selecting a Hi-C matrix color in the following manor:
+
+`Low:` Black
+`High:` White
+
+This utilizes a white background for high signal, making the color much more visible.
+
+<div style="display: inline-block;">
+  <img src="../logo/usage_images/features/hic_blacktowhite.png" alt="enc_upld" width="300" style="vertical-align: top;" />
+</div>
 
 
+### Multiple Features
+
+Add multiple panels, and visualize many features simultaneously! This can be done separately or in the same image. <p>
+
+For example, we add a second panel and upload a bigwig file for RAD21, a protein part of the cohesin complex. Cohesin and CTCF are known to create increased interactions seen in a Hi-C map. The signals look like they overlap quite a bit!
+
+<div style="display: inline-block;">
+  <img src="../logo/usage_images/features/panel2_add.png" alt="enc_upld" width="300" style="vertical-align: top;" />
+  <img src="../logo/usage_images/features/panel2_loaded.png" alt="enc_upld" width="300" style="vertical-align: top;" />
+</div>
+
+<p>
+
+**Combination** Lets plot both CTCF and RAD21 on the *same* image. To do this, check the `combination` button. All panels where this button is checked, will be combined in a single image. <p> 
+
+Any bins where there are signals from multiple features will find a color that represents all, based on the signal from each. Think of this like adding in paint from multiple cans. In this example, if CTCF had 2x the signal (relative to itself) compared to RAD21, then the color split between blue and red would be 2xRED and 1xBLUE. The actual color from this calculation is found from the RGB color space. We try to help you here by adding a Eulerr diagram showing all color combinations from your chosen features.
+
+<div style="display: inline-block;">
+  <img src="../logo/usage_images/features/panel1_panel2_combination.png" alt="enc_upld" width="300" style="vertical-align: top;" />
+    <img src="../logo/usage_images/features/panel1_panel2_comb_zoom.png" alt="enc_upld" width="300" style="vertical-align: top;" />
+</div>
+
+You can do this for about as many features as you want. But be careful that if the signals overlap the same bin, the results can get unclear pretty quickly.
+
+### Separate Signals
+
+This feature allows you to visualize interactions between two chromatin loci, that have distinct chromatin features on each side! An example of this would be interactions where one side you have H3K27me3, and on the other you have H3K27ac. Now, any hightlighted interactions are that between those two histone marks. 
+
+<div style="display: inline-block;">
+  <img src="../logo/usage_images/features/CTCF_RAD_separate_signals.png" alt="enc_upld" width="400" style="vertical-align: top;" />
+</div>
+
+<br>
+
+Here, on the panel with CTCF, we select the `Separate Signal` option. This changes the UI, and now we have a section to upload another bigwig. The `Options` dropdown for the first bigwig contains options for track and background color, and the Data Range options. The dropdown for signal 2 will only contain the Data Range, as the options for signal 1 will apply to signal 2 too.
+
+<p>
+
+
+
+### Download
+
+Click the `Download` button to download all images you can see on your screen to the device that HiCrayon is open on. Once clicked, a zip folder will download that contains a **png** and **svg** for each image. The names will contain some metadata to make life easier, such as:
+
+* Type (HiC, ChIP)
+* Chromosome - Start - Stop - Binsize
+* Hi-C normalization method (KR, VCSQRT)
 
 [Return to Main Page](/README.md)
