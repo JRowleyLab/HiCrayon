@@ -17,26 +17,69 @@ You will be greeted by three sections.
 **Features (1D):** Loads the traditionally 1-dimensional data (e.g. bigwig, bedgraph) that will 'color' the Hi-C canvas.
 
 
-*image*
+<div style="text-align: center;">
+  <img src="../logo/usage_images/landing_page.png" alt="Landing_pge" width="400" />
+</div>
 
 -------------------------------------
 
 ## Hi-C
 
-On the sidebar, click on the '+' to open the options.
+On the sidebar, click on the '+' to open the options. There are a few ways you can get a Hi-C file into HiCrayon. 
 
-*image*
+1) **Select HiC**: Local File Upload. 
 
-To begin, we will load a publicly available map from the ENCODE dataset. We can search by experiment, and will use the ENCSR123UVP experiment with the GRCh38 genome assembly. To select a map, click it from the list and then press the "Load" button at the bottome of the pop-up.
 
-Users can also specify a local Hi-C file using the 'Select HiC' button, navigating to the desired .hic file, selecting the file and pressing the 'Select' button in the lower right corner.
+<div style="display: inline-block;">
+  <img src="../logo/usage_images/hic/hic_upload.png" alt="enc2_upld" width="200" style="vertical-align: top;" />
+  <img src="../logo/usage_images/hic/hic_filesBLUR.png" alt="enc_upld" width="400" style="vertical-align: top;" />
+</div>
+
+
+2) **Load URL**: Paste in a Hi-C URL and click the load URL button. Details on where to get a link are below.
+
+3) **ENCODE**: Choose a Hi-C file from a database of ENCODE-hosted files. This loads in a Hi-C *via* URL.
+
+
+<div style="text-align: center;">
+  <img src="../logo/usage_images/hic/ENCODE.png" alt="enc_upld" width="300" />
+</div>
+
+
+
+
+
+To begin, we will load a publicly available map from the ENCODE dataset. Either choose the ENCODE button to choose between over a hundred Hi-C maps, over enter the URL of the `.hic` file, like so:
+
+`https://www.encodeproject.org/files/ENCFF573OPJ/@@download/ENCFF573OPJ.hic` <p>
+
+To obtain a link to a file from ENCODE, right click and copy the link from the download button on the experiment page.
+
+<div style="text-align: center;">
+  <img src="../logo/usage_images/hic/encode_hic.png" alt="enc_upld" width="300" />
+</div>
+
+Users can also specify a local Hi-C file using the 'Select HiC' button, navigating to the desired .hic file, selecting the file and pressing the 'Select' button in the lower right corner. 
 
 Hi-C matrices contain a vast amount of information on pairwise interacitons between genomic regions.
 
 ### Advanced Options
 
-1. 
+Click the 'Options' box at the bottom of the page for more options.
 
+1. `Scale ChIP w/ Hi-C`. Default: True. Weight 1D feature score by Hi-C interaction score. 
+
+2. `Distance Normalization`. Checking this box will apply a `observed/expected+1` normalization to the Hi-C map.
+
+<div style="display: inline-block;">
+  <img src="../logo/usage_images/hic/hic_distnorm.png" alt="enc_upld" width="300" style="vertical-align: top;" />
+  <img src="../logo/usage_images/hic/hic_nodistnorm.png" alt="enc2_upld" width="300" style="vertical-align: top;" />
+</div>
+
+3. `HiC Threshold`: Choose the maximum value for the Hi-C interaction score. This will represent the upper limit of color range. 
+**Recommended**:
+*Distance-Normalized*: 2
+*Raw*: Varies based on sequencing depth. Values are comparable between Juicebox and HiCrayon.
 -------------------------------------
 
 ## Features 
