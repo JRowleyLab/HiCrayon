@@ -21,8 +21,8 @@ Use HiCrayon to create beautiful images and visualize 1D tracks on 2D matrices.
 
 # Quick Links
 
-[Installation](../../wiki/Installation) <p>
-[Usage](../../wiki/Detailed-Usage) <p>
+[Installation](<../../wiki/1.-Installation>) <p>
+[Usage](<../../wiki/2.-Detailed-Usage>) <p>
 
 
 # Quick Start
@@ -54,7 +54,7 @@ Under the sidebar option, **Hi-C**, at the bottom you'll see a button called 'Ex
 All you need to do now is click 'Generate' at the bottom of the sidebar, and it will load in all the above data, do some HiCrayon stuff, and output the Hi-C map, but now it's colored by histone occupancy, and the eigenvector status! 
 
 ### Try your own! <p>
-Upload a Hi-C file from a local directory, or by importing through a URL and start visualizing! Detailed instructions on usage can be found here: [Usage](../../wiki/Detailed-Usage) <p>
+Upload a Hi-C file from a local directory, or by importing through a URL and start visualizing! Detailed instructions on usage can be found here: [Usage](<../../wiki/2.-Detailed-Usage>) <p>
 
 
 ---------------------------------------------
@@ -71,12 +71,12 @@ A *lite* version of HiCrayon is available at:
 Small Hi-C maps or 1D tracks can be uploaded, but we have implemented a size cap. However, published Hi-C maps and bigwigs from ENCODE (https://www.encodeproject.org/) are able to be visualized in their entirety.
 <!-- and locally stored small bedGraph files. -->
 
-To fully avail yourself of the utility of HiCrayon, please [Install](../../wiki/Installation) a local version of the app.
+To fully avail yourself of the utility of HiCrayon, please [Install](<../../wiki/1.-Installation>) a local version of the app.
 
 ---------------------------------------------
 # Requirements for Installation
 To install HiCrayon, we use containerized Singularity that allows for a portable, reproducible environment.  
-* [Singularity](https://github.com/JRowleyLab/HiCrayon/wiki/installation) is our primary method has excellent [installation](https://docs.sylabs.io/guides/3.0/user-guide/installation.html) documentation.
+* [Singularity] is our primary method and has excellent [documentation](https://docs.sylabs.io/guides/3.0/user-guide/installation.html).
 * [Conda] is also available but **NOT** recommended.
 
 At least 10 gigabytes of storage are recommended for the installation of the application, singularity image, and storage of the large experiment files.
