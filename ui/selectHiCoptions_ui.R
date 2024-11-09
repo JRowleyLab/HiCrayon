@@ -4,7 +4,7 @@ selectHiCoptionsUI <- div(
             if (is_lite_mode) {
                 column(3, 
                     tags$div(id = 'hicdiv', 
-                        fileInput('hic', label = 'Select Hi-C', multiple = FALSE, accept = '.hic')
+                        fileInput('hic', label = '', multiple = FALSE, accept = '.hic')
                     )
                 )
             } else {

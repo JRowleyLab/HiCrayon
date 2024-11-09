@@ -55,7 +55,7 @@ insertUI(
                   if (is_lite_mode) {
                     # Replace shinyFilesButton with fileInput
                     fileInput(paste0('bw', nr, 1), 
-                      label = 'Select Bigwig',
+                      label = '',
                       multiple = FALSE,
                       accept = c('.bw', '.bigwig', '.bigWig'))
                   } else {
@@ -112,7 +112,7 @@ insertUI(
                   if (is_lite_mode) {
                       # Replace shinyFilesButton with fileInput
                       fileInput(paste0('bed', nr, 1), 
-                      label = 'Select Bed/ Bedgraph',
+                      label = '',
                       multiple = FALSE,
                       accept = c('bed', 'bedgraph'))
                   } else {
@@ -243,7 +243,7 @@ insertUI(
             selectInput(paste0("filetype", nr, 2), "", choices = c("Bigwig", "Bedgraph", "Bed"))
           )
         ),
-              # File selection button and toggle button
+        # File selection button and toggle button
       fluidRow(
         tags$div(id = paste0("bigwigdiv", nr, 2),
           column(9,
@@ -252,7 +252,7 @@ insertUI(
                   if (is_lite_mode) {
                     # Replace shinyFilesButton with fileInput
                     fileInput(paste0('bw', nr, 2), 
-                      label = 'Select Bigwig',
+                      label = '',
                       multiple = FALSE,
                       accept = c('.bw', '.bigwig', '.bigWig'))
                   } else {
@@ -309,7 +309,7 @@ insertUI(
                   if (is_lite_mode) {
                       # Replace shinyFilesButton with fileInput
                       fileInput(paste0('bed', nr, 2),
-                      label = 'Select Bed/ Bedgraph',
+                      label = '',
                       multiple = FALSE,
                       accept = c('bed', 'bedgraph'))
                   } else {
@@ -390,18 +390,14 @@ insertUI(
 
 
 # Remove deletes UI + resets bw paths
-observeEvent(input[[paste0('removeBtn',nr)]],{
-        # Remove div
-        # TODO: remove bigwig from system too
-      shiny::removeUI(
-        selector = paste0("#newInput",nr)
-      )
-      # NULL the filepath
-      bw1v$features[[nr]][[1]] <- NULL
-      bw1v$features[[nr]][[2]] <- NULL
-      # Reset combination button to FALSE
-      updateCheckboxInput(session, paste0('comb', nr), value = FALSE)
-    })
+observeEvent(input[[paste0('removeBtn',nr)]], {
+  isolate({
+    bw1v$features[[nr]] <- list(NULL, NULL)
+  })
+  shiny::removeUI(selector = paste0("#newInput",nr))
+  updateCheckboxInput(session, paste0('comb', nr), value = FALSE)
+  print(paste0("NULLING: ", nr))
+})
 
   observeEvent(input[[paste0('cosignal', nr)]], {
     key <- as.character(nr)
@@ -425,12 +421,19 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
       shinyjs::show(paste0("bigwigdiv", nr, 1))    # Toggle the Add URL button
       shinyjs::hide(paste0("bedgraphdiv", nr, 1))
       shinyjs::show(paste0("toggleBtn", nr, 1))
+
+      # update feature2 selectInput to match
+      updateSelectInput(session, paste0('filetype', nr, 2), choices = c("Bigwig"))
     } else {
       shinyjs::hide(paste0("bigwigdiv", nr, 1))  # Toggle the Select Bigwig button
       shinyjs::show(paste0("bedgraphdiv", nr, 1))
       shinyjs::hide(paste0("toggleBtn", nr, 1))
+
+      # update feature2 selectInput to match
+      updateSelectInput(session, paste0('filetype', nr, 2), choices = c("Bed", "Bedgraph"))      
     }
 })
+
 
   # Toggle the collapsible section 2 (for feature 2)
   observeEvent(input[[paste0('collapseBtn2', nr)]], {
@@ -444,14 +447,19 @@ observeEvent({
   input[[paste0('filetype', nr)]]
 }, {
   if (input[[paste0('filetype', nr)]] %in% c("Eigen", "chromHMM")) {
-      shinyjs::hide(paste0("toggleFeature2", nr))  # Hide when both switches are TRUE
+
+      # Hide feature 2 and combination, unchecking both when Eigen/ chromHMM
+      shinyjs::hide(paste0("cosignal", nr))  
+      shinyjs::hide(paste0("toggleFeature2", nr))  
       updateCheckboxInput(session, paste0('cosignal', nr), value = FALSE)
-      shinyjs::hide(paste0("comb", nr))  # Hide when both switches are TRUE
+
+      shinyjs::hide(paste0("comb", nr))  
       updateCheckboxInput(session, paste0('comb', nr), value = FALSE)
-    } 
+    } else {
+      shinyjs::show(paste0("cosignal", nr))  
+      shinyjs::show(paste0("comb", nr)) 
+    }
 })
-
-
 
 # Show feature 2 when cosignal button is TRUE
 observeEvent({
@@ -470,8 +478,6 @@ observeEvent({
     }
   })
 
-
-
 observeEvent({
   input[[paste0('filetype', nr)]]
 }, {
@@ -480,14 +486,18 @@ observeEvent({
     shinyjs::show(paste0("compcolors", nr))
     shinyjs::hide(paste0("trackline", nr))
     shinyjs::hide(paste0("datarange", nr))
-  } else {
+  } else if(input[[paste0('filetype', nr)]] == "chromHMM") {
+    shinyjs::hide(paste0("trackline", nr))
+    shinyjs::hide(paste0("datarange", nr))
+    shinyjs::hide(paste0("compcolors", nr))
+    } else {
     # Hide color selection for A, B, AB
     shinyjs::hide(paste0("compcolors", nr))
     shinyjs::show(paste0("trackline", nr))
     shinyjs::show(paste0("datarange", nr))
   }
-  
 })
+
     
   ### Toggle url and local BIGWIG upload
   # Toggle between "Select Bigwig" and URL input + Add URL button
@@ -529,7 +539,7 @@ observeEvent({
   shinyFileChoose(input, paste0("bw",nr, 1), root = c(wd = workingdir), filetypes=c('bw', 'bigwig'))
 
   # Add file path to reactive variable
-  observe({ #Event(input[[paste0("bw",nr, 1)]], 
+  observeEvent(input[[paste0("bw",nr, 1)]], { #
     if (is_lite_mode) {
       # In 'lite_mode', retrieve filepath from client side
       inFile <- input[[paste0("bw",nr, 1)]]
@@ -552,8 +562,6 @@ observeEvent({
         value = fname
         )
     }
-
-
   })
 
   #BEGRAPH file hanlding
@@ -588,6 +596,11 @@ observeEvent({
           )
       }
 
+  })
+
+  observe({
+    print("FILES:")
+    print(bw1v$features[[nr]])
   })
 
 
@@ -681,12 +694,13 @@ observeEvent({
     isvalid = checkURL(input[[paste0('urlchip',nr, 1)]], list('bigWig', 'bigwig', 'bw'))
 
     if(isvalid=="Valid"){
-        bw1v[[paste0("bw",nr, 1)]] <- input[[paste0('urlchip',nr, 1)]]
+        #bw1v[[paste0("bw",nr, 1)]] <- input[[paste0('urlchip',nr, 1)]]
+        bw1v$features[[nr]][[1]] <- input[[paste0('urlchip',nr, 1)]]
 
         updateTextInput(
           session,
           inputId = paste0("n", nr),
-          value = tools::file_path_sans_ext(basename(bw1v[[paste0("bw",nr, 1)]]))
+          value = tools::file_path_sans_ext(basename(bw1v$features[[nr]][[1]]))
           )
     }else{
         shinyCatch({stop(paste0("URL uploaded: ", 
@@ -702,12 +716,12 @@ observeEvent({
     isvalid = checkURL(input[[paste0('urlchip', nr, 2)]], list('bigWig', 'bigwig', 'bw'))
 
     if(isvalid=="Valid"){
-        bw1v[[paste0("bw", nr, 2)]] <- input[[paste0('urlchip', nr, 2)]]
+        bw1v$features[[nr]][[2]] <- input[[paste0('urlchip',nr, 2)]]
 
         updateTextInput(
           session,
           inputId = paste0("n", nr, 2),
-          value = tools::file_path_sans_ext(basename(bw1v[[paste0("bw", nr, 2)]]))
+          value = tools::file_path_sans_ext(basename(bw1v$features[[nr]][[2]]))
           )
     }else{
         shinyCatch({stop(paste0("URL uploaded: ", 

@@ -14,6 +14,8 @@ output$gallery <- renderUI({
         # Dynamically add chip data
         for(i in seq_along(bw1v$features)){
             if(!is.null(bw1v$features[[i]][[1]])){
+                print(i)
+                print(bw1v$features[[i]][[1]])
                 texts = append(texts, input[[paste0("n", i)]])
                 hrefs = append(hrefs, "")
                 images = append(images, gsub("www/", "", chipplot()[[i]]$svg))
