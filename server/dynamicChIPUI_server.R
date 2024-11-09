@@ -38,15 +38,18 @@ insertUI(
       ),
       # Title with a toggle button to collapse/expand the section
       fluidRow(
-        column(8,
+        column(6,
                h4("Feature 1", style = "margin-bottom: 15px;")
         ),
-        column(2,
-          materialSwitch(inputId = paste0('bedswitch', nr), label = "Bedgraph", value = FALSE)
-        ),
-        column(2,
-          materialSwitch(inputId = paste0('eigenswitch', nr), label = "Eigen", value = FALSE)
+        column(6,
+          selectInput(paste0("filetype", nr), "", choices = c("Bigwig", "Bedgraph", "Bed", "Eigen", "chromHMM"))
         )
+        # column(2,
+        #   materialSwitch(inputId = paste0('bedswitch', nr), label = "Bedgraph", value = FALSE)
+        # ),
+        # column(2,
+        #   materialSwitch(inputId = paste0('eigenswitch', nr), label = "Eigen", value = FALSE)
+        # )
       ),
       
       # File selection button and toggle button
@@ -379,18 +382,15 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
 
   # When bedgraph is toggled, hide bigwig local and url buttons and
   # show the bedgraph buttons
-  observeEvent(input[[paste0("bedswitch", nr)]], {
-    if (input[[paste0("bedswitch", nr)]] == FALSE) {
+  observeEvent(input[[paste0("filetype", nr)]], {
+    if (input[[paste0("filetype", nr)]] %in% c("Bigwig")) {
       shinyjs::show(paste0("bigwigdiv", nr, 1))    # Toggle the Add URL button
       shinyjs::hide(paste0("bedgraphdiv", nr, 1))
       shinyjs::show(paste0("toggleBtn", nr, 1))
-      shinyjs::hide(paste0("eigenswitch", nr))
-      updateMaterialSwitch(session, paste0("eigenswitch", nr), value = FALSE)
     } else {
       shinyjs::hide(paste0("bigwigdiv", nr, 1))  # Toggle the Select Bigwig button
       shinyjs::show(paste0("bedgraphdiv", nr, 1))
       shinyjs::hide(paste0("toggleBtn", nr, 1))
-      shinyjs::show(paste0("eigenswitch", nr))
     }
 })
 
@@ -402,20 +402,18 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
 
 observeEvent({
     input[[paste0('cosignal', nr)]]
-    input[[paste0('bedswitch', nr)]]
-    input[[paste0('eigenswitch', nr)]]
+    input[[paste0('filetype', nr)]]
   }, {
     cosignal_value <- input[[paste0("cosignal", nr)]]
-    bedswitch_value <- input[[paste0("bedswitch", nr)]]
-    eigenswitch_value <- input[[paste0("eigenswitch", nr)]]
+    filetype_value <- input[[paste0("filetype", nr)]]
 
-    if (is.null(cosignal_value) || is.null(bedswitch_value) || is.null(eigenswitch_value)) {
+    if (is.null(cosignal_value) || is.null(filetype_value)) {
       return()  # Do nothing if any input is NULL
     }
 
     if (cosignal_value == FALSE) {
       shinyjs::hide(paste0("toggleFeature2", nr))  # Hide the collapsible section
-    } else if (bedswitch_value == TRUE & eigenswitch_value == TRUE) {
+    } else if (filetype_value %in% c("Eigen", "chromHMM", "Bed", "Bedgraph") ) {
       shinyjs::hide(paste0("toggleFeature2", nr))  # Hide when both switches are TRUE
       updateCheckboxInput(session, paste0('cosignal', nr), value = FALSE)
     } else {
@@ -424,26 +422,26 @@ observeEvent({
   })
 
 
-observeEvent({
-    bwlist_ChIP1()$iseigen[nr][[1]]  # Reactive expression that triggers the event
-  }, {
-    # Check if bwlist_ChIP1()$iseigen[nr][[1]] is TRUE and bw1v$features[[nr]] is not NULL
-    if (!is.null(bwlist_ChIP1()$iseigen[nr][[1]]) && bwlist_ChIP1()$iseigen[nr][[1]] == TRUE && !is.null(bw1v$features[[nr]])) {
-      shinyCatch({
-        message(paste("File: ", bw1v$features[[nr]][[1]], " looks like an Eigen track (bedgraph with positive and negative values), plotting in Eigen format + changing UI in Panel ", nr))
-      }, prefix = '')
-      shinyjs::hide(paste0("datarange", nr))  # Hide the element
-      updateMaterialSwitch(session, paste0("eigenswitch", nr), value = TRUE)  # Update the switch
-      # Show color selection for A, B, AB
-      shinyjs::show(paste0("compcolors", nr))
-    }
-  }, ignoreNULL = TRUE)
+# observeEvent({
+#     bwlist_ChIP1()$iseigen[nr][[1]]  # Reactive expression that triggers the event
+#   }, {
+#     # Check if bwlist_ChIP1()$iseigen[nr][[1]] is TRUE and bw1v$features[[nr]] is not NULL
+#     if (!is.null(bwlist_ChIP1()$iseigen[nr][[1]]) && bwlist_ChIP1()$iseigen[nr][[1]] == TRUE && !is.null(bw1v$features[[nr]])) {
+#       shinyCatch({
+#         message(paste("File: ", bw1v$features[[nr]][[1]], " looks like an Eigen track (bedgraph with positive and negative values), plotting in Eigen format + changing UI in Panel ", nr))
+#       }, prefix = '')
+#       shinyjs::hide(paste0("datarange", nr))  # Hide the element
+#       updateMaterialSwitch(session, paste0("eigenswitch", nr), value = TRUE)  # Update the switch
+#       # Show color selection for A, B, AB
+#       shinyjs::show(paste0("compcolors", nr))
+#     }
+#   }, ignoreNULL = TRUE)
 
 
 observeEvent({
-  input[[paste0('eigenswitch', nr)]]
+  input[[paste0('filetype', nr)]]
 }, {
-  if(input[[paste0('eigenswitch', nr)]] == TRUE){
+  if(input[[paste0('filetype', nr)]] == "Eigen"){
     # Hide color selection for A, B, AB
     shinyjs::show(paste0("compcolors", nr))
     shinyjs::hide(paste0("trackline", nr))

@@ -29,6 +29,7 @@ hicplot <- reactive({
     ))
 }) 
 
+rgb_2_hex <- function(r,g,b){rgb(r, g, b, maxColorValue = 255)}
 
 chipplot <- reactive({
 
@@ -40,6 +41,7 @@ chipplot <- reactive({
     trackcol <- list()
     linewidth <- list()
     eigenbools <- list()
+    filetype <- list()
 
     lapply(seq_along(bw1v$features), function(x){
 
@@ -47,6 +49,7 @@ chipplot <- reactive({
         
             # Overwrite the colour and track for single chips
             col[1] <- input[[paste0("col", x)]]
+            filetype[[1]] <- input[[paste0("filetype", x)]]
             #track color
             trackcol[1] <- input[[paste0("trackcol", x)]]
             linewidth[1] <- input[[paste0("linewidth", x)]]
@@ -62,8 +65,13 @@ chipplot <- reactive({
             }
 
             #Boolean value of if the bigwig is an eigentrack
-            eigenbool = bwlist_ChIP1()$iseigen[x]
-            eigenbools <- append(eigenbools, eigenbool)
+            if(input[[paste0("filetype", x)]] %in% c("Eigen")){
+                eigenbool = TRUE
+            } else {
+               eigenbool = FALSE
+            }
+            
+            eigenbools[1] <- eigenbool
 
             if(eigenbool==TRUE){
                 tracks[[1]][[1]][[1]] <- chipalpha()$chipclipped[[x]]
@@ -71,6 +79,23 @@ chipplot <- reactive({
                 col[[1]][[1]] <- input[[paste0("compcolA", x)]]
                 col[[1]][[2]] <- input[[paste0("compcolB", x)]]
                 col[[1]][[3]] <- input[[paste0("compcolAB", x)]]
+            }
+
+            if(input[[paste0("filetype", x)]] %in% c("chromHMM")){
+                #tracks
+                tracks <- bwlist_ChIP1()$raws[[x]][[1]]
+                print("tracks")
+                print(length(tracks))
+
+                #filetypes
+                filetype <- rep("chromHMM", length(tracks))
+
+                #colors
+                cols <- bwlist_ChIP1()$HMMcols[[x]]
+                col <- lapply(cols, function(x) rgb_2_hex(x[1], x[2], x[3]))
+                print("colors")
+                print(length(col))
+
             }
                 
             # List of min/max values [[1,2]].
@@ -103,7 +128,7 @@ chipplot <- reactive({
                 bedalpha = input$bedalpha,
                 filepathpng = pngpath,
                 filepathsvg = svgpath,
-                iseigen = eigenbools
+                filetype = filetype
                 #minmaxs = minmaxlist #[[1,2]] #not used.
                 )
 
@@ -117,8 +142,6 @@ chipplot <- reactive({
 
     return(images)
 }) 
-
-
 
 combinedchips <- reactiveValues()
 observeEvent(confirmed(), {
@@ -195,14 +218,18 @@ chipcombinedplot <- reactive({
         #minmaxlist_list <- append(minmaxlist_list, list(minmaxargs$nums[[x]][[1]]) )
         
         #Boolean value of if the bigwig is an eigentrack
-        eigenbool = bwlist_ChIP1()$iseigen[x]
-        eigenbools <- append(eigenbools, eigenbool)
+        if(input[[paste0("filetype", x)]] %in% c("Eigen")){
+            eigenbool = TRUE
+        } else {
+            eigenbool = FALSE
+        }
 
         # if it's an eigen track, overwrite track with eigen track
         if(eigenbool==TRUE){
-            #tracks[[1]][[1]] <- chipalpha()$chipclipped[[x]]
             tracks[[counter]][[1]] <- chipalpha()$chipclipped[[chipstocombine[x]]]
         }
+
+        eigenbools[[counter]] <- eigenbool
 
         counter = counter + 1
     }

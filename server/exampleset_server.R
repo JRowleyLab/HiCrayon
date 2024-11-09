@@ -482,18 +482,18 @@ observeEvent({
   })
 
 
-observeEvent({
-    bwlist_ChIP1()$iseigen[nr][[1]]  # Reactive expression that triggers the event
-  }, {
-    # Check if bwlist_ChIP1()$iseigen[nr][[1]] is TRUE and bw1v$features[[nr]] is not NULL
-    if (!is.null(bwlist_ChIP1()$iseigen[nr][[1]]) && bwlist_ChIP1()$iseigen[nr][[1]] == TRUE && !is.null(bw1v$features[[nr]])) {
-      shinyCatch({
-        message(paste("File: ", bw1v$features[[nr]][[1]], " looks like an Eigen track (bedgraph with positive and negative values), plotting in Eigen format + changing UI in Panel ", nr))
-      }, prefix = '')
-      shinyjs::hide(paste0("datarange", nr))  # Hide the element
-      updateMaterialSwitch(session, paste0("eigenswitch", nr), value = TRUE)  # Update the switch
-    }
-  }, ignoreNULL = TRUE)
+# observeEvent({
+#     bwlist_ChIP1()$iseigen[nr][[1]]  # Reactive expression that triggers the event
+#   }, {
+#     # Check if bwlist_ChIP1()$iseigen[nr][[1]] is TRUE and bw1v$features[[nr]] is not NULL
+#     if (!is.null(bwlist_ChIP1()$iseigen[nr][[1]]) && bwlist_ChIP1()$iseigen[nr][[1]] == TRUE && !is.null(bw1v$features[[nr]])) {
+#       shinyCatch({
+#         message(paste("File: ", bw1v$features[[nr]][[1]], " looks like an Eigen track (bedgraph with positive and negative values), plotting in Eigen format + changing UI in Panel ", nr))
+#       }, prefix = '')
+#       shinyjs::hide(paste0("datarange", nr))  # Hide the element
+#       updateMaterialSwitch(session, paste0("eigenswitch", nr), value = TRUE)  # Update the switch
+#     }
+#   }, ignoreNULL = TRUE)
 
     
   ### Toggle url and local BIGWIG upload

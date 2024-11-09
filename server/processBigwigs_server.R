@@ -8,9 +8,10 @@ bwlist_ChIP1 <- reactive({
     # validate(need(hicv$y!="NULL", "Please upload a HiC file"))
 
     # Create nested lists
-    logs <- lapply(1:length(bw1v$features), function(i) lapply(1:2, function(j) "NULL" ))
-    raws <- lapply(1:length(bw1v$features), function(i) lapply(1:2, function(j) "NULL" ))
-    iseigen <- vector("list", length(bw1v$features))  # Initialize as a flat list
+    logs <- lapply(1:length(bw1v$features), function(i) list(list()))
+    raws <- lapply(1:length(bw1v$features), function(i) list(list()))
+    HMMcols <- lapply(1:length(bw1v$features), function(i) lapply(1, function(j) "NULL" ))
+
     
     lapply(seq_along(bw1v$features), function(x){
 
@@ -30,33 +31,92 @@ bwlist_ChIP1 <- reactive({
 
             wigs = list(feature1, feature2)
 
+            if(input[[paste0("filetype", x)]] %in% c("chromHMM", "Eigen")){
+                wigs = list(feature1)
+            }
+
             for(i in seq_along(wigs)){
 
-                bwlist <- processBigwigs(
-                    bigwig = wigs[[i]],
-                    binsize = as.integer(input$bin),
-                    chrom = input$chr,
-                    start = input$start,
-                    stop = input$stop,
-                    num = paste0(x,i),
-                    userinfo = userinfo
-                )
-                if(tuple(bwlist, convert=T)[0]=="OOO"){
-                    "Error: The entries are out of order or have illegal values. Please check and try again."
-                    shinyCatch({stop(paste0("Error: The entries in ", wigs[[i]] ," are out of order or have illegal values. Please check and try again."))}, 
-                        prefix = '',
-                        blocking_level = "error")
+                # if chromHMM, expect two outputs:
+                if(input[[paste0("filetype", x)]] %in% c("chromHMM")){
+
+                    # prepare bigwigs from any input
+                    bwprep <- prepareBigwigs(
+                        input = wigs[[i]],
+                        binsize = as.integer(input$bin),
+                        num = paste0(x,i),
+                        userinfo = userinfo,
+                        filetype = input[[paste0("filetype", x)]]
+                    )
+
+                    print("states completed")
+
+                    # list containing 15+ bigwig paths
+                    # each one a different chromHMM state
+                    bwstatepaths <- tuple(bwprep, convert=T)[0]
+                    # the color associated with each state
+                    bwstatecols <- tuple(bwprep, convert=T)[1]
+
+                    HMMcols[[x]] <<- bwstatecols
+
+
+                    print(bwstatepaths)
+                    print(bwstatecols)
+
+                    # state names as they come out of chromHMM
+                    # (with '/' replaced with '_')
+                    # Update UI with these states and a checkbox beside all
+                    # include only selected ones.
+                    # maybe use the index of the name to remove em from the paths.
+                    state_names <- state <- sub(".*_([^_]+)\\.bigwig$", "\\1", bwstatepaths)
+
+                    for(j in seq_along(bwstatepaths)){
+                        bwlist <- processBigwigs(
+                            bigwig = bwstatepaths[[j]],
+                            binsize = as.integer(input$bin),
+                            chrom = input$chr,
+                            start = input$start,
+                            stop = input$stop
+                            )
+
+                        logs[[x]][[1]][[j]] <<- tuple(bwlist, convert=T)[0]
+                        raws[[x]][[1]][[j]] <<- tuple(bwlist, convert=T)[1]
+                    }
+                    
+                    print("done")
+
+
+                } else {
+                    # prepare bigwigs from any input
+                    bwprep <- prepareBigwigs(
+                        input = wigs[[i]],
+                        binsize = as.integer(input$bin),
+                        num = paste0(x,i),
+                        userinfo = userinfo,
+                        filetype = input[[paste0("filetype", x)]]
+                    )
+
+                    bwpath <- tuple(bwprep, convert=T)[0]
+
+                    # generate value lists (log and raw)
+                    bwlist <- processBigwigs(
+                        bigwig = bwpath,
+                        binsize = as.integer(input$bin),
+                        chrom = input$chr,
+                        start = input$start,
+                        stop = input$stop
+                        )
+
+                    if(tuple(bwlist, convert=T)[0]=="OOO"){
+                        "Error: The entries are out of order or have illegal values. Please check and try again."
+                        shinyCatch({stop(paste0("Error: The entries in ", wigs[[i]] ," are out of order or have illegal values. Please check and try again."))}, 
+                            prefix = '',
+                            blocking_level = "error")
+                    }
+
+                    logs[[x]][[i]] <<- tuple(bwlist, convert=T)[0]
+                    raws[[x]][[i]] <<- tuple(bwlist, convert=T)[1]
                 }
-            logs[[x]][[i]] <<- tuple(bwlist, convert=T)[0]
-            raws[[x]][[i]] <<- tuple(bwlist, convert=T)[1]
-            # iseigen[[x]] <<- tuple(bwlist, convert=T)[2]
-            # Check the length of the tuple before accessing the third element
-            result_tuple <- tuple(bwlist, convert=T)
-            # This needs to check if python is returning a 3 tuple (thruple i guess) 
-            # Not sure why. It should always be 3.
-            if(length(result_tuple) > 2){
-                iseigen[[x]] <<- result_tuple[2]  # Flat list, one element per feature
-            }
         }
     }
     })
@@ -64,7 +124,7 @@ bwlist_ChIP1 <- reactive({
     return(list(
         logs = logs,
         raws = raws,
-        iseigen = iseigen
+        HMMcols = HMMcols
         ))
 }) %>% shiny::bindEvent(confirmed())
 
@@ -122,10 +182,10 @@ chipalpha <- reactive({
             col <- input[[paste0("col", x)]]
             rgb <- col2rgb(col)
             
-            # If a compartment file (ie. bedgraph + values<0).
+            # If an eigenvector bedgraph:
             # Perform A, B and AB calculations automatically and 
             # overlay all.
-            if(bwlist_ChIP1()$iseigen[x]==TRUE){
+            if(input[[paste0("filetype", x)]] %in% c("Eigen")){
 
                 Acolrgb = col2rgb(input[[paste0("compcolA", x)]])
                 Bcolrgb = col2rgb(input[[paste0("compcolB", x)]])
@@ -134,7 +194,7 @@ chipalpha <- reactive({
                 # wigs will always be feature1=eigen, feature2=NULL
                 # split feature1 into: A, B
                 twolists = splitListintoTwo(
-                    bedg = paste0(userinfo,"/bed",x,"1.bw"),
+                    bedg = paste0(userinfo,"/bed",x,"1.bigwig"),
                     binsize = as.integer(input$bin),
                     chrom = input$chr,
                     start = input$start,
@@ -193,8 +253,52 @@ chipalpha <- reactive({
                 chipclipped[[x]] <<- list(Atrack, Btrack)
                 minmaxclip[[x]] <<- as.list(tuple(Amat, convert=T)[2])
 
-            }else {
+            } else if (input[[paste0("filetype", x)]] %in% c("chromHMM")) {
+                # combine all 15 ish bigwigs into matrix.
 
+                # Take colors from HMMcols
+                state_cols = bwlist_ChIP1()$HMMcols[[x]]
+                print("state_col")
+                print(state_cols)
+
+                # wigs will always be feature1=eigen, feature2=NULL
+
+
+                stateWigs = bwlist_ChIP1()$raws[[x]][[1]]
+
+                #print(stateWigs[[1]])
+
+                matrices = list()
+                counter = 1
+
+                for(j in seq_along(stateWigs)){
+                    print(j)
+                    state_matrix <- calcAlphaMatrix(
+                        chiplist= list(stateWigs[[j]], "NULL"),
+                        minmaxlist = minmaxlist, #[1][[1]][[2]] [2][[1]][[2]]
+                        f2=FALSE,
+                        disthic=hic_distance(),
+                        showhic=input$chipscale,
+                        r=state_cols[[j]][1],
+                        g=state_cols[[j]][2],
+                        b=state_cols[[j]][3]
+                        )
+                    
+                    mat1 = tuple(state_matrix, convert=T)[0]
+
+                    matrices[[counter]] <- mat1
+                    counter = counter + 1
+                }
+
+                COMPmat <- lnerp_matrices(matrices)
+
+                # chipclipped: Find a way to clip raws and stitch them back together. 
+                chipalphas[[x]] <<- COMPmat
+                chipclipped[[x]] <<- stateWigs
+                minmaxclip[[x]] <<- as.list(tuple(state_matrix, convert=T)[2])
+
+            } else {
+                # Regular mode, handles bigwigs, bed and bedgraphs
                 m1 <- calcAlphaMatrix(
                     chiplist=wigs,
                     minmaxlist = minmaxlist, #[1][[1]][[2]] [2][[1]][[2]]
