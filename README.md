@@ -9,7 +9,7 @@ Welcome to HiCrayon!
 
 HiCrayon is a tool used to visualize the complex layering of chromatin organization across Hi-C, Micro-C, ChIP-seq, and CUT&RUN in a single image!
 
-Use HiCrayon create beautiful images vizualizing 1D tracks on 2D matrices.
+Use HiCrayon to create beautiful images and visualize 1D tracks on 2D matrices.
 
 <div style="text-align: center;">
   <img src="www/logo/Magnum_Opus.png" alt="Magnum_Opus" width="1200" />
@@ -21,8 +21,8 @@ Use HiCrayon create beautiful images vizualizing 1D tracks on 2D matrices.
 
 # Quick Links
 
-[Installation](/www/md_pages/installation.md) <p>
-[Usage](/www/md_pages/usage.md) <p>
+[Installation](<../../wiki/1.-Installation>) <p>
+[Usage](<../../wiki/2.-Detailed-Usage>) <p>
 
 
 # Quick Start
@@ -51,16 +51,16 @@ Under the sidebar option, **Hi-C**, at the bottom you'll see a button called 'Ex
   * **Three histone marks** uploaded in bigwigs; H3K9me3, H3K27me3 and H3K27ac
   * **Eigenvector** uploaded as a bedgraph.
 
-All you need to do now is click 'Generate' at the bottom of the sidebar and it will load in all the above data, do some HiCrayon stuff, and output the Hi-C map but now it's colored by histone occupancy and the eigenvector status! 
+All you need to do now is click 'Generate' at the bottom of the sidebar, and it will load in all the above data, do some HiCrayon stuff, and output the Hi-C map, but now it's colored by histone occupancy, and the eigenvector status! 
 
 ### Try your own! <p>
-Upload a Hi-C file from a local directory, or by importing through a URL and start visualizing! Detailed instructions on usage can be found here: [Usage](/www/md_pages/usage.md) <p>
+Upload a Hi-C file from a local directory, or by importing through a URL and start visualizing! Detailed instructions on usage can be found here: [Usage](<../../wiki/2.-Detailed-Usage>) <p>
 
 
 ---------------------------------------------
 # Web version
 
-A *lite* version of HiCrayon is availble at:
+A *lite* version of HiCrayon is available at:
 
 <span style="background-color: lightgreen; font-size: 18px; padding: 2px;">
   <a href="https://jrowleylab.com/HiCrayon/" style="font-weight: bold;">jrowleylab.com/HiCrayon/</a>
@@ -71,19 +71,19 @@ A *lite* version of HiCrayon is availble at:
 Small Hi-C maps or 1D tracks can be uploaded, but we have implemented a size cap. However, published Hi-C maps and bigwigs from ENCODE (https://www.encodeproject.org/) are able to be visualized in their entirety.
 <!-- and locally stored small bedGraph files. -->
 
-To fully avail of the utility of HiCrayon, please [Install](/www/md_pages/installation.md) a local version of the app.
+To fully avail yourself of the utility of HiCrayon, please [Install](<../../wiki/1.-Installation>) a local version of the app.
 
 ---------------------------------------------
 # Requirements for Installation
 To install HiCrayon, we use containerized Singularity that allows for a portable, reproducible environment.  
-* [Singularity](https://github.com/JRowleyLab/HiCrayon/wiki/installation) is our primary method has excellent [installation](https://docs.sylabs.io/guides/3.0/user-guide/installation.html) documentation.
-* [Conda](https://github.com/JRowleyLab/HiCrayon/wiki/installation) is also available but **NOT** recommended.
+* [Singularity] is our primary method and has excellent [documentation](https://docs.sylabs.io/guides/3.0/user-guide/installation.html).
+* [Conda] is also available but **NOT** recommended.
 
-At least 10 gigabytes of storage are recommended for installation of the application, singularity image, and storage of the large experiment files.
+At least 10 gigabytes of storage are recommended for the installation of the application, singularity image, and storage of the large experiment files.
 
 ---------------------------------------------
 # Contacts
-HiCrayon is available for public use, and accompanies the publication  https://doi.org/10.1101/2024.02.11.579821.
+HiCrayon is available for public use and accompanies the publication https://doi.org/10.1101/2024.02.11.579821.
 
 Please address questions to the primary author: bnolan@unmc.edu
 

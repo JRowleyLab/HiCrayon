@@ -4,7 +4,9 @@
 
 Congratulations! You should now have the functioning HiCrayon app on your local device.
 
-In this document you'll find step-by-step instructions on how to use HiCrayon. From loading up a Hi-C file, to adding a bunch of different features and visualizing all simultaneously, and finally downloading all the produced images.
+**Note:** HiCrayon is meant as a means of determining which 1D features truly overlap 2D features and for creating final figures. **HiCrayon is not a Genome Browser but is rather meant as a companion tool to existing 2D browsers**, e.g. [Juicebox](https://www.aidenlab.org/juicebox/). We recommend that you browse to identify loci of interest using Juicebox and then use HiCrayon to make final plots. 
+
+In this document, you'll find step-by-step instructions on how to use HiCrayon. From loading up a Hi-C file to adding a bunch of different features and visualizing all simultaneously, and finally downloading all the produced images.
 
 To open HiCrayon, follow the instructions in the [Installation](/www/md_pages/installation.md) page. You can then open up a local verision of the app in your web browser.
 
@@ -16,6 +18,7 @@ You will be greeted by three sections.
 
 **Features (1D):** Loads the traditionally 1-dimensional data (e.g. bigwig, bedgraph) that will 'color' the Hi-C canvas.
 
+**Generate:** Once you have setup the 2D and 1D tracks, click this button to generate the figures.
 
 <div style="text-align: center;">
   <img src="../logo/usage_images/landing_page.png" alt="Landing_pge" width="400" />
@@ -53,7 +56,7 @@ To begin, we will load a publicly available map from the ENCODE dataset. Either 
 
 `https://www.encodeproject.org/files/ENCFF573OPJ/@@download/ENCFF573OPJ.hic` <p>
 
-To obtain a link to a file from ENCODE, right click and copy the link from the download button on the experiment page.
+To obtain a link to a file from ENCODE, right-click and copy the link from the download button on the experiment page.
 
 <div style="text-align: center;">
   <img src="../logo/usage_images/hic/encode_hic.png" alt="enc_upld" width="300" />
@@ -61,7 +64,7 @@ To obtain a link to a file from ENCODE, right click and copy the link from the d
 
 Users can also specify a local Hi-C file using the 'Select HiC' button, navigating to the desired .hic file, selecting the file and pressing the 'Select' button in the lower right corner. 
 
-Hi-C matrices contain a vast amount of information on pairwise interacitons between genomic regions.
+Hi-C matrices contain a vast amount of information on pairwise interactions between genomic regions. **Note** that in lite mode (used for demonstration purposes), we limit the size of the matrix. For high-resolution analysis, we recommend installing the local version which has the full functionality. 
 
 ### Advanced Options
 
@@ -77,9 +80,12 @@ Click the 'Options' box at the bottom of the page for more options.
 </div>
 
 3. `HiC Threshold`: Choose the maximum value for the Hi-C interaction score. This will represent the upper limit of color range. 
-**Recommended**:
+**Recommended Thresholds**:
+
 *Distance-Normalized*: 2
+
 *Raw*: Varies based on sequencing depth. Values are comparable between Juicebox and HiCrayon.
+
 -------------------------------------
 
 ## Features 
@@ -139,17 +145,17 @@ To open up the 'Options' section, click the highlighted dropdown button. This wi
 Choose the color of the background of the track on the X and Y-axes.
 
 **Track Line**
-Choose the color of your feature. This option not only changes the color of the line on the X and Y-axes, but also the color of the feature on the Hi-C itself. <p>
+Choose the color of your feature. This option not only changes the color of the line on the X and Y-axes but also the color of the feature on the Hi-C itself. <p>
 
-Change the width of the track line too with the slider!
+Change the width of the track line with the slider!
 
 **Data Range**
-Choose a minimum and maximum value for your feature. This acts as the floor and ceiling that all data values will be normalized to. Analogous to 'Data Range' in the tool Integrative Genomics Viewer (IGV). Automatically updates when the data is generated the first time. Will reset to empty if locus is changed.
+Choose a minimum and maximum value for your feature. This acts as the floor and ceiling to which all data values will be normalized. This is analogous to 'Data Range' in the tool Integrative Genomics Viewer (IGV). Automatically updates when the data is generated the first time and will reset to empty if the locus is changed.
 
 **Log**
-A box that allows the logarithmic transformation of the data. Consider if data has large variance in peaks and background. 
+A box that allows the logarithmic transformation of the data. Consider if the data has large variances in peaks and background. 
 
-**NOTE:** HiCrayon works by calculating transparency as a function of the 1D signal (weighted by Hi-C too, usually). If you'd to reduce variance in your data, and thus minimize the discrepancy between transparency across peaks, consider altering the `Data Range` or `Log` transforming your data.
+**NOTE:** HiCrayon works by calculating transparency as a function of the 1D signal (weighted by Hi-C too, usually). If you'd like to reduce variance in your data, and thus minimize the discrepancy between transparency across peaks, consider altering the `Data Range` or `Log` transforming your data.
 
 ### Advanced Parameters
 
@@ -162,7 +168,7 @@ A box that allows the logarithmic transformation of the data. Consider if data h
 
 ### Color Recommendation
 
-Consider selecting a Hi-C matrix color in the following manor:
+Consider selecting a Hi-C matrix color in the following manner:
 
 `Low:` Black
 `High:` White
