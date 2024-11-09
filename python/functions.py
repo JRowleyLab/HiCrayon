@@ -165,7 +165,6 @@ def bedgraph_to_bigwig(input_file, output_bigwig_base, binsize, chromHMM):
         bigwig_files = []
         for state, (chroms, starts, ends, values) in state_files.items():
             if (len(starts) == 0):
-                print(f"Skipping state {state} due to incomplete data.")
                 continue
             
             # Sanitize state name for filename
@@ -175,7 +174,6 @@ def bedgraph_to_bigwig(input_file, output_bigwig_base, binsize, chromHMM):
             
             bw = pyBigWig.open(bigwig_path, "w")
             bw.addHeader([(chrom, size) for chrom, size in chrom_sizes.items()])
-            print("check ", state)
             
             try:
                 bw.addEntries(chroms, starts, ends=ends, values=values, validate=False)
@@ -755,8 +753,7 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
     ax3.set_facecolor(tcol)
       
 	# Dynamically add subplots
-    print("chip")
-    print(chip)
+
     for i in range(len(chip)):
         f2 = False
         if filetype[i] != "Eigen" and filetype[i] != "chromHMM":
@@ -764,10 +761,7 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
                 f2 = True
 
         # If it's an eigen track
-        print(filetype)
-        print(filetype[i]) 
         if filetype[i] == "Eigen":
-            print(col1)
 
             Acol = col1[i][0]
             Bcol = col1[i][1]
@@ -824,8 +818,6 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
         elif filetype[i] == "chromHMM":
              # x-axis track
             ax2 = ax1.twinx()
-            print("pythonHMM:", col1)
-            print(col1[i])
             xchip = chip[i]
             ax2.plot(xchip, color=col1[i], linewidth = linewidth[0])
             #set y-axis to custom range #NOT USED #y-axis is baked into the data range itself.
@@ -855,8 +847,6 @@ def ChIP_plot(chip, mat, col1, trackcol, linewidth, disthic,
         else:
             # x-axis track
             ax2 = ax1.twinx()
-            print("python:", col1)
-            print(col1[i])
             xchip = chip[i][0]
             ax2.plot(xchip, color=col1[i], linewidth = linewidth[0])
             #set y-axis to custom range #NOT USED #y-axis is baked into the data range itself.

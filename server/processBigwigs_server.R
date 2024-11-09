@@ -49,8 +49,6 @@ bwlist_ChIP1 <- reactive({
                         filetype = input[[paste0("filetype", x)]]
                     )
 
-                    print("states completed")
-
                     # list containing 15+ bigwig paths
                     # each one a different chromHMM state
                     bwstatepaths <- tuple(bwprep, convert=T)[0]
@@ -58,10 +56,6 @@ bwlist_ChIP1 <- reactive({
                     bwstatecols <- tuple(bwprep, convert=T)[1]
 
                     HMMcols[[x]] <<- bwstatecols
-
-
-                    print(bwstatepaths)
-                    print(bwstatecols)
 
                     # state names as they come out of chromHMM
                     # (with '/' replaced with '_')
@@ -82,9 +76,6 @@ bwlist_ChIP1 <- reactive({
                         logs[[x]][[1]][[j]] <<- tuple(bwlist, convert=T)[0]
                         raws[[x]][[1]][[j]] <<- tuple(bwlist, convert=T)[1]
                     }
-                    
-                    print("done")
-
 
                 } else {
                     # prepare bigwigs from any input
@@ -258,21 +249,13 @@ chipalpha <- reactive({
 
                 # Take colors from HMMcols
                 state_cols = bwlist_ChIP1()$HMMcols[[x]]
-                print("state_col")
-                print(state_cols)
-
-                # wigs will always be feature1=eigen, feature2=NULL
-
 
                 stateWigs = bwlist_ChIP1()$raws[[x]][[1]]
-
-                #print(stateWigs[[1]])
 
                 matrices = list()
                 counter = 1
 
                 for(j in seq_along(stateWigs)){
-                    print(j)
                     state_matrix <- calcAlphaMatrix(
                         chiplist= list(stateWigs[[j]], "NULL"),
                         minmaxlist = minmaxlist, #[1][[1]][[2]] [2][[1]][[2]]

@@ -84,8 +84,6 @@ chipplot <- reactive({
             if(input[[paste0("filetype", x)]] %in% c("chromHMM")){
                 #tracks
                 tracks <- bwlist_ChIP1()$raws[[x]][[1]]
-                print("tracks")
-                print(length(tracks))
 
                 #filetypes
                 filetype <- rep("chromHMM", length(tracks))
@@ -93,8 +91,6 @@ chipplot <- reactive({
                 #colors
                 cols <- bwlist_ChIP1()$HMMcols[[x]]
                 col <- lapply(cols, function(x) rgb_2_hex(x[1], x[2], x[3]))
-                print("colors")
-                print(length(col))
 
             }
                 
@@ -191,6 +187,7 @@ chipcombinedplot <- reactive({
     linewidth <- list()
     names <- list()
     eigenbools <- list()
+    filetype <- list()
     # List of min/max values [[1,2]].
     #minmaxlist_list <- list()
 
@@ -203,6 +200,9 @@ chipcombinedplot <- reactive({
         # Tracks for feature 1 and feature 2
         tracks[[counter]][[1]] <- chipalpha()$chipclipped[[chipstocombine[x]]][[1]]
         tracks[[counter]][[2]] <- NULL
+
+        # Filetype
+        filetype[[counter]] <- input[[paste0("filetype", x)]]
         
         if(f2v[[as.character(x)]]){
             req(!is.null(bw1v$features[[x]][[2]]))
@@ -214,22 +214,6 @@ chipcombinedplot <- reactive({
         linewidth[1] <- input[[paste0("linewidth", x)]]
     
         names <- append(names, input[[paste0("n", chipstocombine[x])]])
-        # List of min/max values [[1,2]].
-        #minmaxlist_list <- append(minmaxlist_list, list(minmaxargs$nums[[x]][[1]]) )
-        
-        #Boolean value of if the bigwig is an eigentrack
-        if(input[[paste0("filetype", x)]] %in% c("Eigen")){
-            eigenbool = TRUE
-        } else {
-            eigenbool = FALSE
-        }
-
-        # if it's an eigen track, overwrite track with eigen track
-        if(eigenbool==TRUE){
-            tracks[[counter]][[1]] <- chipalpha()$chipclipped[[chipstocombine[x]]]
-        }
-
-        eigenbools[[counter]] <- eigenbool
 
         counter = counter + 1
     }
@@ -261,7 +245,7 @@ chipcombinedplot <- reactive({
             bedalpha = input$bedalpha,
             filepathpng = pngpath,
             filepathsvg = svgpath,
-            iseigen = eigenbools
+            filetype = filetype
             )
 
     chippng <- tuple(chipcomb, convert = T)[0]

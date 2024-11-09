@@ -44,12 +44,6 @@ insertUI(
         column(6,
           selectInput(paste0("filetype", nr), "", choices = c("Bigwig", "Bedgraph", "Bed", "Eigen", "chromHMM"))
         )
-        # column(2,
-        #   materialSwitch(inputId = paste0('bedswitch', nr), label = "Bedgraph", value = FALSE)
-        # ),
-        # column(2,
-        #   materialSwitch(inputId = paste0('eigenswitch', nr), label = "Eigen", value = FALSE)
-        # )
       ),
       
       # File selection button and toggle button
@@ -118,13 +112,13 @@ insertUI(
                   if (is_lite_mode) {
                       # Replace shinyFilesButton with fileInput
                       fileInput(paste0('bed', nr, 1), 
-                      label = 'Select bedgraph',
+                      label = 'Select Bed/ Bedgraph',
                       multiple = FALSE,
                       accept = c('bed', 'bedgraph'))
                   } else {
                       shinyFilesButton(
                         paste0('bed', nr, 1),
-                        label = 'Select bedgraph',
+                        label = 'Select Bed/ Bedgraph',
                         title = 'Please select a .bedgraph/.bed file',
                         multiple = FALSE,
                         style = "width: 100%;"
@@ -242,61 +236,105 @@ insertUI(
         #UI
         # Title with a toggle button to collapse/expand the section
         fluidRow(
-          column(10,
+          column(6,
                 h4("Feature 2", style = "margin-bottom: 15px;")
-          )
-        ),
-        
-        # File selection button and toggle button
-        fluidRow(
-              column(9,
-                    # Wrapper div that will hold the "Select Bigwig" button
-                    tags$div(id = paste0('fileSelectDiv', nr, 2),
-                    if (is_lite_mode) {
-                          # Replace shinyFilesButton with fileInput
-                          fileInput(paste0('bw', nr, 2), 
-                          label = 'Select bigwig',
-                          multiple = FALSE,
-                          accept = c('.bw', '.bigwig', '.bigWig'))
-                      } else {
-                          shinyFilesButton(
-                            paste0('bw', nr, 2),
-                            label = 'Select bigwig',
-                            title = 'Please select a .bigwig/.bw file',
-                            multiple = FALSE,
-                            style = "width: 100%;"
-                )
-                            },
-                      
-                    ),
-                    
-                    # Wrapper div that will hold the URL input and Add URL button (initially hidden)
-                    tags$div(
-                      fluidRow(
-                        column(9,
-                                tags$div(
-                                  textInput(
-                                    paste0('urlchip', nr, 2),
-                                    label = NULL,
-                                    placeholder = "https://<file.bigwig>"
-                                  ),
-                                  style = "width: 100%; display:none;",
-                                  id = paste0('textInputDiv', nr, 2)
-                                )
-                        ),
-                        column(3,
-                                actionButton(paste0('loadurlchip', nr, 2), label = "", icon = icon("check"), style = "width: 100%;"),
-                                id = paste0('urlInputDiv', nr, 2),
-                                style = "display:none;"  # Initially hidden
-                        )
-                    )
-              )
           ),
-          column(3,
-                # The toggle button always stays visible, so it's outside the toggleable divs
-                actionButton(paste0('toggleBtn', nr, 2), label = "", style = "width:100%;", icon = icon("exchange-alt"))
+          column(6,
+            selectInput(paste0("filetype", nr, 2), "", choices = c("Bigwig", "Bedgraph", "Bed"))
           )
         ),
+              # File selection button and toggle button
+      fluidRow(
+        tags$div(id = paste0("bigwigdiv", nr, 2),
+          column(9,
+                # Wrapper div that will hold the "Select Bigwig" button
+                tags$div(id = paste0('fileSelectDiv', nr, 2),
+                  if (is_lite_mode) {
+                    # Replace shinyFilesButton with fileInput
+                    fileInput(paste0('bw', nr, 2), 
+                      label = 'Select Bigwig',
+                      multiple = FALSE,
+                      accept = c('.bw', '.bigwig', '.bigWig'))
+                  } else {
+                    shinyFilesButton(
+                      paste0('bw', nr, 2),
+                      label = 'Select bigwig',
+                      title = 'Please select a .bigwig/.bw file',
+                      multiple = FALSE,
+                      style = "width: 100%;"
+                    )
+                  }
+                ),
+                tippy_this(
+                        elementId = paste0('fileSelectDiv', nr, 2), 
+                        tooltip = "<span style='font-size:15px;'>Select .bigwig/ .bw file<span>", 
+                        allowHTML = TRUE,
+                        placement = 'right'
+                    ),
+                
+                # Wrapper div that will hold the URL input and Add URL button (initially hidden)
+                tags$div(
+                  fluidRow(
+                    column(9,
+                            tags$div(
+                              textInput(
+                                paste0('urlchip', nr, 2),
+                                label = NULL,
+                                placeholder = "https://<file.bigwig>"
+                              ),
+                              style = "width: 100%; display:none;",
+                              id = paste0('textInputDiv', nr, 2)
+                            )
+                    ),
+                    column(3,
+                            actionButton(paste0('loadurlchip', nr, 2), label = "", icon = icon("check"), style = "width: 100%;"),
+                            id = paste0('urlInputDiv', nr, 2),
+                            style = "display:none;"  # Initially hidden
+                    ),                   
+                tippy_this(
+                        elementId = paste0('loadurlchip', nr, 2), 
+                        tooltip = "<span style='font-size:15px;'>Upload URL for .bigwig/ .bw file<span>", 
+                        allowHTML = TRUE,
+                        placement = 'right'
+                    ),
+                  )
+                ),
+          )
+        ),
+        tags$div(id = paste0("bedgraphdiv", nr, 2),
+          column(9,
+                # Wrapper div that will hold the "Select Bigwig" button
+                tags$div(id = paste0('bedSelectDiv', nr, 2),
+
+                  if (is_lite_mode) {
+                      # Replace shinyFilesButton with fileInput
+                      fileInput(paste0('bed', nr, 2),
+                      label = 'Select Bed/ Bedgraph',
+                      multiple = FALSE,
+                      accept = c('bed', 'bedgraph'))
+                  } else {
+                      shinyFilesButton(
+                        paste0('bed', nr, 2),
+                        label = 'Select Bed/ Bedgraph',
+                        title = 'Please select a .bedgraph/.bed file',
+                        multiple = FALSE,
+                        style = "width: 100%;"
+                      )
+                  },
+                ),
+                tippy_this(
+                        elementId = paste0('bedSelectDiv', nr, 2), 
+                        tooltip = "<span style='font-size:15px;'>Select local .bedgraph/ .bed file <span>", 
+                        allowHTML = TRUE,
+                        placement = 'right'
+                    )
+          )
+        ),
+        column(3,
+               # The toggle button always stays visible, so it's outside the toggleable divs
+               actionButton(paste0('toggleBtn', nr, 2), label = "", style = "width:100%;", icon = icon("exchange-alt"))
+        )
+      ),
 
       
       #
@@ -359,10 +397,10 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
         selector = paste0("#newInput",nr)
       )
       # NULL the filepath
-      # bw1v[[paste0("bw",nr, 1)]] <- NULL
-      # bw1v[[paste0("bw",nr, 2)]] <- NULL
       bw1v$features[[nr]][[1]] <- NULL
       bw1v$features[[nr]][[2]] <- NULL
+      # Reset combination button to FALSE
+      updateCheckboxInput(session, paste0('comb', nr), value = FALSE)
     })
 
   observeEvent(input[[paste0('cosignal', nr)]], {
@@ -400,42 +438,38 @@ observeEvent(input[[paste0('removeBtn',nr)]],{
   })
 
 
+# When chromHMM or Eigen are selected
+# Remove option to do separate signal AND combination.
+observeEvent({
+  input[[paste0('filetype', nr)]]
+}, {
+  if (input[[paste0('filetype', nr)]] %in% c("Eigen", "chromHMM")) {
+      shinyjs::hide(paste0("toggleFeature2", nr))  # Hide when both switches are TRUE
+      updateCheckboxInput(session, paste0('cosignal', nr), value = FALSE)
+      shinyjs::hide(paste0("comb", nr))  # Hide when both switches are TRUE
+      updateCheckboxInput(session, paste0('comb', nr), value = FALSE)
+    } 
+})
+
+
+
+# Show feature 2 when cosignal button is TRUE
 observeEvent({
     input[[paste0('cosignal', nr)]]
-    input[[paste0('filetype', nr)]]
   }, {
     cosignal_value <- input[[paste0("cosignal", nr)]]
-    filetype_value <- input[[paste0("filetype", nr)]]
 
-    if (is.null(cosignal_value) || is.null(filetype_value)) {
+    if (is.null(cosignal_value)) {
       return()  # Do nothing if any input is NULL
     }
 
     if (cosignal_value == FALSE) {
       shinyjs::hide(paste0("toggleFeature2", nr))  # Hide the collapsible section
-    } else if (filetype_value %in% c("Eigen", "chromHMM", "Bed", "Bedgraph") ) {
-      shinyjs::hide(paste0("toggleFeature2", nr))  # Hide when both switches are TRUE
-      updateCheckboxInput(session, paste0('cosignal', nr), value = FALSE)
     } else {
       shinyjs::show(paste0("toggleFeature2", nr))  # Show otherwise
     }
   })
 
-
-# observeEvent({
-#     bwlist_ChIP1()$iseigen[nr][[1]]  # Reactive expression that triggers the event
-#   }, {
-#     # Check if bwlist_ChIP1()$iseigen[nr][[1]] is TRUE and bw1v$features[[nr]] is not NULL
-#     if (!is.null(bwlist_ChIP1()$iseigen[nr][[1]]) && bwlist_ChIP1()$iseigen[nr][[1]] == TRUE && !is.null(bw1v$features[[nr]])) {
-#       shinyCatch({
-#         message(paste("File: ", bw1v$features[[nr]][[1]], " looks like an Eigen track (bedgraph with positive and negative values), plotting in Eigen format + changing UI in Panel ", nr))
-#       }, prefix = '')
-#       shinyjs::hide(paste0("datarange", nr))  # Hide the element
-#       updateMaterialSwitch(session, paste0("eigenswitch", nr), value = TRUE)  # Update the switch
-#       # Show color selection for A, B, AB
-#       shinyjs::show(paste0("compcolors", nr))
-#     }
-#   }, ignoreNULL = TRUE)
 
 
 observeEvent({
@@ -464,16 +498,6 @@ observeEvent({
   })
 
 
-  # ### Toggle url and local BEDGRAPH upload
-  # # Toggle between "Select Bedgraph" and URL input + Add URL button
-  # observeEvent(input[[paste0('toggleBtn', nr, 1)]], {
-  #   shinyjs::toggle(paste0('bedSelectDiv', nr, 1))  # Toggle the Select Bigwig button
-  #   shinyjs::toggle(paste0('urlInputDivbed', nr, 1))    # Toggle the Add URL button
-  #   shinyjs::toggle(paste0('bedtextInputDiv', nr, 1))    # Toggle the URL input 
-  # })
-
-
-
 #-------------Feature 2-----------------
 ### Toggle url and local bigwig upload for FEATURE 2
   # Toggle between "Select Bigwig" and URL input + Add URL button for FEATURE 2
@@ -483,6 +507,20 @@ observeEvent({
     shinyjs::toggle(paste0('textInputDiv', nr, 2))    # Toggle the URL input 
   })
 
+
+  # When bedgraph is toggled, hide bigwig local and url buttons and
+  # show the bedgraph buttons
+  observeEvent(input[[paste0("filetype", nr, 2)]], {
+    if (input[[paste0("filetype", nr, 2)]] %in% c("Bigwig")) {
+      shinyjs::show(paste0("bigwigdiv", nr, 2))    # Toggle the Add URL button
+      shinyjs::hide(paste0("bedgraphdiv", nr, 2))
+      shinyjs::show(paste0("toggleBtn", nr, 2))
+    } else {
+      shinyjs::hide(paste0("bigwigdiv", nr, 2))  # Toggle the Select Bigwig button
+      shinyjs::show(paste0("bedgraphdiv", nr, 2))
+      shinyjs::hide(paste0("toggleBtn", nr, 2))
+    }
+})
 
 #---File handling---
 
@@ -585,6 +623,47 @@ observeEvent({
     }
         
     })
+
+
+  # FEATURE 2 
+  # BEGRAPH file hanlding
+  #assign to same list as the bigwigs. Handle the difference in python function.
+  # Set up file handling for local files for FEATURE 1
+  shinyFileChoose(input, paste0("bed",nr, 2), root = c(wd = workingdir), filetypes=c('bed', 'bedgraph'))
+
+  # Add file path to reactive variable
+  observeEvent(input[[paste0("bed",nr, 2)]], {
+    if (is_lite_mode) {
+      # In 'lite_mode', retrieve filepath from client side
+      inFile <- input[[paste0("bed",nr, 2)]]
+    } else {
+      inFile <- parseFilePaths(roots = c(wd = workingdir), input[[paste0("bed",nr, 2)]])
+    }
+
+      # GOAL: bw1v -> [1,2,3,4,5] -> [1,2], [1,2], [1,2]...
+      # where each is the bigwig path or NULL
+      if(!rlang::is_empty(inFile$datapath)){
+        if(is_lite_mode){
+          fname <- inFile$name
+        } else {
+          fname <- tools::file_path_sans_ext(basename(inFile$datapath))
+        }
+
+        bw1v$features[[nr]][[2]] <- inFile$datapath
+        # Update text with file name
+        updateTextInput(
+          session,
+          inputId = paste0("n", nr),
+          value = paste0("X-axis: ",
+            tools::file_path_sans_ext(basename(bw1v$features[[nr]][[1]])),
+            " x ",
+            " Y-axis: ",
+            tools::file_path_sans_ext(basename(fname)) 
+                )
+          )
+      }
+
+  })
 
   observeEvent(input[[paste0("log", nr, 1)]], {
     key <- paste0(nr, 1)
